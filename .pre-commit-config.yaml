@@ -1,0 +1,192 @@
+---
+# renovate: datasource=github-tags depName=pre-commit/pre-commit-hooks
+#
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+default_install_hook_types:
+  - pre-commit
+  - post-checkout
+  - post-merge
+  - post-rewrite
+  - pre-push
+  - commit-msg
+
+default_stages:
+  - pre-commit
+
+exclude: |
+  (?x)^(
+    ^.*(copier-answers\.ya?ml)$
+    ^.*\.rej$
+  )$
+
+repos:
+  - repo: local
+    hooks:
+      - id: forbid-yml
+        name: Forbid .yml file extensions (use .yaml)
+        entry: YAML file extensions must be .yaml
+        language: fail
+        files: \.yml$
+        exclude: |
+          (?x)^(
+            ^.*(copier-answers\.ya?ml)$
+          )$
+      - id: forbid-rej
+        name: Forbid .rej file extensions from `copier update`
+        entry: Forbid .rej file extensions from `copier update`
+        language: fail
+        files: \.rej$
+  # renovate: datasource=github-tags depName=pre-commit/pre-commit-hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: "v6.0.0"
+    hooks:
+      - id: check-added-large-files
+        args: [--maxkb=500000]
+        stages: [pre-commit]
+      - id: check-merge-conflict
+        stages: [pre-commit]
+      - id: detect-private-key
+        stages: [pre-commit]
+      - id: check-case-conflict
+        stages: [pre-commit]
+      - id: check-ast
+        stages: [pre-commit]
+      - id: check-json
+        stages: [pre-commit]
+      - id: check-toml
+        stages: [pre-commit]
+      - id: check-yaml
+        stages: [pre-commit]
+        args: [--allow-multiple-documents]
+      - id: end-of-file-fixer
+        stages: [pre-commit]
+      - id: mixed-line-ending
+        stages: [pre-commit]
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+        stages: [pre-commit]
+  # renovate: datasource=github-tags depName=Lucas-C/pre-commit-hooks
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: "v1.5.6"
+    hooks:
+      - id: remove-crlf
+        stages: [pre-commit]
+      # - id: remove-tabs
+      #   stages: [pre-commit]
+  # renovate: datasource=github-tags depName=sirosen/texthooks
+  - repo: https://github.com/sirosen/texthooks
+    rev: "0.7.1"
+    hooks:
+      - id: fix-smartquotes
+        stages: [pre-commit]
+      - id: fix-ligatures
+        stages: [pre-commit]
+  # renovate: datasource=github-tags depName=zricethezav/gitleaks
+  - repo: https://github.com/zricethezav/gitleaks
+    rev: "v8.30.0"
+    hooks:
+      - id: gitleaks
+  # renovate: datasource=github-tags depName=stefmolin/exif-stripper
+  - repo: https://github.com/stefmolin/exif-stripper
+    rev: 1.2.0
+    hooks:
+      - id: strip-exif
+        name: Strip exif metadata from images
+        stages: [pre-commit]
+  # renovate: datasource=github-tags depName=commitizen-tools/commitizen
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.12.1
+    hooks:
+      - id: commitizen
+        language: python
+        stages:
+          - commit-msg
+  # renovate: datasource=github-tags depName=hukkin/mdformat
+  - repo: https://github.com/hukkin/mdformat
+    rev: 1.0.0
+    hooks:
+      - id: mdformat
+        additional_dependencies:
+          - mdformat-gfm
+          - mdformat-front-matters
+          - mdformat-footnote
+          - mdformat-gfm-alerts
+          # - mdformat-tables # now included in mdformat-gfm
+          - mdformat-toc
+          - mdformat-config
+          - mdformat-ruff
+          # - mdformat-shfmt # disable until can pass args (ref: https://github.com/hukkin/mdformat-shfmt/issues/7)
+          - mdformat-simple-breaks
+  # renovate: datasource=github-tags depName=rvben/rumdl-pre-commit
+  - repo: https://github.com/rvben/rumdl-pre-commit
+    rev: v0.1.7  # Use the latest release tag
+    hooks:
+      # - id: rumdl      # Lint only (fails on issues)
+      #   stages: [pre-commit]
+      - id: rumdl-fmt  # Auto-format (fixes what it can)
+        stages: [pre-commit]
+  # renovate: datasource=github-tags depName=charliermarsh/ruff-pre-commit
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: "v0.14.14"
+    hooks:
+      - id: ruff
+        name: Lint and Format with Ruff
+        args: [--fix]
+        stages: [pre-commit]
+  # renovate: datasource=github-tags depName=kynan/nbstripout
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.9.0
+    hooks:
+      - id: nbstripout
+        name: Strip metadata and outputs from ipynb files
+        stages: [pre-commit]
+  - repo: local
+    hooks:
+      - id: shellcheck
+        name: Lint shell scripts
+        language: system
+        entry: shellcheck
+        types: ["shell"]
+        exclude: "^.*zsh$" # ignore '*.zsh" scripts'
+        stages: [pre-commit]
+  # renovate: datasource=github-tags depName=scop/pre-commit-shfmt versioning=loose
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: "v3.12.0-2"
+    hooks:
+      - id: shfmt
+        name: Format shell scripts
+        args:
+          - "--binary-next-line"
+          - "--case-indent"
+          - "--space-redirects"
+          - "--indent"
+          - "2"
+        stages: [pre-commit]
+  # renovate: datasource=github-tags depName=adrienverge/yamllint
+  - repo: https://github.com/adrienverge/yamllint
+    rev: "v1.38.0"
+    hooks:
+      - id: yamllint
+        name: Lint yaml files
+        args: [-c=.yamllint.yaml]
+        stages: [pre-commit]
+  ### NOTE: ".typos.toml" may be required to have _already been committed_
+  ### in order for typos pre-commit hook to read it.
+  ### In this case, comment out this block until ".typos.toml" has been committed successfully
+  # renovate: datasource=github-tags depName=crate-ci/typos
+  - repo: https://github.com/crate-ci/typos
+    rev: "v1.42.3"
+    hooks:
+      - id: typos
+        name: Spellcheck with Typos
+        args: ["--config", ".typos.toml"]
+        exclude: |
+          (?x)^(
+            ^.*(typos\.toml)$ |
+            ^.*(\.typos\.toml)$ |
+            ^.*(\.sops\.yaml)$ |
+            ^.*(\.git.*)$
+          )$
+        stages: [pre-commit]
