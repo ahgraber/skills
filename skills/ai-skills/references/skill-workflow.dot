@@ -1,0 +1,160 @@
+digraph SKILL_WORKFLOW {
+    // Workflow for building and maintaining skills
+
+    // WHEN: Request to create or improve a skill
+    subgraph cluster_start {
+        label="TRIGGER: Need to create or improve a skill";
+
+        "Request for skill work" [shape=ellipse];
+        "Is the use case clear?" [shape=diamond];
+        "Ask for concrete examples" [shape=box];
+        "Collect 2-3 example prompts" [shape=box];
+        "Is this a new skill?" [shape=diamond];
+        "Proceed to planning" [shape=doublecircle];
+
+        "Request for skill work" -> "Is the use case clear?";
+        "Is the use case clear?" -> "Ask for concrete examples" [label="no"];
+        "Ask for concrete examples" -> "Collect 2-3 example prompts";
+        "Collect 2-3 example prompts" -> "Is the use case clear?";
+        "Is the use case clear?" -> "Is this a new skill?" [label="yes"];
+        "Is this a new skill?" -> "Proceed to planning" [label="yes"];
+        "Is this a new skill?" -> "Proceed to planning" [label="no"];
+    }
+
+    // WHEN: Planning reusable resources
+    subgraph cluster_plan {
+        label="PHASE: Plan reusable resources";
+
+        "Proceed to planning" [shape=doublecircle];
+        "List reusable steps" [shape=box];
+        "Need scripts?" [shape=diamond];
+        "Need references?" [shape=diamond];
+        "Need assets?" [shape=diamond];
+        "Plan resource set" [shape=box];
+        "Ready to initialize" [shape=doublecircle];
+
+        "Proceed to planning" -> "List reusable steps";
+        "List reusable steps" -> "Need scripts?";
+        "Need scripts?" -> "Need references?" [label="no"];
+        "Need scripts?" -> "Plan resource set" [label="yes"];
+        "Need references?" -> "Need assets?" [label="no"];
+        "Need references?" -> "Plan resource set" [label="yes"];
+        "Need assets?" -> "Plan resource set" [label="yes"];
+        "Need assets?" -> "Ready to initialize" [label="no"];
+        "Plan resource set" -> "Ready to initialize";
+    }
+
+    // WHEN: Initialize skill (new only)
+    subgraph cluster_init {
+        label="PHASE: Initialize skill";
+
+        "Ready to initialize" [shape=doublecircle];
+        "Is this a new skill?" [shape=diamond];
+        "scripts/init_skill.py" [shape=plaintext];
+        "Skill scaffold created" [shape=ellipse];
+        "Skip initialization" [shape=box];
+
+        "Ready to initialize" -> "Is this a new skill?";
+        "Is this a new skill?" -> "scripts/init_skill.py" [label="yes"];
+        "scripts/init_skill.py" -> "Skill scaffold created";
+        "Is this a new skill?" -> "Skip initialization" [label="no"];
+        "Skip initialization" -> "Skill scaffold created";
+    }
+
+    // WHEN: Authoring
+    subgraph cluster_author {
+        label="PHASE: Author SKILL.md and resources";
+
+        "Skill scaffold created" [shape=ellipse];
+        "Draft frontmatter" [shape=box];
+        "Description trigger-focused?" [shape=diamond];
+        "Tighten description" [shape=box];
+        "Write core instructions" [shape=box];
+        "Add references/scripts/assets" [shape=box];
+        "SKILL.md complete" [shape=doublecircle];
+
+        "Skill scaffold created" -> "Draft frontmatter";
+        "Draft frontmatter" -> "Description trigger-focused?";
+        "Description trigger-focused?" -> "Tighten description" [label="no"];
+        "Tighten description" -> "Description trigger-focused?";
+        "Description trigger-focused?" -> "Write core instructions" [label="yes"];
+        "Write core instructions" -> "Add references/scripts/assets";
+        "Add references/scripts/assets" -> "SKILL.md complete";
+    }
+
+    // WHEN: Testing
+    subgraph cluster_test {
+        label="PHASE: Test and iterate";
+
+        "SKILL.md complete" [shape=doublecircle];
+        "Run trigger tests" [shape=box];
+        "Trigger tests pass?" [shape=diamond];
+        "Fix description" [shape=box];
+        "Run functional tests" [shape=box];
+        "Functional tests pass?" [shape=diamond];
+        "Refine instructions" [shape=box];
+        "Ready to package" [shape=doublecircle];
+
+        "SKILL.md complete" -> "Run trigger tests";
+        "Run trigger tests" -> "Trigger tests pass?";
+        "Trigger tests pass?" -> "Fix description" [label="no"];
+        "Fix description" -> "Run trigger tests";
+        "Trigger tests pass?" -> "Run functional tests" [label="yes"];
+        "Run functional tests" -> "Functional tests pass?";
+        "Functional tests pass?" -> "Refine instructions" [label="no"];
+        "Refine instructions" -> "Run functional tests";
+        "Functional tests pass?" -> "Ready to package" [label="yes"];
+    }
+
+    // WHEN: Packaging
+    subgraph cluster_package {
+        label="PHASE: Validate and package";
+
+        "Ready to package" [shape=doublecircle];
+        "scripts/package_skill.py" [shape=plaintext];
+        "Validation passes?" [shape=diamond];
+        "Fix validation errors" [shape=box];
+        "Skill packaged" [shape=doublecircle];
+
+        "Ready to package" -> "scripts/package_skill.py";
+        "scripts/package_skill.py" -> "Validation passes?";
+        "Validation passes?" -> "Fix validation errors" [label="no"];
+        "Fix validation errors" -> "scripts/package_skill.py";
+        "Validation passes?" -> "Skill packaged" [label="yes"];
+    }
+
+    // WHEN: Iteration
+    subgraph cluster_iterate {
+        label="PHASE: Iterate based on real usage";
+
+        "Skill packaged" [shape=doublecircle];
+        "Collect feedback" [shape=box];
+        "Under/over-triggering?" [shape=diamond];
+        "Adjust description" [shape=box];
+        "Execution issues?" [shape=diamond];
+        "Clarify steps or add scripts" [shape=box];
+        "Return to testing" [shape=box];
+
+        "Skill packaged" -> "Collect feedback";
+        "Collect feedback" -> "Under/over-triggering?";
+        "Under/over-triggering?" -> "Adjust description" [label="yes"];
+        "Adjust description" -> "Return to testing";
+        "Under/over-triggering?" -> "Execution issues?" [label="no"];
+        "Execution issues?" -> "Clarify steps or add scripts" [label="yes"];
+        "Clarify steps or add scripts" -> "Return to testing";
+        "Execution issues?" -> "Collect feedback" [label="no"];
+    }
+
+    // Critical warning
+    subgraph cluster_warnings {
+        label="CRITICAL WARNINGS";
+
+        "STOP: Skip tests?" [shape=octagon, style=filled, fillcolor=red, fontcolor=white];
+        "STOP: Description too long" [shape=octagon, style=filled, fillcolor=red, fontcolor=white];
+    }
+
+    // Cross-process triggers
+    "Run functional tests" -> "STOP: Skip tests?" [label="skipped", style=dotted];
+    "Draft frontmatter" -> "STOP: Description too long" [label="bloated", style=dotted];
+    "Return to testing" -> "Run trigger tests" [label="iterate", style=dotted];
+}
