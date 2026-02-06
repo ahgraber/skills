@@ -39,7 +39,6 @@ venv/
 .direnv/*
 
 # Extras
-*pytest*
 *cache*
 
 # Distribution / packaging
