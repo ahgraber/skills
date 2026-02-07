@@ -1,11 +1,5 @@
 # Data and State Lifecycle
 
-## Scope Note
-
-- Treat these recommendations as preferred defaults for common cases, not universal rules.
-- If a default conflicts with project constraints or worsens the outcome, suggest a better-fit alternative and explain why it is better for this case.
-- When deviating, call out tradeoffs and compensating controls (tests, observability, migration, rollback).
-
 ## Outcome
 
 Clear ownership and predictable data flow from ingress to persistence/egress.

@@ -5,6 +5,16 @@ description: Python skill router. Use when planning, implementing, or reviewing 
 
 # Python Skill Router
 
+## Scope Note
+
+- Treat these recommendations as preferred defaults for common cases, not universal rules.
+- If a default conflicts with project constraints or worsens the outcome, suggest a better-fit alternative and explain why it is better for this case.
+- When deviating, call out tradeoffs and compensating controls (tests, observability, migration, rollback).
+
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `python`.
+
 ## Overview
 
 Use this skill to route Python work to focused skills instead of loading one large guide.

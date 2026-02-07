@@ -1,11 +1,5 @@
 # Functional Core and Imperative Shell
 
-## Scope Note
-
-- Treat these recommendations as preferred defaults for common cases, not universal rules.
-- If a default conflicts with project constraints or worsens the outcome, suggest a better-fit alternative and explain why it is better for this case.
-- When deviating, call out tradeoffs and compensating controls (tests, observability, migration, rollback).
-
 ## Outcome
 
 Business rules are deterministic and side effects are isolated.

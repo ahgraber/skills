@@ -5,6 +5,16 @@ description: Provides Python concurrency and lifecycle guidance. Use when choosi
 
 # Python Concurrency and Performance
 
+## Scope Note
+
+- Treat these recommendations as preferred defaults for common cases, not universal rules.
+- If a default conflicts with project constraints or worsens the outcome, suggest a better-fit alternative and explain why it is better for this case.
+- When deviating, call out tradeoffs and compensating controls (tests, observability, migration, rollback).
+
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `python-concurrency-performance`.
+
 ## Overview
 
 Use this skill for concurrency model selection, cancellation/deadline behavior, and lifecycle safety under load.
