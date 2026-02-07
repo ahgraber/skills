@@ -1,26 +1,33 @@
 ---
 name: python-testing
-description: Provides Python testing strategy and pytest practices. Use when creating or reviewing tests for behavior, contracts, async/concurrency, and reliability paths.
+description: Use when writing or reviewing tests for Python behavior, contracts, async lifecycles, or reliability paths. Also use when tests are flaky, coupled to implementation details, missing regression coverage, slow to run, or when unclear what tests a change needs.
 ---
 
 # Python Testing
 
-## Scope Note
-
-- Treat these recommendations as preferred defaults for common cases, not universal rules.
-- If a default conflicts with project constraints or worsens the outcome, suggest a better-fit alternative and explain why it is better for this case.
-- When deviating, call out tradeoffs and compensating controls (tests, observability, migration, rollback).
-
-## Invocation Notice
-
-- Inform the user when this skill is being invoked by name: `python-testing`.
-
 ## Overview
 
-Use this skill to design tests that prove behavior and contracts while staying deterministic and maintainable.
-Apply it for unit, integration, and reliability-sensitive changes.
+Test observable behavior and contracts, not internal implementation.
+Keep unit tests fast, deterministic, and patched at module boundaries.
 
-## Core Rules
+These are preferred defaults for common cases.
+When a default conflicts with project constraints, suggest a better-fit alternative, call out tradeoffs, and note compensating controls.
+
+## When to Use
+
+- Writing or reviewing unit, integration, or reliability-sensitive tests.
+- Tests are flaky, slow, or coupled to implementation details.
+- Adding regression tests after a bugfix.
+- Testing async lifecycles, cancellation, or cleanup paths.
+- Unsure what test coverage a change needs.
+
+**When NOT to use:**
+
+- Pure data-shape or schema validation (see `python-types-contracts`).
+- Production observability or monitoring concerns (see `python-runtime-operations`).
+- Concurrency design decisions outside of test harnesses (see `python-concurrency-performance`).
+
+## Quick Reference
 
 - Test observable behavior, not internals.
 - Keep unit tests fast and deterministic.
@@ -32,6 +39,24 @@ Apply it for unit, integration, and reliability-sensitive changes.
 
 - Dependency updates: run `uv run pytest scripts/test_pypi_security_audit.py -v`
 - Async-heavy lifecycle changes: run `pyleak` diagnostics.
+
+## Common Mistakes
+
+- **Mocking too deep** — patching internals instead of module-boundary seams makes tests brittle and coupled to implementation.
+- **Testing the mock** — verifying mock call counts without asserting on observable output proves nothing about behavior.
+- **Missing regression test** — fixing a bug without a test that reproduces it first; the bug will recur.
+- **Non-deterministic time/order** — relying on wall-clock time or dict/set ordering instead of injecting clocks and sorting explicitly.
+- **Skipping cleanup assertions** — verifying the happy path but never asserting that resources are released on failure or cancellation.
+
+## Scope Note
+
+- Treat these recommendations as preferred defaults for common cases, not universal rules.
+- If a default conflicts with project constraints or worsens the outcome, suggest a better-fit alternative and explain why it is better for this case.
+- When deviating, call out tradeoffs and compensating controls (tests, observability, migration, rollback).
+
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `python-design-modularity`.
 
 ## References
 
