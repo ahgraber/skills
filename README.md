@@ -8,26 +8,44 @@
 
 ## Installation
 
-Claude Code, OpenAI Codex, and GitHub Copilot (among others) can all use skills, but they look for skills in different locations.
-This instruction assumes installation is intended for a central installation location (e.g., `$HOME/.config/skills`, or wherever you clone this repo) for "globally available" skills; repo-specific skills should be installed in the repo (typically `<repo_path>/{.claude,.codex,.copilot}/skills`).
+Install skills using the [skills.sh](https://skills.sh) CLI:
 
-Symlink skills into the Agent's expected locations:
+```bash
+# List available skills before installing
+npx skills add ahgraber/skills --list
 
-| Assistant      | Location            |
-| -------------- | ------------------- |
-| Claude Code    | `~/.claude/skills`  |
-| GitHub Copilot | `~/.copilot/skills` |
-| OpenAI Codex   | `~/.codex/skills`   |
+# Install all skills interactively (prompts for selection)
+npx skills add ahgraber/skills -g
 
-```sh
-for dir in "${PWD}/skills/"*/; do
-  name="$(basename "$dir")"
-  for target in ~/.claude/skills ~/.copilot/skills ~/.codex/skills; do
-    mkdir -p "$target"
-    ln -sfn "$dir" "$target/$name"
-  done
-done
+# Install specific skills to user scope (global)
+npx skills add ahgraber/skills --skill good-prose --skill mcp-research -g
+
+# Install to specific agents
+npx skills add ahgraber/skills --skill good-prose -a claude-code -a codex -g
+
+# Install to current project (instead of global)
+npx skills add ahgraber/skills --skill code-review
 ```
+
+**CLI Options:**
+
+| Flag                      | Purpose                                               |
+| ------------------------- | ----------------------------------------------------- |
+| `-g, --global`            | Install to user directory (global for all projects)   |
+| `-a, --agent <agents...>` | Target specific agents (`claude-code`, `codex`, etc.) |
+| `-s, --skill <skills...>` | Install specific skills by name                       |
+| `-l, --list`              | List available skills without installing              |
+| `-y, --yes`               | Skip confirmation prompts                             |
+
+**Other commands:**
+
+```bash
+npx skills list          # Show installed skills
+npx skills remove <name> # Uninstall a skill
+npx skills update        # Update all installed skills
+```
+
+**Note on mcp-research**: This skill requires context7, exa, and/or jina mcp servers -a claude-code -a codex -g
 
 ## Further reading
 
