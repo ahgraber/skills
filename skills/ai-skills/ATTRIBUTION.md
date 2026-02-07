@@ -1,7 +1,6 @@
 # Attributions and Citations
 
 This file records external sources referenced while building or maintaining these skills.
-It favors stable, specific links and includes access dates so future readers can verify provenance.
 
 ## Skill templates and examples
 

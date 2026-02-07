@@ -6,6 +6,11 @@
 - The skill directory may contain other documents, scripts, or resources necessary to enact the instructions as directed by the `skill.md`.
 - Skills with python scripts use `uv` to manage their dependencies; you must have `uv` installed.
 
+## Usage
+
+Skills can be invoked automatically if the underlying agent determines they may be useful (based on the skill's `description`, so tune the description to tune trigger relevance).
+Many agents also allow forcibly invoking the skill by invoking as a `/-command`.
+
 ## Installation
 
 Install skills using the [skills.sh](https://skills.sh) CLI:
