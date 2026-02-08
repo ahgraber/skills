@@ -1,11 +1,19 @@
 ---
 name: optimize-skills
-description: Use when creating new skills, reviewing, optimizing, or updating existing skills, or troubleshooting triggering quality (under/over-triggering, vague descriptions, bloated context, or missing workflows).
+description: Use when creating or refining SKILL.md-based skills, or diagnosing weak triggering (under/over-triggering, vague descriptions, bloated context, or missing workflow guidance).
 ---
 
 # Optimizing Skills
 
-Use this skill to create, review, or improve SKILL.md-based skills with strong triggering, clear workflows, and efficient context use.
+Use this skill to create, review, or improve SKILL.md-based skills so they trigger correctly, stay concise, and execute reliably.
+
+## When to Use
+
+- Creating a new reusable skill from repeated work patterns.
+- Updating an existing skill that under-triggers, over-triggers, or misfires.
+- Tightening a skill that is too long, redundant, or hard to execute.
+- Converting narrative guidance into concise, imperative instructions.
+- Rebalancing where content should live across `SKILL.md`, `references/`, `assets/`, and `scripts/`.
 
 ## Overview
 
@@ -35,19 +43,18 @@ Skills help future Agent instances find and apply effective approaches.
 
 ## Workflow
 
-1. Define 2-3 concrete use cases and the phrases that should trigger the skill.
-2. Identify reusable resources (scripts, references, assets).
-3. Draft frontmatter with a trigger-focused `description`.
-4. Write imperative SKILL.md instructions.
-5. Offload details to references/scripts/assets; keep SKILL.md lean.
-6. Test triggering and functional behavior; capture failures and iterate.
+1. Define trigger tests: list 2-3 prompts that should trigger the skill and 2 that should not.
+2. Audit frontmatter: keep only `name` and `description`; make `description` when-focused, not workflow-focused.
+3. Rewrite the body in imperative form: keep main instructions short, specific, and ordered by execution.
+4. Move deep detail out of `SKILL.md` into `references/`, `assets/`, or `scripts/`; link to each from `SKILL.md`.
+5. Validate workflow representation: use markdown for linear steps; use a small DOT flowchart only for non-obvious branching or loops.
+6. Run trigger and functional checks against real prompts; iterate until both pass.
 
 ## Core Principles
 
-- Optimize for triggering: description should emphasize when to use the skill (`references/skills-search-optimization.md`).
+- Optimize for triggering: description must emphasize when to use the skill (`references/skills-search-optimization.md`).
 - Keep frontmatter metadata small (about 100 tokens combined).
-- Keep main `SKILL.md` under 500 lines; move deep detail into references.
-- Keep SKILL.md concise; move heavy reference material into `references/` or `assets/`.
+- Keep main `SKILL.md` under 500 lines and focused on action.
 - Use progressive disclosure: metadata -> SKILL.md -> references/scripts/assets.
 - Choose the right degree of freedom: text, pseudocode, or scripts depending on fragility.
 - Prefer reusable resources (scripts, templates) over repeated prose.
@@ -58,7 +65,7 @@ Skills help future Agent instances find and apply effective approaches.
 - `SKILL.md`: keep actionable and concise, target \<5000 tokens and \<500 lines.
 - `scripts/`, `references/`, `assets/`: loaded only when needed; keep files narrow so agents pull less context.
 
-## Flowchart Usage
+## Flowchart Guidance
 
 ```dot
 digraph when_flowchart {
@@ -74,20 +81,11 @@ digraph when_flowchart {
 }
 ```
 
-**Use flowcharts only for:**
-
-- Complex processes with multiple steps and branches.
-- Non-obvious decision points.
-- "When to use A vs B" routing choices.
-
-**Do not use flowcharts for:**
-
-- Reference material (use tables/lists).
-- Code examples (use fenced code blocks).
-- Linear instructions (use numbered steps).
-- Placeholder node labels without semantic meaning.
-
-Use `references/graphviz-conventions.dot` for style rules.
+- Use markdown lists/tables/code blocks by default.
+- Add DOT only when decision logic or loops are easy to misapply.
+- Avoid placeholder node labels; use concrete actions and conditions.
+- Follow `references/graphviz-conventions.dot` for node shapes and labels.
+- Keep flowcharts small and trigger-based; split large flows into focused subgraphs.
 
 Render DOT to SVG with `scripts/render-dot.py`.
 Output SVGs are written to the target skill's `assets/` directory.
@@ -107,7 +105,7 @@ skills/
   skill-name/
     SKILL.md      # Main reference (required)
     assets/       # (optional) Static reusable resources such as templates or figures
-    references/   # (optional) On-demand documentation, organizedby topic or variant
+    references/   # (optional) On-demand documentation, organized by topic or variant
     scripts/      # (optional) Executable helpers for deterministic tasks;
                   # scripts should be self-contained or clearly declare dependencies,
                   # include clear errors, and handle edge cases.
@@ -118,73 +116,24 @@ skills/
 - SKILL.md must be named exactly `SKILL.md`.
 - Folder name must be kebab-case, matching the `name` in frontmatter.
 - Do not add README.md inside the skill.
-- YAML frontmatter must include `name` and `description` fields:"
-  - `name`: kebab-case, matches folder name.
-  - `description`: emphasize when to use the skill; include triggers and symptoms.
+- YAML frontmatter must include `name` and `description` fields.
+- `name` must be kebab-case and match the folder name.
+- `description` should emphasize when to use the skill and include triggers/symptoms.
 - Avoid workflow summaries in the description.
-  Keep it short and specific.
-
-### Suggested SKILL.md Template
-
-```markdown
----
-name: skill-name
-description: Brief, trigger-focused description of the skill's purpose and when to use it.
----
-
-# Skill Name
-
-## Overview
-
-Brief description of the skill and its purpose in 1-2 sentences.
-
-## When to Use
-
-[optional] (small) inline flowchart if decision matrix is non-obvious or complex
-
-Bulleted list of triggers (symptoms, use cases) When not to use
-
-## Workflow
-
-Step-by-step instructions: Link out to assets, references, scripts to keep SKILL.md concise.
-Leverage flowchart guidance for complex processes.
-
-## Output
-
-Expected results, artifacts, or outcomes from following the workflow.
+- Keep descriptions short and specific.
+- Refer to `assets/skill-template.md` for a suggested (but easily modified) template structure.
 
 ## Common Mistakes
 
-List of pitfalls, common errors to avoid, and how to fix/resolve them.
+- Summarizing workflow in `description` instead of stating actionable triggers and symptoms.
+- Keeping workflows as one giant graph instead of splitting into trigger-based subgraphs.
+- Repeating deep reference material in `SKILL.md` instead of linking to `references/`.
+- Leaving scripts implicit: deterministic steps should be executable where possible.
 
 ## References
 
-Links to related documentation, scripts, templates, or external resources and hints on when to consult each.
-```
-
-## Common Mistakes
-
-- Each Skill has exactly one description field.
-  The description is critical for skill selection: Claude uses it to choose the right Skill from potentially 100+ available Skills.
-  Your description must provide enough detail for Claude to know when to select this Skill, while the rest of SKILL.md provides the implementation details.
-
-- Keep workflows trigger-based and split into focused subgraphs rather than one giant flow.
-
-## References
-
-- `references/best-practices.md` for general guidance on writing, structuring, and optimizing skills.
-
-- `references/skills-search-optimization.md` for specific patterns on optimizing for search and triggering.
-
-- `references/skill-workflow.dot` for a workflow definition of this skill.
-  Use with `references/graphviz-conventions.dot` for styling rules.
-
-- Triggering and description writing patterns
-
-- Testing and iteration checklists
-
-- Troubleshooting under/over-triggering
-
-- When to split content into references or scripts
-
-- Token and context budget guidance
+- `assets/skill-template.md` for a suggested SKILL.md structure.
+- `references/best-practices.md`: checklists, structure guidance, testing, and troubleshooting patterns.
+- `references/skills-search-optimization.md`: description and trigger optimization rules.
+- `references/skill-workflow.dot`: canonical workflow for this skill.
+- `references/graphviz-conventions.dot`: DOT style and semantics for workflow diagrams.
