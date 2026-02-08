@@ -1,0 +1,1 @@
+../../spec-kit/scripts/create-new-feature.sh

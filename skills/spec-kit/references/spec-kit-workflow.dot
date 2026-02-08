@@ -1,0 +1,147 @@
+digraph spec_kit_workflow {
+    // Spec Kit: Workflow Routing
+    // Helps agents pick the right sub-skill and follow the correct sequence.
+
+    rankdir=TB;
+    label="Spec Kit: Workflow Routing";
+    labelloc=t;
+    fontsize=18;
+    fontname="Helvetica";
+    node [fontname="Helvetica", fontsize=11];
+    edge [fontname="Helvetica", fontsize=10];
+
+    // ── Entry ──────────────────────────────────────────────
+    start [label="User request\narrives", shape=doublecircle];
+
+    // ── Top-level intent routing ───────────────────────────
+    q_intent [label="What does the\nuser need?", shape=diamond];
+
+    // ── Governance branch (standalone) ─────────────────────
+    act_constitution [label="Run spec-kit-constitution", shape=box];
+    done_gov [label="Constitution\nupdated", shape=doublecircle];
+
+    // ── Standalone utility branches ────────────────────────
+    act_analyze_solo [label="Run spec-kit-analyze\n(read-only audit)", shape=box];
+    done_analyze_solo [label="Analysis\ndelivered", shape=doublecircle];
+
+    act_checklist_solo [label="Run spec-kit-checklist\n(requirements quality)", shape=box];
+    done_checklist_solo [label="Checklist\ndelivered", shape=doublecircle];
+
+    // ── Feature development path ───────────────────────────
+
+    // Constitution gate
+    q_has_constitution [label="Does\nconstitution.md\nexist?", shape=diamond];
+    act_create_constitution [label="Run spec-kit-constitution", shape=box];
+
+    // Spec gate
+    q_has_spec [label="Does spec.md exist\nfor this feature?", shape=diamond];
+    act_specify [label="Run spec-kit-specify", shape=box];
+
+    // Clarify gate (optional, recommended)
+    q_ambiguous [label="Spec has ambiguity\nor NEEDS CLARIFICATION\nmarkers?", shape=diamond];
+    act_clarify [label="Run spec-kit-clarify\n(max 5 questions)", shape=box];
+
+    // Plan gate
+    q_has_plan [label="Does plan.md\nexist?", shape=diamond];
+    act_plan [label="Run spec-kit-plan", shape=box];
+
+    // Tasks gate
+    q_has_tasks [label="Does tasks.md\nexist?", shape=diamond];
+    act_tasks [label="Run spec-kit-tasks", shape=box];
+
+    // Analysis (optional, recommended)
+    q_run_analyze [label="Run cross-artifact\nconsistency analysis?", shape=diamond];
+    act_analyze [label="Run spec-kit-analyze", shape=box];
+    q_critical_issues [label="Critical issues\nfound?", shape=diamond];
+    state_needs_revision [label="Artifacts need\nrevision", shape=ellipse];
+
+    // Checklist before implement (optional)
+    q_run_checklist [label="Generate quality\nchecklist before\nimplementing?", shape=diamond];
+    act_checklist [label="Run spec-kit-checklist", shape=box];
+
+    // Implement
+    act_implement [label="Run spec-kit-implement", shape=box];
+
+    // Exit
+    done [label="Feature\ncomplete", shape=doublecircle];
+
+    // ── STOP warnings ──────────────────────────────────────
+    warn_plan_no_spec [label="STOP: Specify WHAT\nbefore planning HOW\n(create spec.md first)", shape=octagon, style=filled, fillcolor=red, fontcolor=white];
+    warn_impl_no_tasks [label="STOP: Generate tasks.md\nbefore implementing", shape=octagon, style=filled, fillcolor=red, fontcolor=white];
+    warn_skip_to_impl [label="STOP: Do not jump\nfrom specify to implement\n(plan and tasks required)", shape=octagon, style=filled, fillcolor=red, fontcolor=white];
+
+    // ═══════════════════════════════════════════════════════
+    //  EDGES
+    // ═══════════════════════════════════════════════════════
+
+    // ── Intent routing ─────────────────────────────────────
+    start -> q_intent;
+
+    q_intent -> act_constitution [label="governance\nupdate"];
+    q_intent -> q_has_constitution [label="feature\nwork"];
+    q_intent -> act_analyze_solo [label="analysis\nonly"];
+    q_intent -> act_checklist_solo [label="checklist\nonly"];
+
+    // ── Standalone terminals ───────────────────────────────
+    act_constitution -> done_gov;
+    act_analyze_solo -> done_analyze_solo;
+    act_checklist_solo -> done_checklist_solo;
+
+    // ── Feature: constitution gate ─────────────────────────
+    q_has_constitution -> q_has_spec [label="yes"];
+    q_has_constitution -> act_create_constitution [label="no"];
+    act_create_constitution -> q_has_spec;
+
+    // ── Feature: spec gate ─────────────────────────────────
+    q_has_spec -> q_ambiguous [label="yes"];
+    q_has_spec -> act_specify [label="no"];
+    act_specify -> q_ambiguous;
+
+    // ── Feature: clarify (optional) ────────────────────────
+    q_ambiguous -> act_clarify [label="yes"];
+    q_ambiguous -> q_has_plan [label="no"];
+    act_clarify -> q_has_plan;
+
+    // ── Feature: plan gate ─────────────────────────────────
+    q_has_plan -> q_has_tasks [label="yes"];
+    q_has_plan -> act_plan [label="no"];
+    act_plan -> q_has_tasks;
+
+    // ── Feature: tasks gate ────────────────────────────────
+    q_has_tasks -> q_run_analyze [label="yes"];
+    q_has_tasks -> act_tasks [label="no"];
+    act_tasks -> q_run_analyze;
+
+    // ── Feature: analysis (optional) ───────────────────────
+    q_run_analyze -> act_analyze [label="recommended"];
+    q_run_analyze -> q_run_checklist [label="skip"];
+    act_analyze -> q_critical_issues;
+    q_critical_issues -> q_run_checklist [label="no"];
+    q_critical_issues -> state_needs_revision [label="yes"];
+
+    // ── Feedback loops from analysis ───────────────────────
+    state_needs_revision -> q_ambiguous [label="spec gaps", style=dotted];
+    state_needs_revision -> act_plan [label="plan or\ndesign gaps", style=dotted];
+    state_needs_revision -> act_tasks [label="task coverage\ngaps", style=dotted];
+
+    // ── Feature: checklist (optional) ──────────────────────
+    q_run_checklist -> act_checklist [label="yes"];
+    q_run_checklist -> act_implement [label="no"];
+    act_checklist -> act_implement;
+
+    // ── Feature: implement ─────────────────────────────────
+    act_implement -> done;
+
+    // ── STOP warning guard connections ─────────────────────
+    // These show prerequisite violations agents may hit
+    // when invoking sub-skills directly (bypassing router).
+
+    warn_plan_no_spec -> act_specify [style=dashed, label="create spec first"];
+    warn_impl_no_tasks -> act_tasks [style=dashed, label="create tasks first"];
+    warn_skip_to_impl -> q_has_plan [style=dashed, label="follow sequence"];
+
+    // Position warnings near relevant actions
+    {rank=same; act_plan; warn_plan_no_spec}
+    {rank=same; act_implement; warn_impl_no_tasks}
+    {rank=same; act_tasks; warn_skip_to_impl}
+}

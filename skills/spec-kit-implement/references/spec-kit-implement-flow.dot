@@ -1,0 +1,140 @@
+digraph spec_kit_implement {
+    // Spec Kit: Implementation Execution Flow
+    // Guides agents through phased task execution, parallelism
+    // decisions, failure handling, and completion validation.
+
+    rankdir=TB;
+    label="Spec Kit: Implementation Execution Flow";
+    labelloc=t;
+    fontsize=18;
+    fontname="Helvetica";
+    node [fontname="Helvetica", fontsize=11];
+    edge [fontname="Helvetica", fontsize=10];
+
+    // ── Entry ──────────────────────────────────────────────
+    start [label="Begin\nimplementation", shape=doublecircle];
+
+    // ── Prerequisites ──────────────────────────────────────
+    q_tasks_exist [label="Does tasks.md\nexist?", shape=diamond];
+    warn_no_tasks [label="STOP: Run spec-kit-tasks\nbefore implementing", shape=octagon, style=filled, fillcolor=red, fontcolor=white];
+    act_load_context [label="Load tasks.md, plan.md,\nand optional artifacts\n(data-model, contracts,\nresearch, quickstart)", shape=box];
+
+    // ── Checklist gate ─────────────────────────────────────
+    q_checklists_dir [label="Does checklists/\ndirectory exist?", shape=diamond];
+    q_incomplete_items [label="Any incomplete\nchecklist items?", shape=diamond];
+    q_user_approves [label="User approves\nproceeding with\nincomplete items?", shape=diamond];
+    state_blocked [label="Blocked on\nchecklist completion", shape=ellipse];
+
+    // ── Project setup ──────────────────────────────────────
+    act_verify_ignore [label="Verify and update\nproject ignore files\nfor detected stack", shape=box];
+
+    // ── Phase loop ─────────────────────────────────────────
+    q_phases_remain [label="More phases\nto execute?", shape=diamond];
+    act_enter_phase [label="Enter next phase\n(setup → stories → polish)", shape=box];
+
+    // ── Task loop ──────────────────────────────────────────
+    q_tasks_remain [label="More tasks in\ncurrent phase?", shape=diamond];
+
+    // ── Parallel decision ──────────────────────────────────
+    q_marked_parallel [label="Task marked [P]\nfor parallel?", shape=diamond];
+    q_file_conflicts [label="File or dependency\nconflicts with other\n[P] tasks?", shape=diamond];
+    act_batch_parallel [label="Batch and execute\nparallel task group", shape=box];
+
+    // ── TDD decision ───────────────────────────────────────
+    q_tests_requested [label="Tests requested\nfor this task?", shape=diamond];
+    act_write_test [label="Write test first\n(TDD ordering)", shape=box];
+
+    // ── Execution ──────────────────────────────────────────
+    act_execute_task [label="Execute task", shape=box];
+
+    // ── Result handling ────────────────────────────────────
+    q_task_passed [label="Task\nsucceeded?", shape=diamond];
+    act_mark_complete [label="Mark task [X]\nin tasks.md", shape=box];
+
+    // ── Failure handling ───────────────────────────────────
+    q_is_parallel_task [label="Was this a\nparallel [P] task?", shape=diamond];
+    q_critical_failure [label="Critical sequential\nfailure?", shape=diamond];
+    warn_halt [label="STOP: Halt execution\nReport context, error,\nand next action", shape=octagon, style=filled, fillcolor=red, fontcolor=white];
+    act_log_continue [label="Log parallel failure\nand continue with\nremaining tasks", shape=box];
+    act_report_failure [label="Report non-critical\nfailure and continue", shape=box];
+
+    // ── Completion checks ──────────────────────────────────
+    q_all_required [label="All required tasks\ncomplete?", shape=diamond];
+    q_aligns_spec [label="Implementation aligns\nwith spec and plan?", shape=diamond];
+    q_tests_pass [label="Tests and validation\npass?", shape=diamond];
+    state_gaps [label="Gaps or failures\ndetected", shape=ellipse];
+
+    // ── Final output ───────────────────────────────────────
+    act_report_status [label="Report implementation\nstatus summary", shape=box];
+    done [label="Implementation\ncomplete", shape=doublecircle];
+
+    // ═══════════════════════════════════════════════════════
+    //  EDGES
+    // ═══════════════════════════════════════════════════════
+
+    // ── Prerequisites ──────────────────────────────────────
+    start -> q_tasks_exist;
+    q_tasks_exist -> act_load_context [label="yes"];
+    q_tasks_exist -> warn_no_tasks [label="no"];
+
+    // ── Checklist gate ─────────────────────────────────────
+    act_load_context -> q_checklists_dir;
+    q_checklists_dir -> q_incomplete_items [label="yes"];
+    q_checklists_dir -> act_verify_ignore [label="no"];
+    q_incomplete_items -> q_user_approves [label="yes"];
+    q_incomplete_items -> act_verify_ignore [label="no, all pass"];
+    q_user_approves -> act_verify_ignore [label="yes, proceed"];
+    q_user_approves -> state_blocked [label="no"];
+
+    // ── Project setup → phase loop ─────────────────────────
+    act_verify_ignore -> q_phases_remain;
+
+    // ── Phase loop ─────────────────────────────────────────
+    q_phases_remain -> act_enter_phase [label="yes"];
+    q_phases_remain -> q_all_required [label="no, all done"];
+
+    // ── Task loop ──────────────────────────────────────────
+    act_enter_phase -> q_tasks_remain;
+    q_tasks_remain -> q_marked_parallel [label="yes"];
+    q_tasks_remain -> q_phases_remain [label="no, phase done"];
+
+    // ── Parallel path ──────────────────────────────────────
+    q_marked_parallel -> q_file_conflicts [label="yes"];
+    q_marked_parallel -> q_tests_requested [label="no, sequential"];
+    q_file_conflicts -> q_tests_requested [label="yes, run\nsequentially"];
+    q_file_conflicts -> act_batch_parallel [label="no, safe\nto batch"];
+    act_batch_parallel -> q_task_passed;
+
+    // ── TDD path ───────────────────────────────────────────
+    q_tests_requested -> act_write_test [label="yes"];
+    q_tests_requested -> act_execute_task [label="no"];
+    act_write_test -> act_execute_task;
+
+    // ── Execution result ───────────────────────────────────
+    act_execute_task -> q_task_passed;
+    q_task_passed -> act_mark_complete [label="yes"];
+    q_task_passed -> q_is_parallel_task [label="no"];
+    act_mark_complete -> q_tasks_remain;
+
+    // ── Failure branching ──────────────────────────────────
+    q_is_parallel_task -> act_log_continue [label="yes"];
+    q_is_parallel_task -> q_critical_failure [label="no"];
+    q_critical_failure -> warn_halt [label="yes"];
+    q_critical_failure -> act_report_failure [label="no"];
+    act_log_continue -> q_tasks_remain;
+    act_report_failure -> q_tasks_remain;
+
+    // ── Completion checks ──────────────────────────────────
+    q_all_required -> q_aligns_spec [label="yes"];
+    q_all_required -> state_gaps [label="no, tasks\nremaining"];
+    q_aligns_spec -> q_tests_pass [label="yes"];
+    q_aligns_spec -> state_gaps [label="no, misalignment"];
+    q_tests_pass -> act_report_status [label="yes"];
+    q_tests_pass -> state_gaps [label="no, failures"];
+
+    // ── Gap remediation loop ───────────────────────────────
+    state_gaps -> q_tasks_remain [label="address gaps\nand re-verify", style=dotted];
+
+    // ── Done ───────────────────────────────────────────────
+    act_report_status -> done;
+}

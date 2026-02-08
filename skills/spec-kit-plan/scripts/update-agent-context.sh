@@ -1,0 +1,1 @@
+../../spec-kit/scripts/update-agent-context.sh
