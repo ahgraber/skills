@@ -124,7 +124,7 @@ Rules:
 - Dependency manifest or lockfile changes → assess supply-chain risk and compatibility.
 - Call out TODO comments and their implications.
 
-Compile findings into issues using the template in `references/issue-template.md`.
+Compile findings into issues using the template in `assets/issue-template.md`.
 Sort issues by priority: critical > high > medium > low.
 For each issue, include blocking status, confidence, and evidence.
 
@@ -144,5 +144,5 @@ When a default conflicts with project constraints, suggest a better-fit alternat
 
 ## References
 
-- `references/issue-template.md` — issue type/priority legends and suggestion format.
+- `assets/issue-template.md` — issue type/priority legends and suggestion format.
 - `references/review-best-practices-links.md` — external review best-practice links used by this skill.

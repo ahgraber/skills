@@ -33,7 +33,7 @@ Produce a transfer-ready handoff for in-progress work.
 1. Extract the objective, success criteria, and current status from available context.
 2. Collect concrete evidence: files touched, commands run, validation status, blockers, and risks.
 3. Capture decisions with rationale so the recipient understands intent and tradeoffs.
-4. Fill every section of `references/handoff-template.md`.
+4. Fill every section of `assets/handoff-template.md`.
 5. Ensure next steps are ordered and step 1 is immediately executable.
 6. Return the completed template in chat for copy/paste.
 
@@ -55,4 +55,4 @@ Produce a transfer-ready handoff for in-progress work.
 
 ## References
 
-- `references/handoff-template.md` - canonical output format.
+- `assets/handoff-template.md` - canonical output format.
