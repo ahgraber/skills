@@ -121,7 +121,7 @@ The token refresh endpoint was not thread-safe, causing occasional
 authentication failures under high load.
 
 Fixes #234
-AI-assistant: OpenAI Codex
+AI-assistant: Claude Code
 ```
 
 ### Breaking change
@@ -133,5 +133,5 @@ BREAKING CHANGE: Legacy API key authentication is removed.
 Clients must migrate to OAuth 2.0; see docs/migration-guide.md.
 
 Closes #567
-AI-assistant: OpenAI Codex
+AI-assistant: Github Copilot
 ```
