@@ -6,6 +6,7 @@
 - SKILL.md exists and frontmatter includes only `name` and `description`.
 - Description focuses on when to use the skill and includes realistic trigger phrases.
 - SKILL.md is concise and imperative; heavy content moved to references.
+- Main SKILL.md stays under 500 lines.
 - References are one level deep and linked from SKILL.md.
 - Scripts are used for deterministic, repeatable work and tested once.
 - Skill has trigger tests (should/should-not) and functional tests.
@@ -14,7 +15,9 @@
 ## Principles
 
 - Concision wins: every token in SKILL.md competes with the system prompt.
-- Progressive disclosure: metadata -> SKILL.md -> references/scripts/assets.
+- Progressive disclosure: metadata -> SKILL.md -> assets/scripts/references.
+- Metadata should stay lean (around 100 tokens combined for `name` + `description`).
+- Keep SKILL.md targeted (\<5000 tokens recommended) and push details to on-demand files.
 - Composability: assume multiple skills can load together.
 - Portability: avoid environment-specific assumptions unless required.
 - Right level of freedom: prose for judgment, scripts for fragile steps.
@@ -36,9 +39,20 @@
 - For long references (>100 lines), include a table of contents.
 - Avoid narrative case studies; focus on reusable patterns.
 
-## When to Split into References
+## Optional Directories
 
-Create `references/` when:
+### `assets/`
+
+- Use for static reusable resources (templates, examples, lookup tables, schemas).
+- Store artifacts agents can consume directly instead of re-describing them in prose.
+
+### `references/`
+
+- Use for on-demand documentation that should not sit in main SKILL.md.
+- Keep files focused and topic-scoped; prefer multiple small files over one large file.
+- Common patterns include `REFERENCE.md`, `FORMS.md`, and domain-specific files.
+
+Create resources when:
 
 - The material exceeds ~100 lines.
 - There are multiple variants (frameworks, providers, file types).
@@ -49,11 +63,11 @@ Keep inline when:
 - The pattern fits in a few bullets or a short example.
 - The information is required in most invocations.
 
-## Scripts and Assets
+### `scripts/`
 
-- Add scripts for deterministic or repetitive tasks.
-- Test added scripts at least once after changes.
-- Keep assets for templates or artifacts that are reused in outputs.
+- Use for deterministic or repetitive work agents can execute.
+- Keep scripts self-contained or clearly declare dependencies.
+- Return actionable errors and handle expected edge cases.
 
 ## Workflow Modeling (GraphViz)
 
@@ -61,6 +75,9 @@ Keep inline when:
 - Prefer multiple trigger-based subgraphs over a single giant flow.
 - Use semantic shapes and edge labels per `graphviz-conventions.dot`.
 - Keep node labels short, specific, and action-oriented.
+- Use flowcharts only when decision logic or loops are easy to misapply.
+- Prefer markdown lists/tables/code blocks for linear steps, reference data, and code snippets.
+- Avoid placeholder labels (for example `step1`, `helper2`) that hide intent.
 
 ## Testing and Iteration
 
@@ -88,14 +105,3 @@ Keep inline when:
 - Skill ignored: description may summarize workflow; reduce to when-only triggers.
 - Skill not visible: too many skills or long descriptions; shorten and consolidate.
 - Instructions ignored: move critical rules to the top and tighten language.
-
-## Packaging
-
-- Validate and package with `scripts/package_skill.py`.
-- Fix validation errors before distributing.
-
-## Metrics (Optional)
-
-- Trigger rate on a 10-20 query test set.
-- Average tool calls vs. baseline.
-- Qualitative consistency across sessions.

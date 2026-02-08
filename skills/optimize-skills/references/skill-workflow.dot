@@ -50,13 +50,13 @@ digraph SKILL_WORKFLOW {
 
         "Ready to initialize" [shape=doublecircle];
         "Is this a new skill?" [shape=diamond];
-        "scripts/init_skill.py" [shape=plaintext];
+        "Create skill scaffold" [shape=box];
         "Skill scaffold created" [shape=ellipse];
         "Skip initialization" [shape=box];
 
         "Ready to initialize" -> "Is this a new skill?";
-        "Is this a new skill?" -> "scripts/init_skill.py" [label="yes"];
-        "scripts/init_skill.py" -> "Skill scaffold created";
+        "Is this a new skill?" -> "Create skill scaffold" [label="yes"];
+        "Create skill scaffold" -> "Skill scaffold created";
         "Is this a new skill?" -> "Skip initialization" [label="no"];
         "Skip initialization" -> "Skill scaffold created";
     }
@@ -106,28 +106,11 @@ digraph SKILL_WORKFLOW {
         "Functional tests pass?" -> "Ready to package" [label="yes"];
     }
 
-    // WHEN: Packaging
-    subgraph cluster_package {
-        label="PHASE: Validate and package";
-
-        "Ready to package" [shape=doublecircle];
-        "scripts/package_skill.py" [shape=plaintext];
-        "Validation passes?" [shape=diamond];
-        "Fix validation errors" [shape=box];
-        "Skill packaged" [shape=doublecircle];
-
-        "Ready to package" -> "scripts/package_skill.py";
-        "scripts/package_skill.py" -> "Validation passes?";
-        "Validation passes?" -> "Fix validation errors" [label="no"];
-        "Fix validation errors" -> "scripts/package_skill.py";
-        "Validation passes?" -> "Skill packaged" [label="yes"];
-    }
-
     // WHEN: Iteration
     subgraph cluster_iterate {
         label="PHASE: Iterate based on real usage";
 
-        "Skill packaged" [shape=doublecircle];
+        "Skill ready to distribute" [shape=doublecircle];
         "Collect feedback" [shape=box];
         "Under/over-triggering?" [shape=diamond];
         "Adjust description" [shape=box];
@@ -135,7 +118,7 @@ digraph SKILL_WORKFLOW {
         "Clarify steps or add scripts" [shape=box];
         "Return to testing" [shape=box];
 
-        "Skill packaged" -> "Collect feedback";
+        "Skill ready to distribute" -> "Collect feedback";
         "Collect feedback" -> "Under/over-triggering?";
         "Under/over-triggering?" -> "Adjust description" [label="yes"];
         "Adjust description" -> "Return to testing";
@@ -144,17 +127,4 @@ digraph SKILL_WORKFLOW {
         "Clarify steps or add scripts" -> "Return to testing";
         "Execution issues?" -> "Collect feedback" [label="no"];
     }
-
-    // Critical warning
-    subgraph cluster_warnings {
-        label="CRITICAL WARNINGS";
-
-        "STOP: Skip tests?" [shape=octagon, style=filled, fillcolor=red, fontcolor=white];
-        "STOP: Description too long" [shape=octagon, style=filled, fillcolor=red, fontcolor=white];
-    }
-
-    // Cross-process triggers
-    "Run functional tests" -> "STOP: Skip tests?" [label="skipped", style=dotted];
-    "Draft frontmatter" -> "STOP: Description too long" [label="bloated", style=dotted];
-    "Return to testing" -> "Run trigger tests" [label="iterate", style=dotted];
 }
