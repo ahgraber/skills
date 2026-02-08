@@ -9,14 +9,14 @@ Avoid adding extra documentation files inside skills unless explicitly required.
 ## Development vs. user environment
 
 - These practices describe how we develop and test skills in this repo.
-- Do not assume end users who install skills have the same tools available; only `uv` is a required runtime dependency (per the README).
-- When documenting or scripting behavior, distinguish between developer-only tooling (devshell, `mmdc`, `dot`, `nix`) and what a skill user can be expected to have.
+- **IMPORTANT**: Do not assume end users who install skills have the same tools available; only `uv` is a required runtime dependency (per the README).
+- When documenting or scripting behavior, distinguish between developer-only tooling (devshell, `mmdc`, `dot`, `nix`) and what a user can be expected to have.
 
 ## Dev environment
 
 - Prefer working inside the Nix devshell for tool availability (e.g., `mmdc`, `dot`).
 - Enter the shell with:
-  - `nix --extra-experimental-features 'nix-command flakes' develop`
+  - `nix develop`
 - `flake.nix` is the source of truth for devshell packages.
 
 ## Python scripts (skills/*/scripts/*.py)
@@ -40,5 +40,5 @@ Avoid adding extra documentation files inside skills unless explicitly required.
 
 - Prefer running tests and scripts inside the devshell.
 - Example (mermaid validation/render):
-  - `nix --extra-experimental-features 'nix-command flakes' develop -c skills/mermaid/scripts/validate_mermaid.py --install-chromium <<'EOF'`
-  - `nix --extra-experimental-features 'nix-command flakes' develop -c skills/mermaid/scripts/render_mermaid.py --install-chromium -o /tmp/mermaid.svg <<'EOF'`
+  - `nix develop -c skills/mermaid/scripts/validate_mermaid.py --install-chromium <<'EOF'`
+  - `nix develop -c scripts/render-dot.py skills/optimize-skills/references/skill-workflow.dot`

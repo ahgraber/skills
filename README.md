@@ -56,7 +56,9 @@ Some skill families leverage symlinks to reduce drift in replicated components.
 Symlinks + git work best on macOS/Linux.
 On Windows, symlink behavior can break depending on `core.symlinks` and user permissions.
 
-**Note on mcp-research**: This skill requires context7, exa, and/or jina mcp servers -a claude-code -a codex -g
+**Note on optimize-skills**: This skill requires [`graphviz`](https://www.graphviz.org/download/) available on the system.
+
+**Note on mcp-research**: This skill assumes context7, exa, and/or jina mcp servers are available.
 
 **Note on spec-kit skills**: `skills/spec-kit/scripts` and `skills/spec-kit/references` are the source of truth for shared Spec Kit files.
 Replicated copies in `skills/spec-kit-*` are implemented as symlinks to reduce drift.
