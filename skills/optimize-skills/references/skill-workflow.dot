@@ -8,123 +8,99 @@ digraph SKILL_WORKFLOW {
         "Request for skill work" [shape=ellipse];
         "Is the use case clear?" [shape=diamond];
         "Ask for concrete examples" [shape=box];
-        "Collect 2-3 example prompts" [shape=box];
+        "Collect example scenarios/prompts" [shape=box];
         "Is this a new skill?" [shape=diamond];
-        "Proceed to planning" [shape=doublecircle];
+        "Initialize skill scaffold" [shape=box];
+        "Load existing skill baseline" [shape=box];
+        "Proceed to preparation" [shape=doublecircle];
 
         "Request for skill work" -> "Is the use case clear?";
         "Is the use case clear?" -> "Ask for concrete examples" [label="no"];
-        "Ask for concrete examples" -> "Collect 2-3 example prompts";
-        "Collect 2-3 example prompts" -> "Is the use case clear?";
+        "Ask for concrete examples" -> "Collect example scenarios/prompts";
+        "Collect example scenarios/prompts" -> "Is the use case clear?";
         "Is the use case clear?" -> "Is this a new skill?" [label="yes"];
-        "Is this a new skill?" -> "Proceed to planning" [label="yes"];
-        "Is this a new skill?" -> "Proceed to planning" [label="no"];
+        "Is this a new skill?" -> "Initialize skill scaffold" [label="yes"];
+        "Is this a new skill?" -> "Load existing skill baseline" [label="no"];
+        "Initialize skill scaffold" -> "Proceed to preparation";
+        "Load existing skill baseline" -> "Proceed to preparation";
     }
 
-    // WHEN: Planning reusable resources
-    subgraph cluster_plan {
-        label="PHASE: Plan reusable resources";
+    // WHEN: Preparation before drafting
+    subgraph cluster_prepare {
+        label="PHASE 1: Preparation";
 
-        "Proceed to planning" [shape=doublecircle];
-        "List reusable steps" [shape=box];
-        "Need scripts?" [shape=diamond];
-        "Need references?" [shape=diamond];
-        "Need assets?" [shape=diamond];
-        "Plan resource set" [shape=box];
-        "Ready to initialize" [shape=doublecircle];
+        "Proceed to preparation" [shape=doublecircle];
+        "Define target workflow (steps, prerequisites, gates, outputs)" [shape=box];
+        "Are workflow steps imperative and executable?" [shape=diamond];
+        "Refine workflow steps" [shape=box];
+        "Define trigger scenarios in notes (2-3 should trigger, 2 should not)" [shape=box];
+        "Is branching/loop logic non-obvious?" [shape=diamond];
+        "Plan small DOT flowchart" [shape=box];
+        "Use markdown-only workflow" [shape=box];
+        "Preparation complete" [shape=doublecircle];
 
-        "Proceed to planning" -> "List reusable steps";
-        "List reusable steps" -> "Need scripts?";
-        "Need scripts?" -> "Need references?" [label="no"];
-        "Need scripts?" -> "Plan resource set" [label="yes"];
-        "Need references?" -> "Need assets?" [label="no"];
-        "Need references?" -> "Plan resource set" [label="yes"];
-        "Need assets?" -> "Plan resource set" [label="yes"];
-        "Need assets?" -> "Ready to initialize" [label="no"];
-        "Plan resource set" -> "Ready to initialize";
+        "Proceed to preparation" -> "Define target workflow (steps, prerequisites, gates, outputs)";
+        "Define target workflow (steps, prerequisites, gates, outputs)" -> "Are workflow steps imperative and executable?";
+        "Are workflow steps imperative and executable?" -> "Refine workflow steps" [label="no"];
+        "Refine workflow steps" -> "Are workflow steps imperative and executable?";
+        "Are workflow steps imperative and executable?" -> "Define trigger scenarios in notes (2-3 should trigger, 2 should not)" [label="yes"];
+        "Define trigger scenarios in notes (2-3 should trigger, 2 should not)" -> "Is branching/loop logic non-obvious?";
+        "Is branching/loop logic non-obvious?" -> "Plan small DOT flowchart" [label="yes"];
+        "Is branching/loop logic non-obvious?" -> "Use markdown-only workflow" [label="no"];
+        "Plan small DOT flowchart" -> "Preparation complete";
+        "Use markdown-only workflow" -> "Preparation complete";
     }
 
-    // WHEN: Initialize skill (new only)
-    subgraph cluster_init {
-        label="PHASE: Initialize skill";
+    // WHEN: Drafting the skill
+    subgraph cluster_draft {
+        label="PHASE 2: Draft";
 
-        "Ready to initialize" [shape=doublecircle];
-        "Is this a new skill?" [shape=diamond];
-        "Create skill scaffold" [shape=box];
-        "Skill scaffold created" [shape=ellipse];
-        "Skip initialization" [shape=box];
+        "Preparation complete" [shape=doublecircle];
+        "Draft frontmatter (name + description only)" [shape=box];
+        "Encode trigger scenarios in description and usage guidance" [shape=box];
+        "Draft imperative SKILL.md workflow" [shape=box];
+        "Need references/assets/scripts?" [shape=diamond];
+        "Create or update references/assets/scripts" [shape=box];
+        "Need external research to expand references?" [shape=diamond];
+        "Use mcp-research skill to gather source-backed references" [shape=box];
+        "Draft complete" [shape=doublecircle];
 
-        "Ready to initialize" -> "Is this a new skill?";
-        "Is this a new skill?" -> "Create skill scaffold" [label="yes"];
-        "Create skill scaffold" -> "Skill scaffold created";
-        "Is this a new skill?" -> "Skip initialization" [label="no"];
-        "Skip initialization" -> "Skill scaffold created";
+        "Preparation complete" -> "Draft frontmatter (name + description only)" [label="triggers", style=dotted];
+        "Draft frontmatter (name + description only)" -> "Encode trigger scenarios in description and usage guidance";
+        "Encode trigger scenarios in description and usage guidance" -> "Draft imperative SKILL.md workflow";
+        "Draft imperative SKILL.md workflow" -> "Need references/assets/scripts?";
+        "Need references/assets/scripts?" -> "Create or update references/assets/scripts" [label="yes"];
+        "Need references/assets/scripts?" -> "Draft complete" [label="no"];
+        "Create or update references/assets/scripts" -> "Need external research to expand references?";
+        "Need external research to expand references?" -> "Use mcp-research skill to gather source-backed references" [label="yes"];
+        "Need external research to expand references?" -> "Draft complete" [label="no"];
+        "Use mcp-research skill to gather source-backed references" -> "Create or update references/assets/scripts";
     }
 
-    // WHEN: Authoring
-    subgraph cluster_author {
-        label="PHASE: Author SKILL.md and resources";
+    // WHEN: Review and optimization pass
+    subgraph cluster_review {
+        label="PHASE 3: Review and Optimize";
 
-        "Skill scaffold created" [shape=ellipse];
-        "Draft frontmatter" [shape=box];
-        "Description trigger-focused?" [shape=diamond];
-        "Tighten description" [shape=box];
-        "Write core instructions" [shape=box];
-        "Add references/scripts/assets" [shape=box];
-        "SKILL.md complete" [shape=doublecircle];
+        "Draft complete" [shape=doublecircle];
+        "Run scenario checks against realistic prompts" [shape=box];
+        "Scenario checks pass?" [shape=diamond];
+        "Run functional checks against realistic prompts" [shape=box];
+        "Functional checks pass?" [shape=diamond];
+        "Are resources appropriate and sufficient?" [shape=diamond];
+        "Offload SKILL.md detail into references/assets/scripts" [shape=box];
+        "Optimize draft (triggering, redundancy, disclosure, flowchart need)" [shape=box];
+        "Skill optimized and ready" [shape=doublecircle];
 
-        "Skill scaffold created" -> "Draft frontmatter";
-        "Draft frontmatter" -> "Description trigger-focused?";
-        "Description trigger-focused?" -> "Tighten description" [label="no"];
-        "Tighten description" -> "Description trigger-focused?";
-        "Description trigger-focused?" -> "Write core instructions" [label="yes"];
-        "Write core instructions" -> "Add references/scripts/assets";
-        "Add references/scripts/assets" -> "SKILL.md complete";
-    }
-
-    // WHEN: Testing
-    subgraph cluster_test {
-        label="PHASE: Test and iterate";
-
-        "SKILL.md complete" [shape=doublecircle];
-        "Run trigger tests" [shape=box];
-        "Trigger tests pass?" [shape=diamond];
-        "Fix description" [shape=box];
-        "Run functional tests" [shape=box];
-        "Functional tests pass?" [shape=diamond];
-        "Refine instructions" [shape=box];
-        "Ready to package" [shape=doublecircle];
-
-        "SKILL.md complete" -> "Run trigger tests";
-        "Run trigger tests" -> "Trigger tests pass?";
-        "Trigger tests pass?" -> "Fix description" [label="no"];
-        "Fix description" -> "Run trigger tests";
-        "Trigger tests pass?" -> "Run functional tests" [label="yes"];
-        "Run functional tests" -> "Functional tests pass?";
-        "Functional tests pass?" -> "Refine instructions" [label="no"];
-        "Refine instructions" -> "Run functional tests";
-        "Functional tests pass?" -> "Ready to package" [label="yes"];
-    }
-
-    // WHEN: Iteration
-    subgraph cluster_iterate {
-        label="PHASE: Iterate based on real usage";
-
-        "Skill ready to distribute" [shape=doublecircle];
-        "Collect feedback" [shape=box];
-        "Under/over-triggering?" [shape=diamond];
-        "Adjust description" [shape=box];
-        "Execution issues?" [shape=diamond];
-        "Clarify steps or add scripts" [shape=box];
-        "Return to testing" [shape=box];
-
-        "Skill ready to distribute" -> "Collect feedback";
-        "Collect feedback" -> "Under/over-triggering?";
-        "Under/over-triggering?" -> "Adjust description" [label="yes"];
-        "Adjust description" -> "Return to testing";
-        "Under/over-triggering?" -> "Execution issues?" [label="no"];
-        "Execution issues?" -> "Clarify steps or add scripts" [label="yes"];
-        "Clarify steps or add scripts" -> "Return to testing";
-        "Execution issues?" -> "Collect feedback" [label="no"];
+        "Draft complete" -> "Run scenario checks against realistic prompts" [label="triggers", style=dotted];
+        "Run scenario checks against realistic prompts" -> "Scenario checks pass?";
+        "Scenario checks pass?" -> "Run functional checks against realistic prompts" [label="yes"];
+        "Scenario checks pass?" -> "Optimize draft (triggering, redundancy, disclosure, flowchart need)" [label="no"];
+        "Run functional checks against realistic prompts" -> "Functional checks pass?";
+        "Functional checks pass?" -> "Optimize draft (triggering, redundancy, disclosure, flowchart need)" [label="no"];
+        "Functional checks pass?" -> "Are resources appropriate and sufficient?" [label="yes"];
+        "Are resources appropriate and sufficient?" -> "Skill optimized and ready" [label="yes"];
+        "Are resources appropriate and sufficient?" -> "Offload SKILL.md detail into references/assets/scripts" [label="no"];
+        "Offload SKILL.md detail into references/assets/scripts" -> "Optimize draft (triggering, redundancy, disclosure, flowchart need)";
+        "Optimize draft (triggering, redundancy, disclosure, flowchart need)" -> "Run scenario checks against realistic prompts";
     }
 }

@@ -43,16 +43,46 @@ Skills help future Agent instances find and apply effective approaches.
 
 ## Workflow
 
-1. Define trigger tests: list 2-3 prompts that should trigger the skill and 2 that should not.
-2. Audit frontmatter: keep only `name` and `description`; make `description` when-focused, not workflow-focused.
-3. Rewrite the body in imperative form: keep main instructions short, specific, and ordered by execution.
-4. Move deep detail out of `SKILL.md` into `references/`, `assets/`, or `scripts/`; link to each from `SKILL.md`.
-5. Validate workflow representation: use markdown for linear steps; use a small DOT flowchart only for non-obvious branching or loops.
-6. Run trigger and functional checks against real prompts; iterate until both pass.
+### Phase 1: Preparation
+
+1. Choose the path:
+   - New skill: initialize scaffold and baseline structure.
+   - Existing skill: load current `SKILL.md` and related resources as baseline.
+2. Define the target workflow first:
+   - List the execution steps in order, including prerequisites, gates, and outputs.
+   - Keep steps imperative and executable.
+3. Determine trigger scenarios in working notes:
+   - Capture 2-3 scenarios that must trigger the skill.
+   - Capture up to 2 scenarios that must not trigger the skill.
+4. Decide whether a flowchart is required:
+   - Use markdown-only workflow when flow is linear and obvious.
+   - Add a small DOT flowchart only when branching/loops are non-obvious.
+
+### Phase 2: Draft
+
+1. Draft metadata and usage guidance from preparation:
+   - Keep frontmatter to `name` and `description`.
+   - Encode trigger scenarios in `description` and `## When to Use` (and `## When Not to Use` when helpful).
+2. Draft the skill body in imperative form:
+   - Keep instructions short, specific, and ordered by execution.
+   - Move deep detail to `references/`, `assets/`, or `scripts/` and link from `SKILL.md`.
+
+### Phase 3: Review and Optimize
+
+1. Run scenario and functional checks against realistic prompts.
+2. Review resource fit:
+   - Confirm references/assets/scripts are sufficient and scoped.
+   - Offload verbose `SKILL.md` sections into resources where appropriate.
+3. Optimize the draft:
+   - Tighten triggering (under/over-triggering).
+   - Remove redundancy and improve progressive disclosure.
+   - Re-check whether flowchart usage is still justified.
+4. Iterate until trigger behavior and execution quality both pass.
 
 ## Core Principles
 
 - Optimize for triggering: description must emphasize when to use the skill (`references/skills-search-optimization.md`).
+- Treat trigger scenarios as authoring scaffolding; the final skill should expose triggers through `description` and `## When to Use`.
 - Keep frontmatter metadata small (about 100 tokens combined).
 - Keep main `SKILL.md` under 500 lines and focused on action.
 - Use progressive disclosure: metadata -> SKILL.md -> references/scripts/assets.
@@ -121,11 +151,13 @@ skills/
 - `description` should emphasize when to use the skill and include triggers/symptoms.
 - Avoid workflow summaries in the description.
 - Keep descriptions short and specific.
+- Prefer `## When to Use` / `## When Not to Use` for trigger cues; do not add a dedicated trigger-scenarios section unless explicitly requested by the repo.
 - Refer to `assets/skill-template.md` for a suggested (but easily modified) template structure.
 
 ## Common Mistakes
 
 - Summarizing workflow in `description` instead of stating actionable triggers and symptoms.
+- Copying working trigger scenarios directly into the final skill instead of converting them into `description` and `## When to Use`.
 - Keeping workflows as one giant graph instead of splitting into trigger-based subgraphs.
 - Repeating deep reference material in `SKILL.md` instead of linking to `references/`.
 - Leaving scripts implicit: deterministic steps should be executable where possible.
