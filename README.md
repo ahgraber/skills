@@ -53,8 +53,8 @@ npx skills update        # Update all installed skills
 ## Repository Notes
 
 Some skill families leverage symlinks to reduce drift in replicated components.
-Symlinks + git work best on macOS/Linux.
-On Windows, symlink behavior can break depending on `core.symlinks` and user permissions.
+Contributors should enable symlink checkout in this repo after cloning: `git config core.symlinks true`.
+Symlinks + git work best on macOS/Linux; symlink behavior on Windows can break depending on `core.symlinks` and user permissions.
 
 **Note on optimize-skills**: This skill requires [`graphviz`](https://www.graphviz.org/download/) available on the system.
 
