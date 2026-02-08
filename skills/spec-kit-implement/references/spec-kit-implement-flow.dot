@@ -63,6 +63,7 @@ digraph spec_kit_implement {
     q_aligns_spec [label="Implementation aligns\nwith spec and plan?", shape=diamond];
     q_tests_pass [label="Tests and validation\npass?", shape=diamond];
     state_gaps [label="Gaps or failures\ndetected", shape=ellipse];
+    act_reconcile [label="Run spec-kit-reconcile\nwith concrete gap report", shape=box];
 
     // ── Final output ───────────────────────────────────────
     act_report_status [label="Report implementation\nstatus summary", shape=box];
@@ -133,7 +134,9 @@ digraph spec_kit_implement {
     q_tests_pass -> state_gaps [label="no, failures"];
 
     // ── Gap remediation loop ───────────────────────────────
-    state_gaps -> q_tasks_remain [label="address gaps\nand re-verify", style=dotted];
+    state_gaps -> q_tasks_remain [label="execution-only fix\nand re-verify", style=dotted];
+    state_gaps -> act_reconcile [label="artifact drift", style=dotted];
+    act_reconcile -> q_tasks_exist [label="re-run implement\ngate", style=dotted];
 
     // ── Done ───────────────────────────────────────────────
     act_report_status -> done;

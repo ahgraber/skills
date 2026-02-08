@@ -16,13 +16,14 @@ Run a non-destructive cross-artifact quality audit before implementation.
 ## When Not to Use
 
 - Any prerequisite artifact is missing (`spec-kit-specify`, `spec-kit-plan`, or `spec-kit-tasks` first).
-- You want to fix artifacts directly rather than run analysis (`spec-kit-specify`, `spec-kit-plan`, `spec-kit-tasks`).
+- You need targeted remediation edits now (`spec-kit-reconcile`).
 - You are executing implementation work (`spec-kit-implement`).
 
 ## Router Fit
 
 - Primary route from `spec-kit` after `spec-kit-tasks`.
 - Read-only quality gate before `spec-kit-implement`.
+- Default handoff to `spec-kit-reconcile` when findings require coordinated artifact updates.
 
 ## Critical Constraints
 
@@ -81,12 +82,13 @@ Run a non-destructive cross-artifact quality audit before implementation.
 
 6. Recommend next actions:
 
-   - If `CRITICAL` exists, block `spec-kit-implement` and route to the owning upstream skill.
+   - If `CRITICAL`/`HIGH` findings require cross-artifact edits, block `spec-kit-implement` and route to `spec-kit-reconcile` with a concise gap summary.
+   - If only one artifact needs focused updates, route to its owner skill (`spec-kit-specify`, `spec-kit-plan`, or `spec-kit-tasks`).
    - Otherwise provide prioritized improvements and whether implementation can proceed.
 
 7. Offer follow-up only:
 
-   - Ask whether to propose concrete remediation edits for top findings.
+   - Ask whether to run `spec-kit-reconcile` using top findings as the gap report.
    - Do not apply any edits in this skill.
 
 ## Output

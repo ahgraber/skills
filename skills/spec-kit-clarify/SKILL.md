@@ -18,6 +18,7 @@ Resolve high-impact ambiguity in the active feature specification before plannin
 - No feature spec exists yet (`spec-kit-specify` first).
 - Work is design decomposition (`spec-kit-plan`) or task generation (`spec-kit-tasks`).
 - You only need read-only consistency analysis (`spec-kit-analyze`).
+- You are reconciling broader cross-artifact drift (`spec-kit-reconcile`).
 
 ## Router Fit
 

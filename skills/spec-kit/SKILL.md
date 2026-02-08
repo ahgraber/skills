@@ -1,6 +1,6 @@
 ---
 name: spec-kit
-description: Use when work involves Spec Kit and you need to choose the correct `spec-kit-*` sub-skill, enforce artifact-order gates, or recover from sequence violations (for example planning without `spec.md` or implementing without `tasks.md`).
+description: Use when work involves Spec Kit and you need to choose the correct `spec-kit-*` sub-skill, enforce artifact-order gates, or route remediation work (for example sequence violations or specification drift at any stage).
 ---
 
 # Spec Kit Skill Router
@@ -24,16 +24,17 @@ Treat routes as defaults; if repository constraints require a different sequence
 
 ## Route by Intent
 
-| User Intent                                      | Route                   | Required artifacts                 |
-| ------------------------------------------------ | ----------------------- | ---------------------------------- |
-| Create or update governance/principles           | `spec-kit-constitution` | none                               |
-| Draft or revise feature requirements             | `spec-kit-specify`      | constitution recommended           |
-| Resolve high-impact ambiguity before planning    | `spec-kit-clarify`      | `spec.md`                          |
-| Produce technical design artifacts               | `spec-kit-plan`         | `spec.md` + constitution           |
-| Generate dependency-ordered implementation tasks | `spec-kit-tasks`        | `plan.md` (+ `spec.md`)            |
-| Audit cross-artifact consistency (read-only)     | `spec-kit-analyze`      | `spec.md` + `plan.md` + `tasks.md` |
-| Generate requirements-quality checklist          | `spec-kit-checklist`    | `spec.md`                          |
-| Execute implementation from tasks                | `spec-kit-implement`    | `tasks.md`                         |
+| User Intent                                      | Route                   | Required artifacts                      |
+| ------------------------------------------------ | ----------------------- | --------------------------------------- |
+| Create or update governance/principles           | `spec-kit-constitution` | none                                    |
+| Draft or revise feature requirements             | `spec-kit-specify`      | constitution recommended                |
+| Resolve high-impact ambiguity before planning    | `spec-kit-clarify`      | `spec.md`                               |
+| Produce technical design artifacts               | `spec-kit-plan`         | `spec.md` + constitution                |
+| Generate dependency-ordered implementation tasks | `spec-kit-tasks`        | `plan.md` (+ `spec.md`)                 |
+| Audit cross-artifact consistency (read-only)     | `spec-kit-analyze`      | `spec.md` + `plan.md` + `tasks.md`      |
+| Reconcile specification drift at any stage       | `spec-kit-reconcile`    | gap report + existing feature artifacts |
+| Generate requirements-quality checklist          | `spec-kit-checklist`    | `spec.md`                               |
+| Execute implementation from tasks                | `spec-kit-implement`    | `tasks.md`                              |
 
 ## Routing Flowchart
 
@@ -47,6 +48,7 @@ digraph feature_route {
     edge [fontname="Helvetica", fontsize=9];
 
     start [label="Feature request", shape=oval];
+    reconcile_gate [label="Need reconcile now\n(drift detected)?", shape=diamond];
     has_const [label="constitution exists?", shape=diamond];
     constitution [label="spec-kit-constitution", shape=box];
     has_spec [label="spec.md exists?", shape=diamond];
@@ -55,11 +57,20 @@ digraph feature_route {
     clarify [label="spec-kit-clarify", shape=box];
     plan [label="spec-kit-plan", shape=box];
     tasks [label="spec-kit-tasks", shape=box];
+    analyze_gate [label="Run spec-kit-analyze?", shape=diamond];
+    analyze [label="spec-kit-analyze", shape=box];
+    analyze_blocking [label="Blocking findings?", shape=diamond];
+    reconcile [label="spec-kit-reconcile", shape=box];
     has_tasks [label="tasks.md exists?", shape=diamond];
     stop_tasks [label="STOP:\nrun spec-kit-tasks first", shape=octagon, style=filled, fillcolor=red, fontcolor=white];
     implement [label="spec-kit-implement", shape=box];
+    post_impl_gaps [label="Post-implementation\ngaps found?", shape=diamond];
+    done [label="Feature complete", shape=doublecircle];
 
-    start -> has_const;
+    start -> reconcile_gate;
+    reconcile_gate -> reconcile [label="yes"];
+    reconcile_gate -> has_const [label="no"];
+    reconcile -> has_const [label="continue"];
     has_const -> constitution [label="no"];
     has_const -> has_spec [label="yes"];
     constitution -> has_spec;
@@ -71,8 +82,17 @@ digraph feature_route {
     clarify -> plan;
     plan -> tasks;
     tasks -> has_tasks;
-    has_tasks -> implement [label="yes"];
+    has_tasks -> analyze_gate [label="yes"];
     has_tasks -> stop_tasks [label="no"];
+    analyze_gate -> analyze [label="recommended"];
+    analyze_gate -> implement [label="skip"];
+    analyze -> analyze_blocking;
+    analyze_blocking -> reconcile [label="yes"];
+    analyze_blocking -> implement [label="no"];
+    reconcile -> implement;
+    implement -> post_impl_gaps;
+    post_impl_gaps -> done [label="no"];
+    post_impl_gaps -> reconcile [label="yes"];
 }
 ```
 
@@ -81,6 +101,7 @@ digraph feature_route {
 1. Never run `spec-kit-plan` without `spec.md`.
 2. Never run `spec-kit-implement` without `tasks.md`.
 3. Run `spec-kit-clarify` before planning when ambiguity can change architecture, data model, testing, UX, operations, or compliance.
+4. Run `spec-kit-reconcile` whenever drift is detected at any stage before continuing.
 
 ## Router Behavior
 
@@ -88,6 +109,7 @@ digraph feature_route {
 2. Enforce artifact gates before invoking downstream skills.
 3. Prefer the minimal next step; do not run the full pipeline unless requested.
 4. If the requested step violates a gate, route to the missing prerequisite and explain the dependency.
+5. Route developer-reported drift directly to `spec-kit-reconcile`, even if raised outside analyze/implement.
 
 ## Shared Resource Ownership (Parent Skill)
 

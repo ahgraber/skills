@@ -18,12 +18,13 @@ Execute approved feature tasks in dependency order and keep `tasks.md` status ac
 - `tasks.md` does not exist yet (`spec-kit-tasks` first).
 - You are still writing or revising requirements/design artifacts (`spec-kit-specify`, `spec-kit-clarify`, `spec-kit-plan`).
 - You need read-only consistency analysis rather than execution (`spec-kit-analyze`).
+- You need coordinated artifact remediation after gaps are discovered (`spec-kit-reconcile`).
 
 ## Router Fit
 
 - Primary route from `spec-kit` after `spec-kit-tasks`.
 - Requires planning + task artifacts for the active feature branch.
-- Feeds back to `spec-kit-tasks`/`spec-kit-plan` only when execution reveals artifact gaps.
+- Routes execution-discovered artifact drift to `spec-kit-reconcile`.
 
 ## Preconditions
 
@@ -89,7 +90,7 @@ Execute approved feature tasks in dependency order and keep `tasks.md` status ac
    - All required tasks are complete.
    - Implementation aligns with `spec.md`/`plan.md` intent.
    - Required tests/validation pass per project constraints.
-   - If gaps remain, report blockers and route to the owning upstream skill when needed.
+   - If gaps remain (for example missing wiring, acceptance mismatch, integration drift), route to `spec-kit-reconcile` with a concrete gap report.
 
 9. Report implementation result:
 
@@ -110,6 +111,7 @@ Execute approved feature tasks in dependency order and keep `tasks.md` status ac
 - Never mark a task `[X]` before its work and validations are complete.
 - Do not run `[P]` tasks concurrently when they touch the same files or dependent resources.
 - Stop and reroute when prerequisite artifacts are missing or invalid.
+- Do not patch spec/plan/tasks ad hoc during execution; use `spec-kit-reconcile` for structured remediation.
 
 ## Common Mistakes
 
@@ -118,6 +120,7 @@ Execute approved feature tasks in dependency order and keep `tasks.md` status ac
 - Forgetting immediate `[X]` updates in `tasks.md`, causing drift between reality and artifact state.
 - Running `[P]` tasks together despite file/dependency conflicts.
 - Continuing past critical sequential failures instead of stopping and reporting.
+- Editing `spec.md`/`plan.md`/`tasks.md` informally during implementation instead of routing remediation through `spec-kit-reconcile`.
 
 ## References
 

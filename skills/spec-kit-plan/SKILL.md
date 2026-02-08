@@ -19,6 +19,7 @@ Generate implementation design artifacts from the approved feature specification
 - High-impact ambiguity in `spec.md` still blocks architecture or validation decisions (`spec-kit-clarify` first).
 - You are decomposing design into executable work items (`spec-kit-tasks`).
 - You only need a read-only consistency audit (`spec-kit-analyze`).
+- You are reconciling cross-artifact drift discovered mid-work (`spec-kit-reconcile`).
 
 ## Router Fit
 

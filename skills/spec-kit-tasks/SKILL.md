@@ -1,6 +1,6 @@
 ---
 name: spec-kit-tasks
-description: Use when an approved Spec Kit `plan.md` + `spec.md` must be decomposed into dependency-ordered `tasks.md`, or when `tasks.md` is missing/stale after planning changes.
+description: Use when an approved Spec Kit `plan.md` + `spec.md` must be decomposed into dependency-ordered `tasks.md`, or when `tasks.md` is missing/stale after planning or reconciliation changes.
 ---
 
 # Spec Kit Tasks
@@ -10,7 +10,7 @@ Generate an implementation-ready `tasks.md` from Spec Kit design artifacts.
 ## When to Use
 
 - `plan.md` and `spec.md` exist and you need executable tasks for implementation.
-- `tasks.md` is missing, stale, or not aligned with current plan/spec artifacts.
+- `tasks.md` is missing, stale, or not aligned with current plan/spec artifacts (including post-`spec-kit-reconcile` updates).
 - You need user-story-scoped task phases with clear dependency and parallelization signals.
 
 ## When Not to Use
@@ -24,7 +24,7 @@ Generate an implementation-ready `tasks.md` from Spec Kit design artifacts.
 
 - Primary route from `spec-kit` after `spec-kit-plan`.
 - Must complete before `spec-kit-implement`.
-- Supports `spec-kit-analyze` by producing structured implementation intent.
+- Supports `spec-kit-analyze` and `spec-kit-reconcile` by producing structured implementation intent.
 
 ## Preconditions
 

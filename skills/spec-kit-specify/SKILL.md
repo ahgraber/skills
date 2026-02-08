@@ -17,6 +17,7 @@ Create or refresh the feature specification for the active Spec Kit feature.
 
 - Clarify ambiguity in an already-written spec without redrafting it (`spec-kit-clarify`).
 - Generate design artifacts or tasks from an approved spec (`spec-kit-plan`, `spec-kit-tasks`).
+- Reconcile cross-artifact drift in an existing feature (`spec-kit-reconcile`).
 
 ## Router Fit
 

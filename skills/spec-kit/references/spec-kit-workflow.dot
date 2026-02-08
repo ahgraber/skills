@@ -24,6 +24,9 @@ digraph spec_kit_workflow {
     act_analyze_solo [label="Run spec-kit-analyze\n(read-only audit)", shape=box];
     done_analyze_solo [label="Analysis\ndelivered", shape=doublecircle];
 
+    act_reconcile_solo [label="Run spec-kit-reconcile\n(first-class drift remediation)", shape=box];
+    done_reconcile_solo [label="Reconciliation\ndelivered", shape=doublecircle];
+
     act_checklist_solo [label="Run spec-kit-checklist\n(requirements quality)", shape=box];
     done_checklist_solo [label="Checklist\ndelivered", shape=doublecircle];
 
@@ -52,8 +55,8 @@ digraph spec_kit_workflow {
     // Analysis (optional, recommended)
     q_run_analyze [label="Run cross-artifact\nconsistency analysis?", shape=diamond];
     act_analyze [label="Run spec-kit-analyze", shape=box];
-    q_critical_issues [label="Critical issues\nfound?", shape=diamond];
-    state_needs_revision [label="Artifacts need\nrevision", shape=ellipse];
+    q_blocking_issues [label="Blocking findings\nfound?", shape=diamond];
+    act_reconcile [label="Run spec-kit-reconcile\n(targeted edits)", shape=box];
 
     // Checklist before implement (optional)
     q_run_checklist [label="Generate quality\nchecklist before\nimplementing?", shape=diamond];
@@ -61,6 +64,7 @@ digraph spec_kit_workflow {
 
     // Implement
     act_implement [label="Run spec-kit-implement", shape=box];
+    q_post_impl_gaps [label="Post-implementation\ngaps found?", shape=diamond];
 
     // Exit
     done [label="Feature\ncomplete", shape=doublecircle];
@@ -80,11 +84,13 @@ digraph spec_kit_workflow {
     q_intent -> act_constitution [label="governance\nupdate"];
     q_intent -> q_has_constitution [label="feature\nwork"];
     q_intent -> act_analyze_solo [label="analysis\nonly"];
+    q_intent -> act_reconcile_solo [label="drift at\nany stage"];
     q_intent -> act_checklist_solo [label="checklist\nonly"];
 
     // ── Standalone terminals ───────────────────────────────
     act_constitution -> done_gov;
     act_analyze_solo -> done_analyze_solo;
+    act_reconcile_solo -> done_reconcile_solo;
     act_checklist_solo -> done_checklist_solo;
 
     // ── Feature: constitution gate ─────────────────────────
@@ -115,14 +121,10 @@ digraph spec_kit_workflow {
     // ── Feature: analysis (optional) ───────────────────────
     q_run_analyze -> act_analyze [label="recommended"];
     q_run_analyze -> q_run_checklist [label="skip"];
-    act_analyze -> q_critical_issues;
-    q_critical_issues -> q_run_checklist [label="no"];
-    q_critical_issues -> state_needs_revision [label="yes"];
-
-    // ── Feedback loops from analysis ───────────────────────
-    state_needs_revision -> q_ambiguous [label="spec gaps", style=dotted];
-    state_needs_revision -> act_plan [label="plan or\ndesign gaps", style=dotted];
-    state_needs_revision -> act_tasks [label="task coverage\ngaps", style=dotted];
+    act_analyze -> q_blocking_issues;
+    q_blocking_issues -> q_run_checklist [label="no"];
+    q_blocking_issues -> act_reconcile [label="yes"];
+    act_reconcile -> q_run_checklist;
 
     // ── Feature: checklist (optional) ──────────────────────
     q_run_checklist -> act_checklist [label="yes"];
@@ -130,7 +132,9 @@ digraph spec_kit_workflow {
     act_checklist -> act_implement;
 
     // ── Feature: implement ─────────────────────────────────
-    act_implement -> done;
+    act_implement -> q_post_impl_gaps;
+    q_post_impl_gaps -> done [label="no"];
+    q_post_impl_gaps -> act_reconcile [label="yes"];
 
     // ── STOP warning guard connections ─────────────────────
     // These show prerequisite violations agents may hit
