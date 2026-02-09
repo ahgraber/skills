@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: Use when reviewing code changes before committing or merging — staged diffs, branch diffs, or PR readiness checks. Triggers: 'review my code', 'check these changes', 'review this branch', 'give feedback on my diff', 'is this PR ready?'. Not for implementing features, running test suites, or formatting-only passes.
+description: "Use when reviewing code changes before committing or merging — staged diffs, branch diffs, or PR readiness checks. Triggers: 'review my code', 'check these changes', 'review this branch', 'give feedback on my diff', 'is this PR ready?'. Not for implementing features, running test suites, or formatting-only passes."
 ---
 
 # Code Review

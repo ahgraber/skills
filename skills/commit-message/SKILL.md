@@ -1,6 +1,6 @@
 ---
 name: commit-message
-description: Use when drafting a Conventional Commit message from currently staged Git changes. Triggers: 'write commit message', 'draft commit from staged changes', 'generate conventional commit', 'message for git commit -F -'. Not for creating commits, amending history, or full code review.
+description: "Use when drafting a Conventional Commit message from currently staged Git changes. Triggers: 'write commit message', 'draft commit from staged changes', 'generate conventional commit', 'message for git commit -F -'. Not for creating commits, amending history, or full code review."
 ---
 
 # Commit Message
