@@ -1,0 +1,21 @@
+# Usage / Docstring Template
+
+SCRIPT_NAME="your-script.sh"
+SCRIPT_DESC="One-line description of what the script does."
+
+usage() {
+  cat <<USAGE
+Usage: ${SCRIPT_NAME} [options] [args]
+
+${SCRIPT_DESC}
+
+Options:
+  -h            Show this help and exit
+  -v            Enable verbose logging
+  -n            Dry-run mode (no changes)
+
+Examples:
+  ${SCRIPT_NAME} -v input.txt
+  ${SCRIPT_NAME} -n --target prod
+USAGE
+}
