@@ -71,7 +71,7 @@ If given a draft, do not ask questions unless the intent is unclear.
 2. **Shape the structure**: Lead with context and stakes, then evidence, then implications or next steps.
 3. **Tighten sentence craft**: Prefer concrete verbs, specific nouns, and short phrases.
 4. **Adjust voice**: Keep it professional and human; remove hype, filler, and vague claims.
-   If AI artifacts appear, consult `skills/good-prose/references/humanize-guardrails.md`.
+   If AI artifacts appear, consult `references/humanize-guardrails.md`.
 5. **Polish mechanics**: Fix grammar, punctuation, and consistency.
 
 ## Core Principles
@@ -111,4 +111,5 @@ If given a draft, do not ask questions unless the intent is unclear.
 
 Use these references for deeper guidance when needed:
 
--
+- `references/humanize-guardrails.md` - LLM failure patterns and rewrite guardrails.
+- `references/tropes.md` - local copy of tropes.fyi's catalog of common AI writing tropes to avoid.

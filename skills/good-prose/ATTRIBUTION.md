@@ -5,6 +5,8 @@ Inspired by [blader/humanizer: Claude Code skill that removes signs of AI-genera
 Based on Wikipedia's [_Signs of AI writing_](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) guide, maintained by WikiProject AI Cleanup.
 This comprehensive guide comes from observations of thousands of instances of AI-generated text.
 
+Includes `tropes.md` from [tropes.md - Tropes](https://tropes.fyi/tropes-md), originally published by [tropes.fyi](https://tropes.fyi) and attributed to [ossama.is](https://ossama.is).
+
 - Strunk, William.
   The Elements of Style.
   Project Gutenberg, 2011, eBook no. 37134, <https://www.gutenberg.org/ebooks/37134>
