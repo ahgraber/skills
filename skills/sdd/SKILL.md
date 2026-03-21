@@ -52,7 +52,7 @@ digraph sdd_router {
     node [fontname="Helvetica", fontsize=10];
     edge [fontname="Helvetica", fontsize=9];
 
-    start [label="User intent", shape=oval];
+    start [label="User intent", shape=ellipse];
     explore_first [label="Wants to think\nbefore acting?", shape=diamond];
     explore [label="sdd-explore", shape=box];
 
@@ -146,3 +146,4 @@ Archived changes live in `.specs/changes/archive/YYYY-MM-DD-<name>/`.
 ## References
 
 - `references/sdd-formats.md` — artifact format reference (baseline, delta, proposal, design, tasks)
+- `references/sdd-router.dot` — canonical DOT source for the routing flowchart above

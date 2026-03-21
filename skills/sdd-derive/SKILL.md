@@ -175,3 +175,4 @@ Report: capabilities covered, requirement count, assumptions made.
 ## References
 
 - `references/sdd-formats.md` — complete format reference for all artifact types
+- `references/sdd-derive-output-type.dot` — canonical DOT source for the output type decision above
