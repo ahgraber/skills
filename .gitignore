@@ -1,5 +1,10 @@
 # gitignore
 
+# dot-directories, unless explicitly kept
+.*/
+!.github/
+!.renovate/
+
 # Editors
 .ipynb_checkpoints/
 .profile
