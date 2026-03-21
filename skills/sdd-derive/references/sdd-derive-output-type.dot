@@ -1,0 +1,14 @@
+digraph output_type {
+    // Decision tree for sdd-derive output type
+    // WHEN: Determining whether to generate change directory or baseline specs
+
+    ".specs/specs/ exists?" [shape=diamond];
+    "New or existing behavior?" [shape=diamond];
+    "Generate change directory\n(.specs/changes/<name>/)" [shape=box];
+    "Generate baseline specs\n(.specs/specs/)" [shape=box];
+
+    ".specs/specs/ exists?" -> "New or existing behavior?" [label="yes"];
+    ".specs/specs/ exists?" -> "Generate baseline specs\n(.specs/specs/)" [label="no"];
+    "New or existing behavior?" -> "Generate change directory\n(.specs/changes/<name>/)" [label="new or modified"];
+    "New or existing behavior?" -> "Generate baseline specs\n(.specs/specs/)" [label="retroactive doc"];
+}

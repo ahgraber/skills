@@ -1,0 +1,52 @@
+digraph sdd_router {
+    // Routing flowchart for the SDD parent skill
+    // WHEN: User invokes sdd — classify intent and route to child skill
+
+    rankdir=TB;
+    node [fontname="Helvetica", fontsize=10];
+    edge [fontname="Helvetica", fontsize=9];
+
+    start [label="User intent", shape=ellipse];
+    explore_first [label="Wants to think\nbefore acting?", shape=diamond];
+    explore [label="sdd-explore", shape=box];
+
+    has_specs [label=".specs/specs/ exists?", shape=diamond];
+    confirm_mode [label="Confirm intent\nwith user", shape=box];
+
+    translate [label="sdd-translate", shape=box];
+    derive [label="sdd-derive", shape=box];
+    propose [label="sdd-propose", shape=box];
+
+    has_change [label="Active change exists?", shape=diamond];
+    which_change [label="Which change?\n(ask if multiple)", shape=box];
+    has_tasks [label="tasks.md exists?", shape=diamond];
+    stop [label="STOP:\nrun sdd-propose first", shape=octagon, style=filled, fillcolor=red, fontcolor=white];
+    apply [label="sdd-apply", shape=box];
+    verify [label="sdd-verify", shape=box];
+    sync [label="sdd-sync", shape=box];
+    archive [label="sdd-archive", shape=box];
+
+    start -> explore_first;
+    explore_first -> explore [label="yes"];
+    explore_first -> has_specs [label="no, ready to act"];
+
+    explore -> has_specs [label="crystallized,\nready to act", style=dashed];
+
+    has_specs -> confirm_mode;
+    confirm_mode -> translate [label="convert existing specs"];
+    confirm_mode -> derive [label="spec from code"];
+    confirm_mode -> propose [label="new change"];
+    confirm_mode -> has_change [label="apply/verify/\nsync/archive"];
+    confirm_mode -> explore [label="think more"];
+
+    has_change -> which_change [label="yes"];
+    has_change -> propose [label="no", style=dashed];
+
+    which_change -> has_tasks [label="apply"];
+    which_change -> verify [label="verify"];
+    which_change -> sync [label="sync"];
+    which_change -> archive [label="archive"];
+
+    has_tasks -> apply [label="yes"];
+    has_tasks -> stop [label="no"];
+}
