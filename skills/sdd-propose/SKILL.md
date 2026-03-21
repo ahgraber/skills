@@ -1,7 +1,7 @@
 ---
 name: sdd-propose
 description: |-
-  Use when creating a new change with all SDD artifacts — proposal, delta specs, design, and tasks. Use when the user says "propose a change", "create a change for X", "I want to implement feature Y", "start a new change", or "let's build X". Generates the full artifact set for a change in dependency order.
+  Use when creating a new change with all SDD artifacts — proposal, delta specs, design, and tasks. Triggers: "propose a change", "create a change for X", "I want to implement feature Y", "start a new change", "let's build X".
 ---
 
 # SDD Propose

@@ -1,7 +1,7 @@
 ---
 name: sdd-verify
 description: |-
-  Use when verifying that an implementation matches a change's artifacts — completeness, correctness, and coherence. Produces a structured report with CRITICAL/WARNING/SUGGESTION severity levels. Graceful degradation when artifacts are missing. Triggers: "verify", "check implementation", "did I implement everything", "verify the change", "is implementation complete".
+  Use when verifying that an implementation matches a change's SDD artifacts. Triggers: "verify", "check implementation", "did I implement everything", "verify the change", "is implementation complete".
 ---
 
 # SDD Verify

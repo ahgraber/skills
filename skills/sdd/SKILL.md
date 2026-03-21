@@ -1,7 +1,7 @@
 ---
 name: sdd
 description: |-
-  Use when the user wants to do any spec-driven development work — creating specs, managing changes, implementing from specs, or verifying implementations. Routes to the correct sdd-* child skill. Triggers: 'spec this out', 'create a spec', 'implement from spec', 'apply tasks', 'verify implementation', 'sync specs', 'archive change', 'sdd', 'think through', 'explore', any mention of .specs/ directory or spec-driven workflow.
+  Use when the user wants to do any spec-driven development work — creating, deriving, or inheriting specs, managing changes, implementing from specs, or verifying implementations. Triggers: 'spec this out', 'create a spec', 'implement from spec', 'apply tasks', 'verify implementation', 'sync specs', 'archive change', 'sdd', any mention of .specs/ directory or spec-driven workflow.
 ---
 
 # SDD — Spec Driven Development

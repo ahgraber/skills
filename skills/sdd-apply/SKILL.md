@@ -1,7 +1,7 @@
 ---
 name: sdd-apply
 description: |-
-  Use when implementing tasks from a change's tasks.md. Checks off tasks as completed. Hard gate: tasks.md must exist or execution stops. Triggers: "apply tasks", "implement the change", "work through tasks", "start implementing", "continue implementing", "apply the change".
+  Use when implementing tasks from a change's tasks.md. Triggers: "apply tasks", "implement the change", "work through tasks", "start implementing", "continue implementing", "apply the change".
 ---
 
 # SDD Apply
@@ -59,7 +59,6 @@ For each unchecked task:
 4. **Test** — verify the implementation works
    If the test fails, stop and resolve the failure before proceeding to the next step.
 5. **Check off** — update `tasks.md`: `- [ ]` → `- [x]`
-6. **Commit** — include both the implementation code and the updated `tasks.md` check-off in the same commit
 
 Follow design decisions in `design.md` — don't diverge without reason.
 Follow behavioral requirements in delta specs — these define what "correct" means.
@@ -74,6 +73,14 @@ When all tasks are checked off:
 > 2. Run `sdd-sync` to merge delta specs into main specs
 > 3. Run `sdd-archive` to complete the change"
 
+## Fluid Workflow
+
+This skill can be invoked at any point after `tasks.md` exists — not only when all artifacts are complete.
+
+- If implementation reveals a design issue, pause and suggest updating `design.md` or delta specs before continuing.
+- If scope changes mid-implementation, suggest updating `proposal.md` and `tasks.md`.
+- Don't treat the artifact set as frozen — work fluidly, but document changes.
+
 ## Common Mistakes
 
 - Implementing without reading design.md (misses architectural decisions)
@@ -81,3 +88,4 @@ When all tasks are checked off:
 - Implementing tasks out of order when dependencies exist
 - Continuing past a failed task without resolving it
 - Diverging from design decisions without documenting why
+- Treating artifacts as frozen when implementation reveals issues (update them)

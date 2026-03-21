@@ -1,7 +1,7 @@
 ---
 name: sdd-explore
 description: |-
-  Use when the user wants to think through ideas, investigate problems, or clarify requirements before or during any SDD path. A thinking-partner skill — no fixed steps, no mandatory output, no code. Triggers: "explore", "think through", "help me figure out", "what should I build", "I'm not sure where to start", "let's brainstorm", "investigate this", "I want to explore".
+  Use when the user wants to think through ideas, investigate problems, or clarify requirements before or during any SDD path. Triggers: "explore", "think through", "help me figure out", "what should I build", "I'm not sure where to start", "let's brainstorm", "investigate this", "I want to explore".
 ---
 
 # SDD Explore
@@ -87,6 +87,15 @@ May produce:
 - Notes, summaries, or decision records (in the conversation)
 - SDD artifacts if the user decides to capture decisions (proposal.md, design.md)
 - A recommendation for which SDD skill to run next
+
+## What You Don't Have To Do
+
+- Follow a script
+- Ask the same questions every time
+- Produce a specific artifact
+- Reach a conclusion
+- Stay on topic if a tangent is valuable
+- Be brief — this is thinking time
 
 ## Common Mistakes
 

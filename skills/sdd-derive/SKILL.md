@@ -1,6 +1,7 @@
 ---
 name: sdd-derive
-description: Use when deriving SDD artifacts from existing code based on a user's request or direction. Use when a user describes a feature, behavior, or change to document and wants SDD-compatible output based on codebase analysis. Also use for retroactive spec generation on existing code. Triggers: "spec this out", "create an SDD change for X", "document this in SDD", "generate specs from code", "derive specs".
+description: |-
+  Use when generating SDD specs from existing code or retroactively documenting existing behavior. Triggers: "spec this out", "create an SDD change for X", "document this in SDD", "generate specs from code", "derive specs".
 ---
 
 # SDD Derive

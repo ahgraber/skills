@@ -1,7 +1,7 @@
 ---
 name: sdd-archive
 description: |-
-  Use when completing and archiving a change after all tasks are done and specs are synced. Moves the change directory to .specs/changes/archive/YYYY-MM-DD-<name>/. Soft gate on incomplete tasks. Triggers: "archive the change", "complete this change", "close out the change", "finish the change", "archive".
+  Use when completing and archiving a change after all tasks are done and specs are synced. Triggers: "archive the change", "complete this change", "close out the change", "finish the change", "archive".
 ---
 
 # SDD Archive

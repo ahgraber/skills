@@ -1,7 +1,7 @@
 ---
 name: sdd-sync
 description: |-
-  Use when merging delta specs from a change into the main baseline specs. Applies ADDED/MODIFIED/REMOVED/RENAMED sections from change specs into .specs/specs/ intelligently. Idempotent. Triggers: "sync specs", "merge delta specs", "update main specs", "apply the spec changes", "sync the change".
+  Use when merging delta specs from a change into the main baseline specs. Triggers: "sync specs", "merge delta specs", "update main specs", "apply the spec changes", "sync the change".
 ---
 
 # SDD Sync
