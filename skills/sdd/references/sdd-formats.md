@@ -16,10 +16,10 @@ All skills that produce `.specs/` files SHALL conform to these formats.
 | SHOULD       | Recommended — exceptions require justification |
 | MAY          | Optional — permitted but not required          |
 
-- Use SHALL for non-negotiable system behaviors
-- Use MUST for non-negotiable user/actor obligations
-- Use SHOULD for strong recommendations
-- Use MAY for optional behaviors
+- Use **SHALL** for non-negotiable system behaviors
+- Use **MUST** for non-negotiable user/actor obligations
+- Use **SHOULD** for strong recommendations
+- Use **MAY** for optional behaviors
 
 ## 2. Baseline Spec Format
 
@@ -28,7 +28,8 @@ Location: `.specs/specs/<capability>/spec.md`
 ```markdown
 # {Capability} Specification
 
-> Translated from {Source} on {date}.
+> {Optional: translation note, generation note, or source attribution}
+> {e.g., "Translated from Spec Kit on 2026-01-15" or "Generated from code analysis on 2026-01-15"}
 
 ## Purpose
 
@@ -48,8 +49,8 @@ The system SHALL/MUST/SHOULD/MAY {observable behavior}.
 
 ## Technical Notes
 
-- **Implementation:** {relevant implementation notes}
-- **Dependencies:** {external dependencies or related capabilities}
+- **Implementation**: {source files or leave blank}
+- **Dependencies**: {related capabilities or "none"}
 ```
 
 Rules:
@@ -166,13 +167,15 @@ Location: `.specs/changes/<name>/design.md`
 
 ## Architecture
 
+{ASCII diagram or prose description of component relationships and data flows.}
+
 ```text
-{ASCII diagram illustrating the system structure or data flow}
+{optional ASCII art}
 ```
 
 ## Risks
 
-- {risk}: {mitigation strategy}
+- **{Risk}**: {mitigation strategy}
 ````
 
 ## 6. Tasks Format
@@ -197,7 +200,7 @@ Rules:
 
 - Tasks are atomic — each task is a single, completable unit of work
 - Tasks describe implementation actions, not outcomes
-- Groups organize by component or phase
+- Groups organize by component or phase (e.g., 'Backend', 'Frontend', 'Tests')
 - Use `- [x]` to mark completed tasks
 
 ## 7. Scenario Format
