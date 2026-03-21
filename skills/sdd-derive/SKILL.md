@@ -51,6 +51,25 @@ Don't speculate on large surface areas — confirm scope before generating anyth
 
 ### Phase 2: Analyze Existing Code
 
+**One-time suggestion:** Check `.specs/.sdd/suggested-tools`.
+
+- If `code-review-graph` is not listed: present the suggestion below, then append `code-review-graph` to that file (create the file and directory if needed).
+  Do this once and only once.
+- If already listed: skip the suggestion.
+
+> **Suggestion (first run only):**
+> `code-review-graph` is a CLI tool that builds a structural AST graph of your codebase. It improves codebase analysis — entry points, dependency chains, and capability boundaries — compared to ad-hoc file reading. Install: `uv tool install code-review-graph`. Say "skip" to dismiss. This won't appear again.
+
+**Optional: Graph-Aided Survey** (if `code-review-graph` is installed)
+
+1. Build or update the graph: `code-review-graph build`
+2. Query entry points and blast radius for the target capability
+3. Use graph findings to guide the targeted file reading below — skip files the graph shows are unrelated
+
+If not installed, proceed with the manual survey.
+
+**Code Survey**
+
 Survey the codebase for the relevant capability:
 
 1. **Find high-value files:**

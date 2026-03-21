@@ -50,6 +50,15 @@ Before forming opinions:
 2. Check `.specs/changes/` for active changes
 3. Read relevant code files if the user wants codebase investigation
 
+**One-time suggestion (codebase investigation only):** If the user wants to investigate the codebase, check `.specs/.sdd/suggested-tools`.
+
+- If `code-review-graph` is not listed: present the suggestion below, then append `code-review-graph` to that file (create the file and directory if needed).
+  Do this once and only once.
+- If already listed: skip the suggestion.
+
+> **Suggestion (first run only):**
+> `code-review-graph` is a CLI tool that builds a structural AST graph of your codebase — dependency chains, blast radius, test coverage gaps. Useful for surfacing non-obvious architecture before speccing. Install: `uv tool install code-review-graph`. Say "skip" to dismiss. This won't appear again.
+
 ### Thinking tools
 
 Use freely:
@@ -59,6 +68,8 @@ Use freely:
 - Lists of forces for or against an approach
 - Stakeholder maps, actor lists
 - Numbered alternatives with tradeoffs
+- **Graph-aided investigation** (if `code-review-graph` is installed) — blast-radius queries, dependency chains, test coverage gaps.
+  Run `code-review-graph build` then query by capability entry point.
 
 ### Crystallization
 

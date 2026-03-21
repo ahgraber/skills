@@ -126,16 +126,18 @@ All SDD skills operate on `.specs/` at the project root:
 ├── specs/                          # Main specs (source of truth)
 │   └── <capability>/
 │       └── spec.md
-└── changes/
-    ├── <change-name>/              # In-progress changes (kebab-case)
-    │   ├── proposal.md
-    │   ├── design.md
-    │   ├── tasks.md
-    │   └── specs/                  # Delta specs
-    │       └── <capability>/
-    │           └── spec.md
-    └── archive/                    # Completed changes
-        └── YYYY-MM-DD-<name>/
+├── changes/
+│   ├── <change-name>/              # In-progress changes (kebab-case)
+│   │   ├── proposal.md
+│   │   ├── design.md
+│   │   ├── tasks.md
+│   │   └── specs/                  # Delta specs
+│   │       └── <capability>/
+│   │           └── spec.md
+│   └── archive/                    # Completed changes
+│       └── YYYY-MM-DD-<name>/
+└── .sdd/                           # SDD tooling metadata (not specs)
+    └── suggested-tools            # Tracks one-time tool suggestions
 ```
 
 An **active change** is any directory directly under `.specs/changes/` (not under `archive/`).
