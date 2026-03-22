@@ -1,6 +1,7 @@
 ---
 name: mcp-research
-description: Use when tasks require current, source-backed technical information from MCP tools. Apply for library/API questions, dependency version checks, third-party integration work, framework- or SDK-specific debugging, and any case where stale model knowledge could cause incorrect guidance.
+description: |-
+  Use when tasks require current, source-backed technical information from MCP tools. Apply for library/API questions, dependency version checks, third-party integration work, framework- or SDK-specific debugging, and any case where stale model knowledge could cause incorrect guidance.
 ---
 
 # MCP Docs and Research (Context7, Exa, Jina)

@@ -1,6 +1,7 @@
 ---
 name: python-notebooks-async
-description: "Use when writing or reviewing asyncio code in Jupyter notebooks or '#%%' cell workflows — structuring event-loop ownership, orchestrating async tasks, or choosing compatibility strategies. Also use when hitting RuntimeError: This event loop is already running, asyncio.run() failures in cells, or tasks silently never completing."
+description: |-
+  Use when writing or reviewing asyncio code in Jupyter notebooks or '#%%' cell workflows — structuring event-loop ownership, orchestrating async tasks, or choosing compatibility strategies. Also use when hitting RuntimeError: This event loop is already running, asyncio.run() failures in cells, or tasks silently never completing.
 ---
 
 # Python Notebooks Async

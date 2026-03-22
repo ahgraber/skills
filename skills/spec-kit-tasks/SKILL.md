@@ -1,6 +1,7 @@
 ---
 name: spec-kit-tasks
-description: Use when an approved Spec Kit `plan.md` + `spec.md` must be decomposed into dependency-ordered `tasks.md`, or when `tasks.md` is missing/stale after planning or reconciliation changes.
+description: |-
+  Use when an approved Spec Kit `plan.md` + `spec.md` must be decomposed into dependency-ordered `tasks.md`, or when `tasks.md` is missing/stale after planning or reconciliation changes.
 ---
 
 # Spec Kit Tasks

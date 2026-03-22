@@ -1,6 +1,7 @@
 ---
 name: python-design-modularity
-description: Use when designing module boundaries, planning refactors, or reviewing architecture in Python codebases. Also use when facing tangled dependencies, god classes, deep inheritance hierarchies, unclear ownership, or risky structural changes.
+description: |-
+  Use when designing module boundaries, planning refactors, or reviewing architecture in Python codebases. Also use when facing tangled dependencies, god classes, deep inheritance hierarchies, unclear ownership, or risky structural changes.
 ---
 
 # Python Design and Modularity

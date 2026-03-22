@@ -1,6 +1,7 @@
 ---
 name: python-runtime-operations
-description: Use when building or reviewing service, job, or CLI runtime behavior in Python — designing startup validation, shutdown sequences, observability, and structured logging. Also use when startup crashes from late config, shutdown leaves orphaned processes, terminal states are implicit, or logs lack structure.
+description: |-
+  Use when building or reviewing service, job, or CLI runtime behavior in Python — designing startup validation, shutdown sequences, observability, and structured logging. Also use when startup crashes from late config, shutdown leaves orphaned processes, terminal states are implicit, or logs lack structure.
 ---
 
 # Python Runtime Operations

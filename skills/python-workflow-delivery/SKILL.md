@@ -1,6 +1,7 @@
 ---
 name: python-workflow-delivery
-description: Use when preparing branches, commits, or PRs for Python changes — scoping work, running validation gates, and ensuring merge readiness. Also use when debugging CI gate failures, resolving lockfile conflicts, or uncertain what checks to run before opening a PR.
+description: |-
+  Use when preparing branches, commits, or PRs for Python changes — scoping work, running validation gates, and ensuring merge readiness. Also use when debugging CI gate failures, resolving lockfile conflicts, or uncertain what checks to run before opening a PR.
 ---
 
 # Python Workflow and Delivery

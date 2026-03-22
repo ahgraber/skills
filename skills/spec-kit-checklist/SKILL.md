@@ -1,6 +1,7 @@
 ---
 name: spec-kit-checklist
-description: Use when a Spec Kit feature has `spec.md` and you need a requirements-quality checklist (clarity, completeness, consistency, measurability, coverage), not implementation/runtime test cases.
+description: |-
+  Use when a Spec Kit feature has `spec.md` and you need a requirements-quality checklist (clarity, completeness, consistency, measurability, coverage), not implementation/runtime test cases.
 ---
 
 # Spec Kit Checklist

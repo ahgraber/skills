@@ -1,6 +1,7 @@
 ---
 name: good-prose
-description: Write, rewrite, or line-edit professional or semi-formal prose for letters, emails, blog posts, op-eds, reports, or longform messages. Apply to ANY prose humans will read. Makes your writing clearer, stronger, and more professional.
+description: |-
+  Write, rewrite, or line-edit professional or semi-formal prose for letters, emails, blog posts, op-eds, reports, or longform messages. Apply to ANY prose humans will read. Makes your writing clearer, stronger, and more professional.
 ---
 
 # Good Prose: Write and Edit Professional, Clear, Human-Sounding Text

@@ -1,6 +1,7 @@
 ---
 name: spec-kit-analyze
-description: Use when `spec.md`, `plan.md`, and `tasks.md` exist and you need a read-only Spec Kit audit for consistency, requirement-to-task coverage, ambiguity, duplication, or constitution conflicts before implementation.
+description: |-
+  Use when `spec.md`, `plan.md`, and `tasks.md` exist and you need a read-only Spec Kit audit for consistency, requirement-to-task coverage, ambiguity, duplication, or constitution conflicts before implementation.
 ---
 
 # Spec Kit Analyze

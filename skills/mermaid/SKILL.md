@@ -1,6 +1,7 @@
 ---
 name: mermaid
-description: Generate Mermaid diagrams for chatbot flows that render in Markdown, including choosing diagram types, producing valid Mermaid code blocks, and validating or rendering diagrams locally via the bundled scripts. Use when a user asks for chatbot flowcharts/sequence/state diagrams, wants Mermaid syntax, or needs to verify/render Mermaid without a web service.
+description: |-
+  Generate Mermaid diagrams for chatbot flows that render in Markdown, including choosing diagram types, producing valid Mermaid code blocks, and validating or rendering diagrams locally via the bundled scripts. Use when a user asks for chatbot flowcharts/sequence/state diagrams, wants Mermaid syntax, or needs to verify/render Mermaid without a web service.
 ---
 
 # Mermaid Diagrams for Chatbots

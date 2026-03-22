@@ -1,6 +1,7 @@
 ---
 name: spec-kit-clarify
-description: Use when an existing Spec Kit `spec.md` has high-impact ambiguity (for example `[NEEDS CLARIFICATION]`, unresolved scope decisions, or unquantified requirements) that must be resolved before `spec-kit-plan`.
+description: |-
+  Use when an existing Spec Kit `spec.md` has high-impact ambiguity (for example `[NEEDS CLARIFICATION]`, unresolved scope decisions, or unquantified requirements) that must be resolved before `spec-kit-plan`.
 ---
 
 # Spec Kit Clarify

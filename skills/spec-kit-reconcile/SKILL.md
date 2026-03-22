@@ -1,6 +1,7 @@
 ---
 name: spec-kit-reconcile
-description: Use when specification drift is discovered at any stage and existing Spec Kit artifacts (`spec.md`, `plan.md`, `tasks.md`) must be reconciled in-place without creating a new feature branch.
+description: |-
+  Use when specification drift is discovered at any stage and existing Spec Kit artifacts (`spec.md`, `plan.md`, `tasks.md`) must be reconciled in-place without creating a new feature branch.
 ---
 
 # Spec Kit Reconcile

@@ -1,6 +1,7 @@
 ---
 name: spec-kit-constitution
-description: Use when creating or amending a Spec Kit project constitution, especially when `memory/constitution.md` is missing, contains `[PLACEHOLDER]` tokens, or principle changes must be propagated to planning/spec/task templates.
+description: |-
+  Use when creating or amending a Spec Kit project constitution, especially when `memory/constitution.md` is missing, contains `[PLACEHOLDER]` tokens, or principle changes must be propagated to planning/spec/task templates.
 ---
 
 # Spec Kit Constitution

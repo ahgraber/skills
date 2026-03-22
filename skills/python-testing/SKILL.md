@@ -1,6 +1,7 @@
 ---
 name: python-testing
-description: Use when writing or reviewing tests for Python behavior, contracts, async lifecycles, or reliability paths. Also use when tests are flaky, coupled to implementation details, missing regression coverage, slow to run, or when unclear what tests a change needs.
+description: |-
+  Use when writing or reviewing tests for Python behavior, contracts, async lifecycles, or reliability paths. Also use when tests are flaky, coupled to implementation details, missing regression coverage, slow to run, or when unclear what tests a change needs.
 ---
 
 # Python Testing

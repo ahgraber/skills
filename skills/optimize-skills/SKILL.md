@@ -1,6 +1,7 @@
 ---
 name: optimize-skills
-description: Use when creating or refining SKILL.md-based skills, or diagnosing weak triggering (under/over-triggering, vague descriptions, bloated context, or missing workflow guidance).
+description: |-
+  Use when creating or refining SKILL.md-based skills, or diagnosing weak triggering (under/over-triggering, vague descriptions, bloated context, or missing workflow guidance).
 ---
 
 # Optimizing Skills

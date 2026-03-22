@@ -1,6 +1,7 @@
 ---
 name: spec-kit-plan
-description: Use when an approved Spec Kit `spec.md` must be translated into technical design artifacts (`plan.md`, `research.md`, `data-model.md`, `contracts/`, `quickstart.md`) before `spec-kit-tasks`, or when `plan.md` is missing/outdated after spec or constitution changes.
+description: |-
+  Use when an approved Spec Kit `spec.md` must be translated into technical design artifacts (`plan.md`, `research.md`, `data-model.md`, `contracts/`, `quickstart.md`) before `spec-kit-tasks`, or when `plan.md` is missing/outdated after spec or constitution changes.
 ---
 
 # Spec Kit Plan

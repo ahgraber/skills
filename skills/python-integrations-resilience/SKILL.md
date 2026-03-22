@@ -1,6 +1,7 @@
 ---
 name: python-integrations-resilience
-description: Use when building or reviewing external API integrations in Python — designing client boundaries, defining outbound reliability policy, or structuring contract tests. Also use when provider SDK details leak into domain logic, outbound calls lack timeout/retry policy, or failure paths are untested.
+description: |-
+  Use when building or reviewing external API integrations in Python — designing client boundaries, defining outbound reliability policy, or structuring contract tests. Also use when provider SDK details leak into domain logic, outbound calls lack timeout/retry policy, or failure paths are untested.
 ---
 
 # Python Integrations and Resilience

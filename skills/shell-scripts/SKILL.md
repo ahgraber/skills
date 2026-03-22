@@ -1,6 +1,7 @@
 ---
 name: shell-scripts
-description: Use when writing or reviewing Bash scripts and shell snippets, especially for shebang selection, quoting, parameter expansion ("${VAR}" style), test expressions ([ ] vs [[ ]]), ShellCheck-guided fixes, and portability decisions across POSIX sh, Bash, and zsh compatibility targets.
+description: |-
+  Use when writing or reviewing Bash scripts and shell snippets, especially for shebang selection, quoting, parameter expansion ("${VAR}" style), test expressions ([ ] vs [[ ]]), ShellCheck-guided fixes, and portability decisions across POSIX sh, Bash, and zsh compatibility targets.
 ---
 
 # Writing Shell Scripts

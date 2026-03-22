@@ -1,6 +1,7 @@
 ---
 name: spec-kit
-description: Use when work involves Spec Kit and you need to choose the correct `spec-kit-*` sub-skill, enforce artifact-order gates, or route remediation work (for example sequence violations or specification drift at any stage).
+description: |-
+  Use when work involves Spec Kit and you need to choose the correct `spec-kit-*` sub-skill, enforce artifact-order gates, or route remediation work (for example sequence violations or specification drift at any stage).
 ---
 
 # Spec Kit Skill Router

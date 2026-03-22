@@ -1,6 +1,7 @@
 ---
 name: python-data-state
-description: Use when designing data ownership, validation boundaries, consistency models, or configuration strategy in Python. Also use when encountering unclear ownership across modules, shared mutable state leaking between layers, validation gaps at ingress, cross-module transactional coupling, or config drift between environments.
+description: |-
+  Use when designing data ownership, validation boundaries, consistency models, or configuration strategy in Python. Also use when encountering unclear ownership across modules, shared mutable state leaking between layers, validation gaps at ingress, cross-module transactional coupling, or config drift between environments.
 ---
 
 # Python Data and State

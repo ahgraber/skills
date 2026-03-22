@@ -1,6 +1,7 @@
 ---
 name: python-concurrency-performance
-description: Use when designing or reviewing concurrent Python code — selecting between asyncio, threads, or multiprocessing; structuring cancellation and deadline propagation; bounding fan-out and backpressure. Also use when diagnosing race conditions, deadlocks, slow throughput, or thread/task leaks under load.
+description: |-
+  Use when designing or reviewing concurrent Python code — selecting between asyncio, threads, or multiprocessing; structuring cancellation and deadline propagation; bounding fan-out and backpressure. Also use when diagnosing race conditions, deadlocks, slow throughput, or thread/task leaks under load.
 ---
 
 # Python Concurrency and Performance

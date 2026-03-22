@@ -1,6 +1,7 @@
 ---
 name: python
-description: Python skill router. Use when planning, implementing, or reviewing Python changes and you need to select focused skills for workflow, design, typing/contracts, reliability, testing, data/state, concurrency, integrations, runtime operations, or notebook async behavior.
+description: |-
+  Python skill router. Use when planning, implementing, or reviewing Python changes and you need to select focused skills for workflow, design, typing/contracts, reliability, testing, data/state, concurrency, integrations, runtime operations, or notebook async behavior.
 ---
 
 # Python Skill Router

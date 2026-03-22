@@ -1,6 +1,7 @@
 ---
 name: sdd-translate
-description: Use when translating or migrating existing specs from another tool or format (Spec Kit, Kiro, ADRs, Jira, Confluence, Word docs, or custom markdown requirements) into SDD baseline spec format. Also use when the user says "convert these specs", "migrate to SDD", "translate from X to SDD", or "import specs".
+description: |-
+  Use when translating or migrating existing specs from another tool or format (Spec Kit, Kiro, ADRs, Jira, Confluence, Word docs, or custom markdown requirements) into SDD baseline spec format. Also use when the user says "convert these specs", "migrate to SDD", "translate from X to SDD", or "import specs".
 ---
 
 # SDD Translate

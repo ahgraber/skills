@@ -1,6 +1,7 @@
 ---
 name: python-types-contracts
-description: Use when defining or evolving public interfaces, schema boundaries, or pydantic usage in Python. Also use when annotations are missing on public APIs, pydantic models appear everywhere instead of at trust boundaries, contract changes lack migration guidance, or Any/object types are overused across module boundaries.
+description: |-
+  Use when defining or evolving public interfaces, schema boundaries, or pydantic usage in Python. Also use when annotations are missing on public APIs, pydantic models appear everywhere instead of at trust boundaries, contract changes lack migration guidance, or Any/object types are overused across module boundaries.
 ---
 
 # Python Types and Contracts

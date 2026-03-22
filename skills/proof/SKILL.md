@@ -1,6 +1,7 @@
 ---
 name: proof
-description: "Use when the user asks for proofreading or light copy editing while preserving original wording, tone, and order. Triggers: 'proofread', 'fix typos', 'grammar only', 'copy edit only', 'SPAG pass'. Not for rewrites, tone shifts, structural edits, or style upgrades; use good-prose for those requests."
+description: |-
+  Use when the user asks for proofreading or light copy editing while preserving original wording, tone, and order. Triggers: 'proofread', 'fix typos', 'grammar only', 'copy edit only', 'SPAG pass'. Not for rewrites, tone shifts, structural edits, or style upgrades; use good-prose for those requests.
 ---
 
 # Proof

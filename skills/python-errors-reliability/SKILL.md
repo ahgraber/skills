@@ -1,6 +1,7 @@
 ---
 name: python-errors-reliability
-description: Use when designing error handling, retry policies, timeout behavior, or failure classification in Python. Also use when code swallows exceptions, loses error context across boundaries, has unbounded retries, silent failures, or lacks idempotency guarantees on retried writes.
+description: |-
+  Use when designing error handling, retry policies, timeout behavior, or failure classification in Python. Also use when code swallows exceptions, loses error context across boundaries, has unbounded retries, silent failures, or lacks idempotency guarantees on retried writes.
 ---
 
 # Python Errors and Reliability

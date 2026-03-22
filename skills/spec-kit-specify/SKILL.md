@@ -1,6 +1,7 @@
 ---
 name: spec-kit-specify
-description: Use when a Spec Kit feature needs `spec.md` authored or rewritten from natural-language requirements, especially when the feature has no usable specification or requirements are too vague for planning.
+description: |-
+  Use when a Spec Kit feature needs `spec.md` authored or rewritten from natural-language requirements, especially when the feature has no usable specification or requirements are too vague for planning.
 ---
 
 # Spec Kit Specify

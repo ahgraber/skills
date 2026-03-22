@@ -1,6 +1,7 @@
 ---
 name: spec-kit-implement
-description: Use when approved Spec Kit `tasks.md` must be executed into implementation changes, or when task execution is blocked by sequencing/checklist gates before feature completion.
+description: |-
+  Use when approved Spec Kit `tasks.md` must be executed into implementation changes, or when task execution is blocked by sequencing/checklist gates before feature completion.
 ---
 
 # Spec Kit Implement
