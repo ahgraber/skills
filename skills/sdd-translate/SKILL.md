@@ -64,7 +64,7 @@ Proceed with this split? (or suggest changes)
 
 For each capability, produce `.specs/specs/<capability>/spec.md` following SDD baseline format.
 
-See `references/sdd-formats.md` for the complete baseline spec format and scenario format.
+See `references/sdd-spec-formats.md` for the baseline spec and scenario formats.
 
 Add a source attribution blockquote at the top of each generated spec (see format reference Section 2):
 
@@ -103,6 +103,20 @@ Add a source attribution blockquote at the top of each generated spec (see forma
 - [ ] No implementation details copied into requirement text (class names, SQL, library choices, technology decisions)
 - [ ] Implementation details from source were moved to `## Technical Notes` where present
 
+### Phase 5: Schema Snapshot (if schemas configured)
+
+If `.sdd/schema-config.yaml` exists:
+
+1. Generate schema snapshots using the configured extraction commands.
+2. Store in `.specs/schemas/` — this establishes the baseline for all future `sdd-verify` conformance checks.
+3. Update `.specs/schemas/.schema-sources.yaml` with the generation date.
+
+If no schema config exists but schema artifacts are detected in the repo (e.g., `openapi.yaml`, `.proto` files, `schema.graphql`), suggest creating `.sdd/schema-config.yaml` before the first `sdd-verify` run:
+
+> "Detected schema artifacts. A `.sdd/schema-config.yaml` would let `sdd-verify` cross-validate implementation against these specs. See `references/sdd-schema.md` § 3 for the format. Say 'skip' to dismiss."
+
+If no schema config and no artifacts detected, skip silently.
+
 ## Output
 
 - `.specs/specs/<capability>/spec.md` per capability
@@ -118,4 +132,5 @@ Add a source attribution blockquote at the top of each generated spec (see forma
 
 ## References
 
-- `references/sdd-formats.md` — complete format reference for baseline specs and scenarios
+- `references/sdd-spec-formats.md` — baseline spec and scenario formats
+- `references/sdd-schema.md` — schema config format and lifecycle policy

@@ -68,11 +68,26 @@ If a delta spec covers a capability with no corresponding main spec:
 2. Create `spec.md` in baseline format (no delta markers)
 3. Strip the `## ADDED`, `## MODIFIED`, `## REMOVED` section headings and keep the `### Requirement:` entries beneath them as plain requirements
 
-See `references/sdd-formats.md` for the baseline spec format to use.
+See `references/sdd-spec-formats.md` for the baseline spec format.
 
 If the delta spec contains only RENAMED and the old capability does not exist in main specs, create the capability under the new name using the ADDED requirements as baseline content.
 
-### Phase 4: Validate Output
+### Phase 4: Update Schema Snapshots (if schemas configured)
+
+If `.sdd/schema-config.yaml` exists and `schemas/after/` is present in the change directory:
+
+1. Copy each schema file from `.specs/changes/<name>/schemas/after/<schema-type>` to `.specs/schemas/<schema-type>` (overwrite).
+
+2. Update `.specs/schemas/.schema-sources.yaml` with the generation date and change name.
+
+3. If the repo contains a committed authored schema (e.g., `docs/openapi.yaml`), surface a reminder — do **not** auto-update it:
+
+   > "Authored schema at `<path>` may need updating to match the implementation.
+   > Reference: `.specs/changes/<name>/schemas/after/`"
+
+If no schema config exists, skip silently.
+
+### Phase 5: Validate Output
 
 - [ ] All ADDED requirements appear in the main spec
 - [ ] All MODIFIED requirements reflect the updated behavior (old version removed)
@@ -80,7 +95,7 @@ If the delta spec contains only RENAMED and the old capability does not exist in
 - [ ] No delta markers (ADDED/MODIFIED/REMOVED/RENAMED) remain in main specs
 - [ ] Content not mentioned in deltas is unchanged
 
-### Phase 5: Report
+### Phase 6: Report
 
 List each capability synced:
 
@@ -89,6 +104,9 @@ Synced:
 - auth/          → 2 requirements added, 1 modified
 - payments/      → 1 requirement removed
 - notifications/ → new capability created (3 requirements)
+Schema snapshots updated:
+- openapi.yaml   → 2 endpoints added, 1 model modified
+- Reminder: authored docs/openapi.yaml may be stale (schema sync did not update it)
 ```
 
 ## Common Mistakes
@@ -100,4 +118,6 @@ Synced:
 
 ## References
 
-- `references/sdd-formats.md` — baseline spec format for new capabilities created during sync
+- `references/sdd-spec-formats.md` — baseline spec format for new capabilities created during sync
+- `references/sdd-change-formats.md` — change directory artifact formats (proposal, design, tasks)
+- `references/sdd-schema.md` — schema lifecycle policy (§ 4) and `.schema-sources.yaml` format (§ 3)

@@ -89,7 +89,34 @@ Survey the codebase for the relevant capability:
 
 3. **Identify capability boundaries** — if the request spans multiple unrelated concerns, plan decomposition.
 
-### Phase 3: Assess Scope and Plan Decomposition
+### Phase 3: Schema Discovery (if applicable)
+
+After the code survey, check for machine-readable schema artifacts.
+This runs in parallel with the code survey — use whichever source provides higher-fidelity evidence.
+
+1. **Detect schema artifacts** — look for: committed specs (`openapi.yaml`, `swagger.json`, `openapi.json`, `docs/api/`, `openapi/`); schema files (`.proto`, `.graphql`, `.prisma`, `.avsc`, `schema.sql`); or framework markers implying runtime schema generation (FastAPI, NestJS, Spring Boot, DRF, Rails API, Go Echo/Gin, Laravel, GraphQL servers, gRPC).
+   See `references/sdd-schema.md` § 3 for config examples.
+
+2. **Check for `.sdd/schema-config.yaml`** — if it exists, use the configured extraction commands.
+   If not, and schema artifacts were detected, suggest creating one (one-time, using the `suggested-tools` pattern):
+
+   > "Detected `<files>`.
+   > Consider creating `.sdd/schema-config.yaml` to configure schema extraction for SDD verification.
+   > See `references/sdd-schema.md` § 3 for the format.
+   > Say 'skip' to dismiss."
+
+3. **Generate snapshots** — if extraction is configured, run the commands and store output in `.specs/schemas/`.
+
+4. **Diff authored vs. generated** — if the repo contains a committed authored schema (e.g., `docs/openapi.yaml`) and a generated snapshot was produced, diff them:
+
+   - Paths in authored but not generated → aspirational (planned but not yet implemented)
+   - Paths in generated but not authored → undocumented drift
+   - Type or shape mismatches → potential bugs or stale spec
+     Use these findings to inform requirement writing: aspirational paths suggest ADDED candidates; undocumented drift suggests missing requirements.
+
+5. **Enrich generated specs** — where a requirement maps to a specific schema path, add a `**Schema reference:**` annotation to the relevant scenario (see `references/sdd-schema.md` § 1 for the format).
+
+### Phase 4: Assess Scope and Plan Decomposition
 
 | Signal            | Action                                       |
 | ----------------- | -------------------------------------------- |
@@ -108,7 +135,7 @@ This covers 3 capabilities. I'll generate:
 Proceed with this split? (or suggest changes)
 ```
 
-### Phase 4A: Change Directory (new or modified behavior)
+### Phase 5A: Change Directory (new or modified behavior)
 
 Create `.specs/changes/<change-name>/` with artifacts in this order:
 
@@ -119,25 +146,25 @@ Create `.specs/changes/<change-name>/` with artifacts in this order:
 Note: sdd-derive produces a **partial** change directory — no `design.md`.
 If the user needs a full artifact set including design decisions, use `sdd-propose` instead. sdd-derive is optimized for code-first derivation; sdd-propose is the complete change creation workflow.
 
-See `references/sdd-formats.md` for the complete proposal, delta spec, and tasks formats.
+See `references/sdd-change-formats.md` (proposal, tasks) and `references/sdd-spec-formats.md` (delta specs) for the formats.
 
 Add a generation note at the top of each delta spec:
 
 > Generated from code analysis on {date}
 > Source files: {list of analyzed files}
 
-### Phase 4B: Baseline Specs (retroactive documentation)
+### Phase 5B: Baseline Specs (retroactive documentation)
 
 Create `.specs/specs/<capability>/spec.md` per capability.
 
-See `references/sdd-formats.md` for the complete baseline spec format.
+See `references/sdd-spec-formats.md` for the baseline spec format.
 
 Add a generation note at the top of each spec:
 
 > Generated from code analysis on {date}
 > Source files: {list of analyzed files}
 
-### Phase 5: Validate
+### Phase 6: Validate
 
 - [ ] Requirements use RFC 2119 keywords (SHALL/MUST/SHOULD/MAY)
 - [ ] Scenarios use `#### Scenario:` with **GIVEN**/**WHEN**/**THEN** (bold, exact casing)
@@ -174,5 +201,7 @@ Report: capabilities covered, requirement count, assumptions made.
 
 ## References
 
-- `references/sdd-formats.md` — complete format reference for all artifact types
+- `references/sdd-spec-formats.md` — baseline spec, delta spec, scenario formats
+- `references/sdd-change-formats.md` — proposal, design, tasks formats
+- `references/sdd-schema.md` — schema artifacts and lifecycle policy
 - `references/sdd-derive-output-type.dot` — canonical DOT source for the output type decision above

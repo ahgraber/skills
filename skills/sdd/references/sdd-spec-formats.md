@@ -1,12 +1,11 @@
 ---
-name: sdd-formats
-description: SDD artifact format reference — baseline specs, delta specs, proposals, designs, tasks, RFC 2119 keywords, and scenarios. Referenced by sdd-translate, sdd-derive, sdd-propose, and sdd-sync.
+name: sdd-spec-formats
+description: SDD spec artifact formats — RFC 2119 keywords, baseline spec, delta spec, and scenario format. Referenced by sdd-translate, sdd-derive, sdd-propose, and sdd-sync.
 ---
 
-# SDD Format Reference
+# SDD Spec Formats
 
-Shared format reference for all SDD skill artifacts.
-All skills that produce `.specs/` files SHALL conform to these formats.
+Format reference for `.specs/` artifact files.
 
 ## 1. RFC 2119 Keywords
 
@@ -106,104 +105,7 @@ Rules:
 - REMOVED entries must include a reason
 - No `## Purpose` or `## Technical Notes` in delta specs
 
-## 4. Proposal Format
-
-Location: `.specs/changes/<name>/proposal.md`
-
-```markdown
-# Proposal: {Change Name}
-
-## Intent
-
-{2-4 sentences describing why this change is needed and what problem it solves.}
-
-## Scope
-
-**In scope:**
-
-- {item}
-
-**Out of scope:**
-
-- {item}
-
-## Approach
-
-{High-level technical direction and strategy for implementing this change.}
-
-## Open Questions
-
-- {Unresolved decision or question that must be answered before implementation}
-```
-
-Rules:
-
-- Intent is the "why" — not the "what" or "how"
-- Scope prevents scope creep — be explicit about boundaries
-- Open Questions is optional — omit if there are none
-
-## 5. Design Format
-
-Location: `.specs/changes/<name>/design.md`
-
-````markdown
-# Design: {Change Name}
-
-## Context
-
-{Background, constraints, and assumptions that shape this design.}
-
-## Decisions
-
-### Decision: {DecisionName}
-
-**Chosen:** {the selected approach}
-
-**Rationale:** {why this approach was chosen}
-
-**Alternatives considered:**
-
-- {alternative}: {why it was not chosen}
-
-## Architecture
-
-{ASCII diagram or prose description of component relationships and data flows.}
-
-```text
-{optional ASCII art}
-```
-
-## Risks
-
-- **{Risk}**: {mitigation strategy}
-````
-
-## 6. Tasks Format
-
-Location: `.specs/changes/<name>/tasks.md`
-
-```markdown
-# Tasks: {Change Name}
-
-## {Group Name}
-
-- [ ] {Concrete, atomic implementation step}
-- [ ] {Concrete, atomic implementation step}
-
-## {Another Group Name}
-
-- [ ] {Concrete, atomic implementation step}
-- [x] {Completed implementation step}
-```
-
-Rules:
-
-- Tasks are atomic — each task is a single, completable unit of work
-- Tasks describe implementation actions, not outcomes
-- Groups organize by component or phase (e.g., 'Backend', 'Frontend', 'Tests')
-- Use `- [x]` to mark completed tasks
-
-## 7. Scenario Format
+## 4. Scenario Format
 
 Used in both baseline and delta spec requirements.
 

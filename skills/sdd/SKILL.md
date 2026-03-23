@@ -126,24 +126,35 @@ All SDD skills operate on `.specs/` at the project root:
 ├── specs/                          # Main specs (source of truth)
 │   └── <capability>/
 │       └── spec.md
+├── schemas/                        # Schema snapshots (generated from code)
+│   ├── .schema-sources.yaml        # Manifest: generation date and source per schema
+│   └── <schema-type>               # e.g., openapi.yaml, db-schema.sql, schema.graphql
 ├── changes/
 │   ├── <change-name>/              # In-progress changes (kebab-case)
 │   │   ├── proposal.md
 │   │   ├── design.md
 │   │   ├── tasks.md
+│   │   ├── schemas/                # Schema snapshots scoped to this change
+│   │   │   ├── before/             # Snapshot taken at propose/derive time
+│   │   │   ├── after/              # Snapshot taken at verify time
+│   │   │   └── expected.md         # Prose: expected schema changes
 │   │   └── specs/                  # Delta specs
 │   │       └── <capability>/
 │   │           └── spec.md
-│   └── archive/                    # Completed changes
+│   └── archive/                    # Completed changes (schemas travel with change)
 │       └── YYYY-MM-DD-<name>/
 └── .sdd/                           # SDD tooling metadata (not specs)
-    └── suggested-tools            # Tracks one-time tool suggestions
+    ├── schema-config.yaml          # Project schema extraction config
+    └── suggested-tools             # Tracks one-time tool suggestions
 ```
 
 An **active change** is any directory directly under `.specs/changes/` (not under `archive/`).
 Archived changes live in `.specs/changes/archive/YYYY-MM-DD-<name>/`.
+Schema snapshots travel with the change directory into the archive — no separate schema archive path is needed.
 
 ## References
 
-- `references/sdd-formats.md` — artifact format reference (baseline, delta, proposal, design, tasks)
+- `references/sdd-spec-formats.md` — baseline spec, delta spec, scenario formats
+- `references/sdd-change-formats.md` — proposal, design, tasks formats
+- `references/sdd-schema.md` — schema artifacts and lifecycle policy
 - `references/sdd-router.dot` — canonical DOT source for the routing flowchart above

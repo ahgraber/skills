@@ -41,7 +41,7 @@ If the user isn't sure about scope, offer `sdd-explore` first.
 
 Create `.specs/changes/<name>/proposal.md`.
 
-See `references/sdd-formats.md` for the complete proposal format.
+See `references/sdd-change-formats.md` for the proposal format.
 
 Write with the user's input:
 
@@ -52,11 +52,22 @@ Write with the user's input:
 
 Present to user and confirm before continuing.
 
-### Phase 3: Generate Delta Specs
+### Phase 3: Schema Baseline (if schemas configured)
+
+If `.sdd/schema-config.yaml` exists:
+
+1. Generate current schema snapshots and store in `.specs/changes/<name>/schemas/before/`.
+2. Add a `## Schema Impact` section to `proposal.md` describing expected schema changes — new endpoints, new or modified models, removed operations.
+   See `references/sdd-schema.md` § 2 for the format.
+3. Create `.specs/changes/<name>/schemas/expected.md` with a prose description of the expected schema diff. `sdd-verify` uses this to cross-check actual changes at verify time.
+
+If no schema config exists, skip silently.
+
+### Phase 4: Generate Delta Specs
 
 Create `.specs/changes/<name>/specs/<capability>/spec.md` for each affected capability.
 
-See `references/sdd-formats.md` for the complete delta spec format.
+See `references/sdd-spec-formats.md` for the delta spec format.
 
 Rules:
 
@@ -67,11 +78,11 @@ Rules:
 
 Present specs to user and confirm before continuing.
 
-### Phase 4: Generate design.md
+### Phase 5: Generate design.md
 
 Create `.specs/changes/<name>/design.md`.
 
-See `references/sdd-formats.md` for the complete design format.
+See `references/sdd-change-formats.md` for the design format.
 
 Include:
 
@@ -84,11 +95,11 @@ Only include sections with content — omit empty sections.
 
 Present to user and confirm before continuing.
 
-### Phase 5: Generate tasks.md
+### Phase 6: Generate tasks.md
 
 Create `.specs/changes/<name>/tasks.md`.
 
-See `references/sdd-formats.md` for the complete tasks format.
+See `references/sdd-change-formats.md` for the tasks format.
 
 Rules:
 
@@ -97,7 +108,7 @@ Rules:
 - Group by component or phase
 - Every task is a concrete action, not an outcome
 
-### Phase 6: Validate
+### Phase 7: Validate
 
 - [ ] Change directory exists: `.specs/changes/<name>/`
 - [ ] `proposal.md` has Intent, Scope (in/out), Approach
@@ -125,4 +136,6 @@ Summary: change name, capabilities affected, task count.
 
 ## References
 
-- `references/sdd-formats.md` — complete format reference for all artifact types
+- `references/sdd-spec-formats.md` — baseline spec, delta spec, scenario formats
+- `references/sdd-change-formats.md` — proposal, design, tasks formats
+- `references/sdd-schema.md` — schema artifacts and lifecycle policy

@@ -1,1 +1,0 @@
-../../sdd/references/sdd-formats.md

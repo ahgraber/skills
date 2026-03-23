@@ -1,0 +1,1 @@
+../../sdd/references/sdd-schema.md

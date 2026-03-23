@@ -36,6 +36,8 @@ Do not proceed without tasks.md.
 3. Read `.specs/changes/<name>/design.md` — architectural decisions to follow
 4. Read `.specs/changes/<name>/specs/` — delta specs for behavioral requirements
 5. Read `.specs/specs/` — baseline specs for full context
+6. If `.sdd/schema-config.yaml` exists, identify tasks that define schema contracts (endpoint definitions, model schemas, DDL changes) and check that they are sequenced before any tasks that consume them in `tasks.md`.
+   Surface any ordering gaps to the user before implementing.
 
 ### Phase 2: Identify Starting Point
 
@@ -63,6 +65,9 @@ For each unchecked task:
 Follow design decisions in `design.md` — don't diverge without reason.
 Follow behavioral requirements in delta specs — these define what "correct" means.
 
+If `.sdd/schema-config.yaml` exists and a task consumes a schema contract that is not yet defined, pause before implementing it.
+Surface the dependency gap and confirm with the user whether to reorder tasks in `tasks.md` first.
+
 ### Phase 4: After All Tasks
 
 When all tasks are checked off:
@@ -89,3 +94,7 @@ This skill can be invoked at any point after `tasks.md` exists — not only when
 - Continuing past a failed task without resolving it
 - Diverging from design decisions without documenting why
 - Treating artifacts as frozen when implementation reveals issues (update them)
+
+## References
+
+- `references/sdd-schema.md` — schema config format (§ 3) and lifecycle policy (§ 4)
