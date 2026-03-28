@@ -65,6 +65,12 @@ Before collecting findings:
 - Optionally split analysis by module and use subagents/parallel review passes when available.
 - Consolidate findings into one prioritized report after parallel passes.
 
+**Graph-aided triage** (if `code-review-graph` MCP tools are available):
+
+1. Run `get_impact_radius_tool` on key changed files to surface callers, dependents, and test coverage gaps.
+2. Use `get_review_context_tool` for token-efficient structural context instead of reading entire files.
+3. Focus the review plan on high-impact nodes the graph identifies — files with many dependents or no test coverage.
+
 ### Step 1 — Identify Changes
 
 Determine the review scope based on what the user is reviewing.
@@ -119,6 +125,7 @@ Rules:
 - Reference specific code locations (line numbers or quoted snippets).
 - Keep feedback actionable and concise.
 - Review all changed lines before final judgment; open surrounding context where needed.
+- When `code-review-graph` tools are available, use `query_graph_tool` (e.g., `callers_of`, `callees_of`) to verify that changed interfaces, signatures, or contracts don't break downstream consumers.
 - Address runtime errors, validation, error handling, concurrency risks, resource usage, and obvious performance pitfalls.
 - Behavior changes without tests → raise an issue (at least Medium).
 - Style comments are non-blocking unless they map to project conventions.
