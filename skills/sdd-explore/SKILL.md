@@ -75,7 +75,8 @@ Use freely:
 
 When thinking becomes clear enough to act:
 
-- Offer to create an artifact: "Want me to capture this as a proposal?" or "Should I sketch a design?"
+- Offer to create an artifact: "Want me to capture this as a proposal?"
+  or "Should I sketch a design?"
 - Route to the right skill: `sdd-propose`, `sdd-derive`, `sdd-translate`
 - Don't force it — the user decides when thinking is done
 

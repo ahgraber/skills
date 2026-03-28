@@ -31,6 +31,19 @@ Should not trigger:
 - "Debug this Python error"
 - "Review my PR"
 
+## Locate Specs Root
+
+Before routing, resolve the specs root for this session:
+
+1. Search for `.specs/` directories in the repo (up to 3 directory levels deep).
+2. **Multiple found** — list them and ask the user which to use.
+3. **Exactly one found** — use it; announce the resolved path.
+4. **None found** — ask the user where to initialize `.specs/` (default: repo root).
+5. **User specifies a path explicitly** — use that path regardless of search results.
+
+Call the resolved path `SPECS_ROOT`.
+All child skills use `SPECS_ROOT` in place of `.specs/`.
+
 ## Route by Intent
 
 | User Intent                              | Route           | Notes                  |
@@ -53,10 +66,14 @@ digraph sdd_router {
     edge [fontname="Helvetica", fontsize=9];
 
     start [label="User intent", shape=ellipse];
+    locate_root [label="Locate SPECS_ROOT\n(.specs/ directories)", shape=box];
+    multi_specs [label="Multiple .specs/\nfound?", shape=diamond];
+    ask_which [label="Ask user which\nto use", shape=box];
+
     explore_first [label="Wants to think\nbefore acting?", shape=diamond];
     explore [label="sdd-explore", shape=box];
 
-    has_specs [label=".specs/specs/ exists?", shape=diamond];
+    has_specs [label="SPECS_ROOT/specs/ exists?", shape=diamond];
     confirm_mode [label="Confirm intent\nwith user", shape=box];
 
     translate [label="sdd-translate", shape=box];
@@ -72,7 +89,12 @@ digraph sdd_router {
     sync [label="sdd-sync", shape=box];
     archive [label="sdd-archive", shape=box];
 
-    start -> explore_first;
+    start -> locate_root;
+    locate_root -> multi_specs;
+    multi_specs -> ask_which [label="yes"];
+    multi_specs -> explore_first [label="no (0 or 1)"];
+    ask_which -> explore_first;
+
     explore_first -> explore [label="yes"];
     explore_first -> has_specs [label="no, ready to act"];
 
@@ -100,29 +122,33 @@ digraph sdd_router {
 
 ## Routing Rules
 
-1. **Classify intent first** — explore-or-act, then determine path
-2. **Infer mode from directory state** — check `.specs/specs/` existence — but **always confirm with user** before routing
-3. **One hard gate** — `sdd-apply` requires `tasks.md` at `.specs/changes/<change-name>/tasks.md`; if missing, stop and route to `sdd-propose`
-4. **Prefer minimal next step** — don't run the full pipeline unless requested
-5. **Explore is mode-agnostic** — available at every stage, before or after any action
-6. **Multiple active changes** — ask which change before routing to apply/verify/sync/archive
+1. **Resolve SPECS_ROOT first** — locate `.specs/` before routing; ask if multiple exist or user specifies a path
+2. **Classify intent** — explore-or-act, then determine path
+3. **Infer mode from directory state** — check `SPECS_ROOT/specs/` existence — but **always confirm with user** before routing
+4. **One hard gate** — `sdd-apply` requires `tasks.md` at `SPECS_ROOT/changes/<change-name>/tasks.md`; if missing, stop and route to `sdd-propose`
+5. **Prefer minimal next step** — don't run the full pipeline unless requested
+6. **Explore is mode-agnostic** — available at every stage, before or after any action
+7. **Multiple active changes** — ask which change before routing to apply/verify/sync/archive
 
 ## Sequence Gates
 
-| Action      | Expected prerequisite              | Warning if missing                                               |
-| ----------- | ---------------------------------- | ---------------------------------------------------------------- |
-| sdd-apply   | `tasks.md`                         | **Hard block** — "No tasks to implement. Run sdd-propose first." |
-| sdd-verify  | Some completed tasks in `tasks.md` | "No completed tasks yet — verify output will be limited."        |
-| sdd-sync    | Delta specs in change directory    | "No delta specs to sync."                                        |
-| sdd-archive | All tasks complete                 | "Incomplete tasks remain. Archive anyway?" (ask user)            |
-| design.md   | `proposal.md` exists               | "Consider writing a proposal first for context."                 |
+| Action      | Expected prerequisite                | Warning if missing                                               |
+| ----------- | ------------------------------------ | ---------------------------------------------------------------- |
+| sdd-apply   | `SPECS_ROOT/changes/<name>/tasks.md` | **Hard block** — "No tasks to implement. Run sdd-propose first." |
+| sdd-verify  | Some completed tasks in `tasks.md`   | "No completed tasks yet — verify output will be limited."        |
+| sdd-sync    | Delta specs in change directory      | "No delta specs to sync."                                        |
+| sdd-archive | All tasks complete                   | "Incomplete tasks remain. Archive anyway?" (ask user)            |
+| design.md   | `proposal.md` exists                 | "Consider writing a proposal first for context."                 |
 
 ## Directory Convention
 
-All SDD skills operate on `.specs/` at the project root:
+All SDD skills operate on `SPECS_ROOT` — resolved at session start (see **Locate Specs Root** above).
+The default is `.specs/` at the project root, but monorepos or user preference may place it elsewhere (e.g., `packages/api/.specs/`, `services/auth/.specs/`).
+
+Child skills replace `.specs/` with `SPECS_ROOT` in all paths.
 
 ```text
-.specs/
+<SPECS_ROOT>/          # e.g. .specs/ or packages/api/.specs/
 ├── specs/                          # Main specs (source of truth)
 │   └── <capability>/
 │       └── spec.md
@@ -148,8 +174,8 @@ All SDD skills operate on `.specs/` at the project root:
     └── suggested-tools             # Tracks one-time tool suggestions
 ```
 
-An **active change** is any directory directly under `.specs/changes/` (not under `archive/`).
-Archived changes live in `.specs/changes/archive/YYYY-MM-DD-<name>/`.
+An **active change** is any directory directly under `SPECS_ROOT/changes/` (not under `archive/`).
+Archived changes live in `SPECS_ROOT/changes/archive/YYYY-MM-DD-<name>/`.
 Schema snapshots travel with the change directory into the archive — no separate schema archive path is needed.
 
 ## References

@@ -6,7 +6,10 @@ description: |-
 
 # SDD Translate
 
-Convert existing specifications from other frameworks, tools, or formats into SDD baseline `spec.md` files in `.specs/specs/<capability>/`.
+Convert existing specifications from other frameworks, tools, or formats into SDD baseline `spec.md` files in `SPECS_ROOT/specs/<capability>/`.
+
+> `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
+> Replace `.specs/` with your project's actual specs root in all paths below.
 
 ## When to Use
 

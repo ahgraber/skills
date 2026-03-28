@@ -9,6 +9,9 @@ description: |-
 Generate SDD artifacts from user intent and existing code.
 Produces either a change directory (for new/modified behavior) or baseline specs (for retroactive documentation).
 
+> `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
+> Replace `.specs/` with your project's actual specs root in all paths below.
+
 ## When to Use
 
 - User describes a feature to specify: "derive SDD specs for the auth flow"
@@ -39,12 +42,23 @@ digraph output_type {
 
 ## Process
 
+### Checklist
+
+- [ ] Phase 1: Understand User Intent
+- [ ] Phase 2: Analyze Existing Code
+- [ ] Phase 3: Schema Discovery
+- [ ] Phase 4: Assess Scope and Plan Decomposition
+- [ ] Phase 5: Generate Artifacts
+- [ ] Phase 6: Validate
+
 ### Phase 1: Understand User Intent
 
 Extract from the request:
 
-- **Which capability(s)** does this touch? (auth, payments, UI, etc.)
-- **What behavior** is being specified? (new feature, modification, retroactive doc)
+- **Which capability(s)** does this touch?
+  (auth, payments, UI, etc.)
+- **What behavior** is being specified?
+  (new feature, modification, retroactive doc)
 - **What's in scope vs. out of scope?**
   Ask one targeted question if truly ambiguous.
 
@@ -82,7 +96,8 @@ Survey the codebase for the relevant capability:
 
 2. **Extract observable behavior** (not internals):
 
-   - What inputs are accepted? What are the shapes?
+   - What inputs are accepted?
+     What are the shapes?
    - What outputs or side effects occur?
    - What validations or business rules apply?
    - What error conditions exist?

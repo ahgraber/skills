@@ -9,6 +9,9 @@ description: |-
 Create a change directory with all SDD artifacts.
 Generates artifacts in dependency order: proposal → delta specs → design → tasks.
 
+> `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
+> Replace `.specs/` with your project's actual specs root in all paths below.
+
 ## When to Use
 
 - Starting a new feature or behavioral change
@@ -28,9 +31,11 @@ Generates artifacts in dependency order: proposal → delta specs → design →
 
 Ask the user:
 
-1. **What are we building?** — feature, bugfix, refactor, migration?
+1. **What are we building?**
+   — feature, bugfix, refactor, migration?
 2. **Change name** — kebab-case identifier (e.g., `user-auth-refresh`, `payment-retry`)
-3. **Which capabilities does it touch?** — which existing specs are affected?
+3. **Which capabilities does it touch?**
+   — which existing specs are affected?
 
 Read `.specs/specs/` to understand existing baseline specs before generating deltas.
 If `.specs/specs/` is empty or does not exist, generate delta specs using only ADDED sections — all behavior is new.

@@ -9,6 +9,9 @@ description: |-
 Merge delta specs from a change directory into the main baseline specs.
 Applies each delta marker intelligently, preserving existing content not mentioned in the delta.
 
+> `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
+> Replace `.specs/` with your project's actual specs root in all paths below.
+
 ## When to Use
 
 - After `sdd-verify` passes — implementation is confirmed correct
