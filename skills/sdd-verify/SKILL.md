@@ -71,7 +71,7 @@ For each implemented requirement:
 
 ### Phase 4: Check Conformance (if schemas configured)
 
-If `.sdd/schema-config.yaml` exists:
+If `.specs/.sdd/schema-config.yaml` exists:
 
 1. **Re-generate schema snapshots** — capture the current "after" state and store in `.specs/changes/<name>/schemas/after/`.
 2. **Schema-vs-schema diff** (before → after) — what was added, modified, removed?

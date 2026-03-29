@@ -108,15 +108,15 @@ Add a source attribution blockquote at the top of each generated spec (see forma
 
 ### Phase 5: Schema Snapshot (if schemas configured)
 
-If `.sdd/schema-config.yaml` exists:
+If `.specs/.sdd/schema-config.yaml` exists:
 
 1. Generate schema snapshots using the configured extraction commands.
 2. Store in `.specs/schemas/` — this establishes the baseline for all future `sdd-verify` conformance checks.
 3. Update `.specs/schemas/.schema-sources.yaml` with the generation date.
 
-If no schema config exists but schema artifacts are detected in the repo (e.g., `openapi.yaml`, `.proto` files, `schema.graphql`), suggest creating `.sdd/schema-config.yaml` before the first `sdd-verify` run:
+If no schema config exists but schema artifacts are detected in the repo (e.g., `openapi.yaml`, `.proto` files, `schema.graphql`), suggest creating `.specs/.sdd/schema-config.yaml` before the first `sdd-verify` run:
 
-> "Detected schema artifacts. A `.sdd/schema-config.yaml` would let `sdd-verify` cross-validate implementation against these specs. See `references/sdd-schema.md` § 3 for the format. Say 'skip' to dismiss."
+> "Detected schema artifacts. A `.specs/.sdd/schema-config.yaml` would let `sdd-verify` cross-validate implementation against these specs. See `references/sdd-schema.md` § 3 for the format. Say 'skip' to dismiss."
 
 If no schema config and no artifacts detected, skip silently.
 

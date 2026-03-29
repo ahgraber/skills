@@ -169,9 +169,9 @@ Child skills replace `.specs/` with `SPECS_ROOT` in all paths.
 │   │           └── spec.md
 │   └── archive/                    # Completed changes (schemas travel with change)
 │       └── YYYY-MM-DD-<name>/
-└── .sdd/                           # SDD tooling metadata (not specs)
-    ├── schema-config.yaml          # Project schema extraction config
-    └── suggested-tools             # Tracks one-time tool suggestions
+├── .sdd/                           # SDD tooling metadata
+│   ├── schema-config.yaml          # Project schema extraction config
+│   └── suggested-tools             # Tracks one-time tool suggestions
 ```
 
 An **active change** is any directory directly under `SPECS_ROOT/changes/` (not under `archive/`).

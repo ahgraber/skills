@@ -67,10 +67,10 @@ Rules:
 
 ## 3. Schema Config Format
 
-Location: `.sdd/schema-config.yaml`
+Location: `SPECS_ROOT/.sdd/schema-config.yaml`
 
 ```yaml
-# .sdd/schema-config.yaml
+# .specs/.sdd/schema-config.yaml
 # Defines how SDD extracts and tracks schema artifacts for this project.
 # All fields except 'schemas' are optional.
 #
@@ -122,7 +122,7 @@ Rules:
 - `authored` path is relative to the project root; omit if no authored schema exists
 - `generate.command` must be runnable from the project root; omit if extraction is not possible
 - Each schema entry is independent — configure only what the project has
-- Store this file in `.sdd/`, not in `.specs/` (it's tooling config, not a spec)
+- Store this file in `SPECS_ROOT/.sdd/` (tooling config, not a spec)
 
 ## 4. Schema Lifecycle Policy
 

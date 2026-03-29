@@ -112,13 +112,10 @@ This runs in parallel with the code survey — use whichever source provides hig
 1. **Detect schema artifacts** — look for: committed specs (`openapi.yaml`, `swagger.json`, `openapi.json`, `docs/api/`, `openapi/`); schema files (`.proto`, `.graphql`, `.prisma`, `.avsc`, `schema.sql`); or framework markers implying runtime schema generation (FastAPI, NestJS, Spring Boot, DRF, Rails API, Go Echo/Gin, Laravel, GraphQL servers, gRPC).
    See `references/sdd-schema.md` § 3 for config examples.
 
-2. **Check for `.sdd/schema-config.yaml`** — if it exists, use the configured extraction commands.
+2. **Check for `.specs/.sdd/schema-config.yaml`** — if it exists, use the configured extraction commands.
    If not, and schema artifacts were detected, suggest creating one (one-time, using the `suggested-tools` pattern):
 
-   > "Detected `<files>`.
-   > Consider creating `.sdd/schema-config.yaml` to configure schema extraction for SDD verification.
-   > See `references/sdd-schema.md` § 3 for the format.
-   > Say 'skip' to dismiss."
+   > "Detected `<files>`. > Consider creating `.specs/.sdd/schema-config.yaml` to configure schema extraction for SDD verification. > See `references/sdd-schema.md` § 3 for the format. > Say 'skip' to dismiss."
 
 3. **Generate snapshots** — if extraction is configured, run the commands and store output in `.specs/schemas/`.
 

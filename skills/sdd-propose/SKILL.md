@@ -59,7 +59,7 @@ Present to user and confirm before continuing.
 
 ### Phase 3: Schema Baseline (if schemas configured)
 
-If `.sdd/schema-config.yaml` exists:
+If `.specs/.sdd/schema-config.yaml` exists:
 
 1. Generate current schema snapshots and store in `.specs/changes/<name>/schemas/before/`.
 2. Add a `## Schema Impact` section to `proposal.md` describing expected schema changes — new endpoints, new or modified models, removed operations.
@@ -68,7 +68,7 @@ If `.sdd/schema-config.yaml` exists:
 
 If no schema config exists but `.specs/schemas/` contains files, emit a visible warning:
 
-> **WARNING:** Found schema artifacts in `.specs/schemas/` but no `.sdd/schema-config.yaml`. Schema snapshots will not be captured for this change. Run `sdd-derive` or create the config manually to enable schema tracking.
+> **WARNING:** Found schema artifacts in `.specs/schemas/` but no `.specs/.sdd/schema-config.yaml`. Schema snapshots will not be captured for this change. Run `sdd-derive` or create the config manually to enable schema tracking.
 
 If no schema config exists and `.specs/schemas/` is empty or absent, skip silently.
 
