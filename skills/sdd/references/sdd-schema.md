@@ -140,10 +140,10 @@ Each SDD skill plays a distinct role in the schema lifecycle — act only within
 
 Apply consistently across all SDD skills:
 
-| Condition                                                    | Action                                                                             |
-| ------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
-| `schema-config.yaml` exists                                  | Run extraction; proceed with schema operations                                     |
-| No config; schema artifacts present; not yet suggested       | One-time suggestion via `suggested-tools` pattern; skip silently after first offer |
-| No config; no artifacts detected, or suggestion already made | Skip silently                                                                      |
+| Condition                                                | Action                                                                                                                                    |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `schema-config.yaml` exists                              | Run extraction; proceed with schema operations                                                                                            |
+| No config; schema artifacts present in `.specs/schemas/` | Emit a visible **WARNING** naming the stale artifacts and suggesting `sdd-derive` or manual config creation. Then skip schema operations. |
+| No config; `.specs/schemas/` empty or absent             | Skip silently                                                                                                                             |
 
 Skills that skip silently should note the omission in their output where relevant (e.g., `sdd-verify` notes that conformance was not checked).

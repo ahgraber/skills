@@ -66,7 +66,11 @@ If `.sdd/schema-config.yaml` exists:
    See `references/sdd-schema.md` § 2 for the format.
 3. Create `.specs/changes/<name>/schemas/expected.md` with a prose description of the expected schema diff. `sdd-verify` uses this to cross-check actual changes at verify time.
 
-If no schema config exists, skip silently.
+If no schema config exists but `.specs/schemas/` contains files, emit a visible warning:
+
+> **WARNING:** Found schema artifacts in `.specs/schemas/` but no `.sdd/schema-config.yaml`. Schema snapshots will not be captured for this change. Run `sdd-derive` or create the config manually to enable schema tracking.
+
+If no schema config exists and `.specs/schemas/` is empty or absent, skip silently.
 
 ### Phase 4: Generate Delta Specs
 

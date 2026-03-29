@@ -88,7 +88,11 @@ If `.sdd/schema-config.yaml` exists and `schemas/after/` is present in the chang
    > "Authored schema at `<path>` may need updating to match the implementation.
    > Reference: `.specs/changes/<name>/schemas/after/`"
 
-If no schema config exists, skip silently.
+If no schema config exists but `.specs/schemas/` contains files and no `schemas/after/` directory exists in the change, emit a visible warning:
+
+> **WARNING:** Schema baseline exists at `.specs/schemas/` but this change has no after-snapshot. The schema baseline may be stale. Run `sdd-derive` or create `.sdd/schema-config.yaml` to enable schema tracking.
+
+If no schema config exists and `.specs/schemas/` is empty or absent, skip silently.
 
 ### Phase 5: Validate Output
 
