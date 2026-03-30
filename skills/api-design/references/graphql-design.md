@@ -15,7 +15,7 @@
 
 ### Type Design Principles
 
-1. **Implement the `Node` interface** on major types with a globally unique `ID` for client caching and refetching
+1. **Consider implementing the `Node` interface** on major types when clients benefit from globally unique IDs for caching and refetching
 2. **Use custom scalars** for semantically meaningful types: `DateTime`, `URL`, `Email`, `JSON` — not raw `String`
 3. **Use enums** for restricted value sets (statuses, categories, sort directions)
 4. **Replace foreign key IDs with object references**: `author: User!` instead of `authorId: ID!`
@@ -41,10 +41,10 @@ This is intentional — networked services fail.
 
 ## Query Design
 
-### Pagination — Relay Connection Specification
+### Pagination — Relay-Style Connections
 
-**Always paginate** lists that could grow.
-This is both a UX and security requirement (cost-based rate limiting depends on it).
+Paginate lists that can grow large, are user-controlled, or would otherwise create unbounded cost.
+Relay-style connections are a strong default for public or long-lived schemas, but they are not the only valid pagination model.
 
 ```graphql
 type Query {
@@ -131,9 +131,9 @@ enum SortDirection {
    }
    ```
 
-3. **Unique payload type.**
-   Never return the domain type directly.
-   The payload wrapper provides room for metadata, errors, and evolution:
+3. **Prefer a unique payload type for evolving schemas.**
+   Payload wrappers provide room for metadata, errors, and evolution.
+   Returning the domain type directly can still be acceptable for simple internal mutations:
 
    ```graphql
    type CreateUserPayload {
@@ -265,17 +265,27 @@ Layer defenses:
 
 ## Schema Evolution
 
-GraphQL avoids traditional versioning.
-Instead, evolve continuously:
+GraphQL often avoids traditional versioning.
+Instead, most schemas evolve continuously:
 
 1. **Add** the new field/type alongside the old one
 2. **Deprecate** the old field: `oldField: String @deprecated(reason: "Use newField instead.")`
 3. **Monitor** field usage metrics to track which clients still use deprecated fields
 4. **Remove** only when usage reaches zero and schema checks confirm no breaking changes
 
-**Safe changes (always non-breaking):** new fields, new types, new enum values, new arguments with defaults.
+**Usually safe additive changes:** new fields, new types, and new arguments with defaults.
+New enum values are often additive, but they can still break clients that assume exhaustive enum handling.
 
 **Breaking changes (require deprecation workflow):** removing fields, changing types, making nullable fields non-null, removing enum values.
 
 **Principle:** It is easier to add fields than to remove them.
 Be conservative about what you expose initially.
+
+## Further Reading
+
+- [GraphQL.org Best Practices](https://graphql.org/learn/best-practices/)
+- [GraphQL.org Schema Design](https://graphql.org/learn/schema-design/)
+- [GraphQL.org Pagination](https://graphql.org/learn/pagination/)
+- [GraphQL.org Authorization](https://graphql.org/learn/authorization/)
+- [GraphQL.org Security](https://graphql.org/learn/security/)
+- [Apollo, Errors as Data](https://www.apollographql.com/docs/graphos/schema-design/guides/errors-as-data-explained)

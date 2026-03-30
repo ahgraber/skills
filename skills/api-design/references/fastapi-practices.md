@@ -89,7 +89,8 @@ For **CPU-intensive** work (image processing, ML inference, heavy computation): 
 
 ## Dependencies for Validation and Auth
 
-FastAPI dependencies are the primary tool for request validation, authorization, and shared logic.
+FastAPI dependencies are the primary tool for request validation, authentication, resource loading, and shared request-scoped logic.
+Use them as adapters over domain authorization rules, not as the sole source of business authorization policy.
 Use them extensively.
 
 ### Resource validation
@@ -176,7 +177,8 @@ class UserListResponse(BaseModel):
     # Fewer fields for list views
 ```
 
-Never return the same model for create, read, and list.
+Prefer separate request and response models.
+Split create, detail, and list response models when they expose meaningfully different fields.
 Response models control what leaves the API boundary.
 
 ### Custom base model for app-wide behavior
@@ -341,7 +343,8 @@ async def list_users(): ...
 async def create_user(data: CreateUserRequest): ...
 ```
 
-Always set `response_model` — it controls serialization, filters out fields not in the model, and drives OpenAPI documentation.
+Set `response_model` for structured JSON endpoints unless you intentionally return a raw, streaming, redirect, or other custom response.
+It controls serialization, filters out fields not in the model, and drives OpenAPI documentation.
 
 ## Common Footguns
 
@@ -353,3 +356,11 @@ Always set `response_model` — it controls serialization, filters out fields no
 | Global database sessions                         | Use dependency injection for DB sessions; never share across requests              |
 | `HTTPException` in service layer                 | Use domain exceptions + exception handlers                                         |
 | No async test client                             | Set up `httpx.AsyncClient` with `ASGITransport` from the start                     |
+
+## Further Reading
+
+- [FastAPI documentation](https://fastapi.tiangolo.com/)
+- [FastAPI dependencies](https://fastapi.tiangolo.com/tutorial/dependencies/)
+- [FastAPI error handling](https://fastapi.tiangolo.com/tutorial/handling-errors/)
+- [Pydantic model concepts](https://docs.pydantic.dev/latest/concepts/models/)
+- [HTTPX AsyncClient](https://www.python-httpx.org/async/)

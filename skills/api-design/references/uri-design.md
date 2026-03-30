@@ -59,21 +59,23 @@ For APIs where resources don't have natural slugs, UUIDs are preferred over sequ
 
 ## Path Structure
 
-### Canonical format
+### Common format
 
 ```text
-/{version}/{resource}/{identifier}/{sub-resource}?{modifiers}
+/{resource}/{identifier}/{sub-resource}?{modifiers}
 ```
 
 **Examples:**
 
 ```text
-/v1/users
-/v1/users/abc-123
-/v1/users/abc-123/orders
-/v1/users/abc-123/orders/ord-456
-/v1/products?category=electronics&sort=-price&page=2
+/users
+/users/abc-123
+/users/abc-123/orders
+/users/abc-123/orders/ord-456
+/products?category=electronics&sort=-price&page=2
 ```
+
+If the API versions in the path, prepend the version segment consistently rather than treating it as part of the resource hierarchy.
 
 ### Path segments = hierarchy; query params = modifiers
 
@@ -129,3 +131,10 @@ Well-designed URIs are **hackable** — users can navigate by modifying them:
 ```
 
 If a URI segment is removable, the truncated URI should return a meaningful response (the parent collection or a summary).
+
+## Further Reading
+
+- [RFC 3986, URI Generic Syntax](https://www.rfc-editor.org/rfc/rfc3986)
+- [Microsoft REST API URL guidance](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#uniform-resource-locators-urls)
+- [Google AIP-122, Resource names](https://google.aip.dev/122)
+- [Zalando URL guidelines](https://opensource.zalando.com/restful-api-guidelines/#135)

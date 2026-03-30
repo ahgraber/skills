@@ -37,13 +37,17 @@ These apply regardless of REST or GraphQL:
 3. **API surface is not database surface.**
    Never mirror internal data models in public contracts.
    Abstract so you can change internals without breaking clients.
-4. **Validate at the boundary.**
-   The API layer is where you enforce input constraints, authorize access, and shape responses.
+4. **Validate and shape at the boundary.**
+   Enforce input constraints and response shaping at the API boundary.
+   Authenticate before business logic runs, but keep authorization policy in the domain/business layer.
 5. **Evolve without breaking.**
    Additive changes are safe.
    Removal, renaming, and type changes require versioning (REST) or deprecation workflows (GraphQL).
 6. **Security is structural.**
    HTTPS, authentication, authorization, rate limiting, and input validation are not optional additions — they are part of the design.
+
+Use the references below as scoped guidance.
+Some references describe broad consensus, while others document strong defaults or ecosystem-specific patterns.
 
 ## Route by Task
 

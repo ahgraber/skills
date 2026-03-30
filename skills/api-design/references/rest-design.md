@@ -7,17 +7,17 @@ HTTP methods provide the verbs.
 
 ### HTTP Method Semantics
 
-| Method    | Purpose                                 | Idempotent | Safe | Typical Status Codes                   |
-| --------- | --------------------------------------- | ---------- | ---- | -------------------------------------- |
-| `GET`     | Read resource(s)                        | Yes        | Yes  | 200, 404                               |
-| `POST`    | Create resource                         | No         | No   | 201 (with `Location` header), 400, 409 |
-| `PUT`     | Replace resource entirely               | Yes        | No   | 200, 204, 404                          |
-| `PATCH`   | Partial update                          | No\*       | No   | 200, 204, 404                          |
-| `DELETE`  | Remove resource                         | Yes        | No   | 204, 404                               |
-| `HEAD`    | Headers only (same as GET without body) | Yes        | Yes  | 200, 404                               |
-| `OPTIONS` | Supported methods/capabilities          | Yes        | Yes  | 200, 204                               |
+| Method    | Purpose                                 | Idempotent                    | Safe | Typical Status Codes                   |
+| --------- | --------------------------------------- | ----------------------------- | ---- | -------------------------------------- |
+| `GET`     | Read resource(s)                        | Yes                           | Yes  | 200, 404                               |
+| `POST`    | Create resource                         | No                            | No   | 201 (with `Location` header), 400, 409 |
+| `PUT`     | Replace resource entirely               | Yes                           | No   | 200, 204, 404                          |
+| `PATCH`   | Partial update                          | It depends on patch semantics | No   | 200, 204, 404                          |
+| `DELETE`  | Remove resource                         | Yes                           | No   | 204, 404                               |
+| `HEAD`    | Headers only (same as GET without body) | Yes                           | Yes  | 200, 404                               |
+| `OPTIONS` | Supported methods/capabilities          | Yes                           | Yes  | 200, 204                               |
 
-\*PATCH can be made idempotent with `If-Match` + ETag.
+\*PATCH may be idempotent or non-idempotent depending on the patch format and operation semantics. `If-Match` + ETag helps prevent lost updates, but it is a concurrency control mechanism rather than a blanket idempotency guarantee.
 
 ### CRUD Endpoint Layout
 
@@ -192,3 +192,12 @@ For non-trivial REST APIs, maintain an OpenAPI 3.1 spec:
 - Validate with `npx @redocly/cli lint openapi.yaml`
 - Generate mock servers with `npx @stoplight/prism-cli mock openapi.yaml`
 - Version-control the spec alongside the code
+
+## Further Reading
+
+- [Microsoft Azure REST API Guidelines](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md)
+- [Google API Design Guide](https://docs.cloud.google.com/apis/design)
+- [Google AIP-121, Resource-oriented design](https://google.aip.dev/121)
+- [Google AIP-136, Custom methods](https://google.aip.dev/136)
+- [Zalando RESTful API Guidelines](https://opensource.zalando.com/restful-api-guidelines/)
+- [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)

@@ -25,7 +25,7 @@ Non-breaking changes do not require a new version.
 
 ## Versioning Strategies
 
-### URL path versioning (recommended default)
+### URL path versioning (common default)
 
 ```text
 GET /v1/users
@@ -85,11 +85,11 @@ Less conventional.
 | Content negotiation | No                 | Yes                       | No               |
 | **Recommendation**  | **Default choice** | Complex/multi-format APIs | Rarely preferred |
 
-For **most APIs**, use URL path versioning.
-Use header versioning only when content negotiation is a real requirement.
+For many APIs, URL path versioning is the simplest default to operate and document.
+Header versioning is also valid when content negotiation or stable resource identity matters more than discoverability.
 
-For **GraphQL APIs**, do not use any of these.
-GraphQL uses continuous evolution with `@deprecated` instead of discrete versions.
+For **GraphQL APIs**, continuous evolution with `@deprecated` is the usual default.
+Schema or endpoint versioning is still possible when compatibility or governance requirements demand it.
 
 ## Version Lifecycle
 
@@ -156,3 +156,11 @@ Link: <https://api.example.com/docs/migration/v1-to-v2>; rel="deprecation"
 | Versioning individual endpoints inconsistently        | Confusing, hard to document       |
 | Date-based versioning without clear major breakpoints | Hard to know which changes matter |
 | No sunset plan                                        | Versions accumulate forever       |
+
+## Further Reading
+
+- [RFC 8594, The Sunset HTTP Header Field](https://www.rfc-editor.org/rfc/rfc8594)
+- [Google AIP-185, API Versioning](https://google.aip.dev/185)
+- [Stripe API Versioning](https://docs.stripe.com/api/versioning)
+- [Microsoft REST API versioning guidance](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#api-versioning)
+- [GraphQL.org Schema Design and evolution](https://graphql.org/learn/schema-design/)

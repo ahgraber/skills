@@ -12,19 +12,19 @@
 
 ### Client Error (4xx)
 
-| Code                         | Meaning                                   | When to Use                                          |
-| ---------------------------- | ----------------------------------------- | ---------------------------------------------------- |
-| `400 Bad Request`            | Malformed request or validation failure   | Invalid JSON, constraint violations, type mismatches |
-| `401 Unauthorized`           | Not authenticated                         | Missing or invalid credentials                       |
-| `403 Forbidden`              | Authenticated but not authorized          | Valid credentials, insufficient permissions          |
-| `404 Not Found`              | Resource does not exist                   | Invalid ID, deleted resource                         |
-| `405 Method Not Allowed`     | HTTP method not supported                 | `DELETE` on a read-only resource                     |
-| `409 Conflict`               | State conflict                            | Duplicate creation, optimistic lock failure          |
-| `410 Gone`                   | Resource permanently removed              | Deprecated endpoint past sunset date                 |
-| `412 Precondition Failed`    | `If-Match` / `If-Unmodified-Since` failed | Stale ETag in conditional update                     |
-| `415 Unsupported Media Type` | Wrong `Content-Type`                      | XML sent to JSON-only endpoint                       |
-| `422 Unprocessable Entity`   | Semantically invalid                      | Well-formed JSON but business rule violation         |
-| `429 Too Many Requests`      | Rate limited                              | Always include `Retry-After` header                  |
+| Code                         | Meaning                                   | When to Use                                              |
+| ---------------------------- | ----------------------------------------- | -------------------------------------------------------- |
+| `400 Bad Request`            | Malformed request or generic client error | Invalid JSON, unsupported parameters, type mismatches    |
+| `401 Unauthorized`           | Not authenticated                         | Missing or invalid credentials                           |
+| `403 Forbidden`              | Authenticated but not authorized          | Valid credentials, insufficient permissions              |
+| `404 Not Found`              | Resource does not exist                   | Invalid ID, deleted resource                             |
+| `405 Method Not Allowed`     | HTTP method not supported                 | `DELETE` on a read-only resource                         |
+| `409 Conflict`               | State conflict                            | Duplicate creation, optimistic lock failure              |
+| `410 Gone`                   | Resource permanently removed              | Deprecated endpoint past sunset date                     |
+| `412 Precondition Failed`    | `If-Match` / `If-Unmodified-Since` failed | Stale ETag in conditional update                         |
+| `415 Unsupported Media Type` | Wrong `Content-Type`                      | XML sent to JSON-only endpoint                           |
+| `422 Unprocessable Entity`   | Semantically invalid                      | Well-formed JSON but validation or business rule failure |
+| `429 Too Many Requests`      | Rate limited                              | Always include `Retry-After` header                      |
 
 ### Server Error (5xx)
 
@@ -88,7 +88,8 @@ Use RFC 7807 (`application/problem+json`) for structured error responses:
 
 ## Validation Errors
 
-For requests with multiple invalid fields, return **all** validation errors at once (not just the first one):
+For requests with multiple invalid fields, return **all** validation errors at once (not just the first one).
+Use either `400` or `422` consistently for this category and document the choice:
 
 ```json
 {
@@ -166,3 +167,11 @@ For automated clients, optionally include retry guidance in the response:
 - [ ] Rate-limited responses include `Retry-After`
 - [ ] No internal details leak in any error response
 - [ ] Error `type` URIs are documented and stable
+
+## Further Reading
+
+- [RFC 7807, Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc7807)
+- [HTTP Semantics status codes](https://www.rfc-editor.org/rfc/rfc9110)
+- [Google AIP-193, Errors](https://google.aip.dev/193)
+- [Stripe API Errors](https://docs.stripe.com/api/errors)
+- [GraphQL response and errors](https://graphql.org/learn/response/)

@@ -64,21 +64,21 @@ Many production systems use both:
 
 ## Tradeoff Matrix
 
-| Dimension            | REST                              | GraphQL                                                         |
-| -------------------- | --------------------------------- | --------------------------------------------------------------- |
-| **Endpoints**        | Multiple, resource-oriented       | Single endpoint                                                 |
-| **Data shape**       | Fixed response per endpoint       | Client-specified per query                                      |
-| **Type safety**      | Optional (OpenAPI adds it)        | Built-in schema + type system                                   |
-| **Caching**          | Native HTTP caching               | Requires custom strategies (persisted queries, CDN with GET)    |
-| **Error handling**   | HTTP status codes (4xx, 5xx)      | Always HTTP 200; errors in response body                        |
-| **Versioning**       | URL/header versioning             | Continuous evolution via `@deprecated`                          |
-| **File handling**    | Native multipart upload           | Requires workarounds (multipart spec or separate REST endpoint) |
-| **Real-time**        | Requires SSE/WebSocket separately | Subscriptions built-in                                          |
-| **Discoverability**  | OpenAPI/Swagger docs              | Introspection + schema docs                                     |
-| **Learning curve**   | Lower                             | Higher                                                          |
-| **Tooling maturity** | Very mature                       | Mature and growing rapidly                                      |
-| **N+1 risk**         | Controlled by endpoint design     | Inherent; mitigated by DataLoader                               |
-| **Security surface** | Smaller (fixed queries)           | Larger (arbitrary queries require depth/cost limiting)          |
+| Dimension            | REST                              | GraphQL                                                                                           |
+| -------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------- |
+| **Endpoints**        | Multiple, resource-oriented       | Single endpoint                                                                                   |
+| **Data shape**       | Fixed response per endpoint       | Client-specified per query                                                                        |
+| **Type safety**      | Optional (OpenAPI adds it)        | Built-in schema + type system                                                                     |
+| **Caching**          | Native HTTP caching               | Requires custom strategies (persisted queries, CDN with GET)                                      |
+| **Error handling**   | HTTP status codes (4xx, 5xx)      | HTTP status codes for transport/protocol errors; execution errors may return `data` plus `errors` |
+| **Versioning**       | URL/header versioning             | Continuous evolution via `@deprecated`                                                            |
+| **File handling**    | Native multipart upload           | Requires workarounds (multipart spec or separate REST endpoint)                                   |
+| **Real-time**        | Requires SSE/WebSocket separately | Subscriptions built-in                                                                            |
+| **Discoverability**  | OpenAPI/Swagger docs              | Introspection + schema docs                                                                       |
+| **Learning curve**   | Lower                             | Higher                                                                                            |
+| **Tooling maturity** | Very mature                       | Mature and growing rapidly                                                                        |
+| **N+1 risk**         | Controlled by endpoint design     | Inherent; mitigated by DataLoader                                                                 |
+| **Security surface** | Smaller (fixed queries)           | Larger (arbitrary queries require depth/cost limiting)                                            |
 
 ## Design-First vs Code-First
 
@@ -130,3 +130,11 @@ Run automated checks to detect spec drift.
 - Unusual but sometimes necessary (simplifying, reducing operational complexity)
 - Map each commonly-used query to a dedicated REST endpoint
 - Lose client flexibility but gain caching and operational simplicity
+
+## Further Reading
+
+- [GraphQL.org Thinking in Graphs](https://graphql.org/learn/thinking-in-graphs/)
+- [GraphQL.org Best Practices](https://graphql.org/learn/best-practices/)
+- [Microsoft REST API design guidance](https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design)
+- [Google API Design Guide](https://docs.cloud.google.com/apis/design)
+- [Apollo, Demand-oriented schema design](https://www.apollographql.com/docs/graphos/schema-design/guides/demand-oriented-schema-design)

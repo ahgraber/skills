@@ -194,3 +194,11 @@ This follows the GitHub API pattern and keeps links machine-readable without pol
 | `per_page` exceeding max     | Silently cap to max, or return `400` (document which approach you use)       |
 | Invalid cursor               | `400 Bad Request` with descriptive error                                     |
 | Filtering returns no results | `200 OK` with empty array (not 404 — the collection exists, it's just empty) |
+
+## Further Reading
+
+- [GraphQL.org Pagination](https://graphql.org/learn/pagination/)
+- [Google AIP-158, Pagination](https://google.aip.dev/158)
+- [Google AIP-160, Filtering](https://google.aip.dev/160)
+- [Stripe Pagination](https://docs.stripe.com/api/pagination)
+- [Zalando pagination guidelines](https://opensource.zalando.com/restful-api-guidelines/#pagination)
