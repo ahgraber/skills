@@ -35,11 +35,13 @@ Should not trigger:
 
 Before routing, resolve the specs root for this session:
 
-1. Search for `.specs/` directories in the repo (up to 3 directory levels deep).
+1. Use `Glob` with pattern `**/.specs/**` to find files inside any `.specs/` directory, then extract the unique `.specs/` parent paths from results. (Glob matches files only — searching for files _inside_ `.specs/` is how you locate the directories.)
 2. **Multiple found** — list them and ask the user which to use.
 3. **Exactly one found** — use it; announce the resolved path.
 4. **None found** — ask the user where to initialize `.specs/` (default: repo root).
 5. **User specifies a path explicitly** — use that path regardless of search results.
+
+> **Escape hatch:** If discovery requires more complex logic (empty directories, unusual nesting, or large monorepos), add a helper script at `skills/sdd/scripts/find-specs-roots.sh` and reference it here. Until then, fall back to `find . -type d -name ".specs" -maxdepth 4` via Bash if Glob returns no results.
 
 Call the resolved path `SPECS_ROOT`.
 All child skills use `SPECS_ROOT` in place of `.specs/`.
