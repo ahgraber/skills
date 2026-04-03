@@ -5,6 +5,37 @@
 REST APIs are organized around **resources** (nouns), not actions (verbs).
 HTTP methods provide the verbs.
 
+### Resource Archetypes
+
+Every URI in a REST API identifies one of four resource archetypes:
+
+| Archetype      | What It Is                                                          | Naming Rule         | Example                                |
+| -------------- | ------------------------------------------------------------------- | ------------------- | -------------------------------------- |
+| **Document**   | A singular concept — like an object instance or record              | Singular noun       | `/leagues/seattle/teams/trebuchet`     |
+| **Collection** | A server-managed directory of resources                             | Plural noun         | `/leagues/seattle/teams`               |
+| **Store**      | A client-managed resource repository (client chooses URIs)          | Plural noun         | `PUT /users/a3f9c12d/favorites/alonso` |
+| **Controller** | A procedural concept — an executable action with inputs and outputs | Verb or verb phrase | `POST /alerts/245743/resend`           |
+
+**Controller resources** are the exception to the "nouns only" rule.
+Use them for operations that cannot logically map to standard CRUD methods.
+Controller names appear as the **last segment** in the URI path, with no child resources following them.
+
+```text
+POST /users/morgan/register           ✓ controller — action that isn't CRUD
+POST /dbs/reindex                     ✓ controller — procedural operation
+POST /orders/{id}/cancel              ✓ controller — can't be modeled as a simple state field
+
+GET  /getUsers                        ✗ verb used where a collection noun belongs
+POST /createOrder                     ✗ verb duplicates what POST already means
+```
+
+Before reaching for a controller, try modeling the operation as:
+
+1. A **state transition** — `PATCH /orders/{id}` with `{"status": "cancelled"}`
+2. A **sub-resource** — `POST /orders/{id}/cancellation` (treats the action result as a created resource)
+
+Use a controller (option 3) when the operation is procedural, has side effects beyond the target resource, or doesn't produce a resource that clients would later GET.
+
 ### HTTP Method Semantics
 
 | Method    | Purpose                                 | Idempotent                    | Safe | Typical Status Codes                   |
@@ -90,11 +121,76 @@ If-None-Match: "v1-abc123"
 → 304 Not Modified (cache hit) or 200 OK (new data)
 ```
 
+## API Surface Is Not Database Surface
+
+Your API contract and your database schema serve different masters.
+The API serves consumers; the schema serves storage.
+Coupling them looks easy at first and becomes expensive fast.
+
+### Why This Matters
+
+1. **Breaking changes propagate silently.**
+   Renaming a DB column (`birth_day` → `birthday`) instantly breaks every client if the API auto-maps fields.
+   With a mapping layer, the API keeps returning `birth_day` regardless of the internal rename.
+
+2. **Sensitive data leaks by default.**
+   Auto-serializing entities exposes fields like `password_hash`, internal flags, or soft-delete markers unless you remember to exclude them — an opt-out model that fails under pressure.
+
+3. **Business logic migrates to clients.**
+   If your API returns raw join tables, clients must reassemble domain concepts themselves, duplicating logic across every consumer.
+   Zalando's guidelines warn that "thin database wrappers tend to shift business logic to the clients."
+
+4. **Independent evolution becomes impossible.**
+   You cannot split tables, change storage engines, or denormalize for performance without an API release.
+   Google's API Design Guide states: "having an API that is identical to the underlying database schema is actually an anti-pattern, as it tightly couples the surface to the underlying system."
+
+5. **CRUD-per-table forces wrong transaction boundaries.**
+   Mirroring CRUD onto endpoints (`POST /items`, `POST /payments` individually) forces distributed coordination.
+   Designing around domain operations (`POST /orders` with items and payment as a batch) eliminates race conditions and partial-failure complexity.
+
+### Anti-Patterns
+
+| Anti-Pattern                                  | Risk Level                                                                               | Problem                                                     |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Auto-serializing ORM entities to JSON         | High for public/multi-consumer APIs; low for internal-only MVPs where you own both sides | Leaks internals, breaks on schema changes                   |
+| One REST resource per DB table                | High                                                                                     | Forces clients to do joins; N+1 API calls                   |
+| Exposing surrogate keys (`id: 47`)            | Medium–High                                                                              | Ties clients to DB-generated IDs; leaks ordering and volume |
+| Returning all columns by default              | High                                                                                     | Over-fetching; security risk                                |
+| DB enum values in API responses (`status: 1`) | High                                                                                     | Internal storage representation leaks into contract         |
+
+### How to Decouple
+
+**Use a dedicated mapping layer** — DTOs, serializers, or view models — inside the service layer, not in controllers.
+
+```text
+DB entity (internal)              API representation (contract)
+─────────────────────             ──────────────────────────────
+users.first_name          →       { "name": "Alice Smith" }
+users.last_name           ↗
+users.password_hash                (omitted)
+users.is_deleted                   (omitted)
+users.created_at          →       { "joined": "2024-03-15" }
+orders.user_id (FK)       →       { "customer": "/users/abc-123" }
+```
+
+**Key rules:**
+
+- **Separate DTOs per operation** — `CreateUserRequest`, `UserResponse`, `UserSummary` — not one object for everything.
+  Different operations need different shapes; a creation request shouldn't carry an `id`, and a list response shouldn't carry every detail.
+- **Map in the service layer**, not the controller.
+  Controllers stay thin; the service layer owns the translation between domain and contract.
+- **Treat the API shape as a versioned contract.**
+  Use OpenAPI/JSON Schema as the source of truth.
+  The DB schema is free to change behind the mapping layer.
+- **Use opaque identifiers.**
+  UUIDs or slugs instead of sequential integers.
+  Pagination cursors should be opaque tokens, never raw DB offsets or IDs.
+
 ## Response Design
 
 ### Consistent Envelope (Optional)
 
-Some APIs use a response envelope; others return data directly.
+Some APIs use one; others return data directly.
 Pick one and be consistent:
 
 **Direct (recommended for simple APIs):**
@@ -134,7 +230,7 @@ Pick one and be consistent:
 }
 ```
 
-### HATEOAS (Hypermedia)
+### HATEOAS (Hypermedia as the Engine of Application State)
 
 Include links to related resources and available actions:
 
@@ -171,6 +267,55 @@ Skip it for simple internal APIs.
 - Distinguish `public` (CDN-cacheable) from `private` (user-specific) responses
 - Use `Vary` header when responses differ by request headers (e.g., `Vary: Accept, Authorization`)
 
+## Long-Running Operations
+
+Not all operations complete synchronously.
+When processing takes more than a few seconds, use an asynchronous job pattern:
+
+1. **Accept the request** — return `202 Accepted` immediately with a job resource URI:
+
+   ```text
+   POST /reports/generate
+   → 202 Accepted
+      Location: /jobs/report-abc123
+   ```
+
+2. **Poll for status** — clients `GET` the job resource:
+
+   ```json
+   GET /jobs/report-abc123
+   → 200 OK
+   {
+     "id": "report-abc123",
+     "status": "processing",
+     "progress": 42,
+     "created_at": "2024-03-15T10:00:00Z",
+     "estimated_completion": "2024-03-15T10:02:00Z"
+   }
+   ```
+
+3. **Return the result** — once complete, either redirect to the result resource or embed it:
+
+   ```json
+   GET /jobs/report-abc123
+   → 200 OK
+   {
+     "id": "report-abc123",
+     "status": "complete",
+     "result": "/reports/2024-Q1"
+   }
+   ```
+
+4. **Handle failure** — surface `"status": "failed"` with an error body, not a successful status code.
+
+**When to apply:**
+
+- Database-heavy exports or aggregations
+- External service calls (email sends, third-party processing)
+- Any operation where P99 latency exceeds client timeout budgets
+
+For real-time progress, prefer WebSockets or SSE over aggressive polling.
+
 ## Security Checklist
 
 - **HTTPS everywhere** — no exceptions
@@ -195,6 +340,7 @@ For non-trivial REST APIs, maintain an OpenAPI 3.1 spec:
 
 ## Further Reading
 
+- Mark Massé, _REST API Design Rulebook_ (O'Reilly, 2011) — resource archetypes, URI naming rules, and controller resources
 - [Microsoft Azure REST API Guidelines](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md)
 - [Google API Design Guide](https://docs.cloud.google.com/apis/design)
 - [Google AIP-121, Resource-oriented design](https://google.aip.dev/121)

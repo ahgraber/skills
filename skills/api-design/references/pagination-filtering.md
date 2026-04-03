@@ -128,6 +128,40 @@ or use bracket notation:
 GET /orders?filter[customer.tier]=premium
 ```
 
+### POST-based search for complex filter shapes
+
+Query-parameter filtering is the default: it's cacheable, inspectable, bookmarkable, and simple.
+However, it has real limits — URL length caps, encoding complexity, and the inability to express deeply nested or structured criteria.
+
+When filter expressions are complex, use a `POST`-based search endpoint:
+
+```text
+POST /products/search
+Content-Type: application/json
+
+{
+  "filters": {
+    "category": "electronics",
+    "price": { "gte": 50, "lte": 500 },
+    "tags": { "all": ["wireless", "usb-c"] },
+    "availability": { "not": "discontinued" }
+  },
+  "sort": [{ "field": "rating", "direction": "desc" }],
+  "page": { "size": 20, "cursor": "eyJpZCI6MTIzfQ==" }
+}
+```
+
+Tradeoffs:
+
+| Approach             | Caching                                          | Complexity | Max filter depth |
+| -------------------- | ------------------------------------------------ | ---------- | ---------------- |
+| GET query parameters | Native HTTP                                      | Low        | Shallow          |
+| POST search endpoint | Requires CDN workaround or short-lived cache key | Higher     | Unlimited        |
+
+Use GET query params as the default.
+Use POST search when filter shapes are complex enough that query strings become unmanageable or hit URL length limits.
+See also: [Azure AI Search Documents - Search POST](https://learn.microsoft.com/en-us/rest/api/searchservice/documents/search-post) for a real-world example of this pattern.
+
 ## Sorting
 
 ### Convention
@@ -147,8 +181,9 @@ GET /products?sort=-created_at,+name
 - **Define a default sort** for every collection endpoint (typically `-created_at`)
 - **Invalid sort fields** should return `400 Bad Request`, not silently ignore
 
-## Field Selection (Sparse Fieldsets)
+## Field Selection
 
+Also called sparse fieldsets.
 Allow clients to request only the fields they need:
 
 ```text
@@ -171,8 +206,9 @@ GET /products?category=electronics&min_price=50&sort=-rating&page=2&per_page=10&
 **Important:** Filtering and sorting should be applied **before** pagination.
 The pagination window operates on the filtered, sorted result set.
 
-## Link Headers (RFC 5988)
+## Link Headers
 
+[RFC 8288, Web Linking](https://www.rfc-editor.org/info/rfc8288) defines the `Link` header for expressing typed relationships between resources.
 Optionally include pagination links in response headers:
 
 ```text
@@ -202,3 +238,4 @@ This follows the GitHub API pattern and keeps links machine-readable without pol
 - [Google AIP-160, Filtering](https://google.aip.dev/160)
 - [Stripe Pagination](https://docs.stripe.com/api/pagination)
 - [Zalando pagination guidelines](https://opensource.zalando.com/restful-api-guidelines/#pagination)
+- [RFC 8288, Web Linking](https://www.rfc-editor.org/info/rfc8288)

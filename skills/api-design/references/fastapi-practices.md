@@ -5,7 +5,10 @@ For general API design principles (URI naming, versioning, error handling, pagin
 
 ## Project Structure
 
-### Domain-driven organization (recommended for non-trivial apps)
+### Domain-driven organization
+
+Recommended for non-trivial apps.
+Organizes code by domain feature rather than technical layer.
 
 ```text
 src/
@@ -36,7 +39,10 @@ from src.auth import constants as auth_constants
 from src.notifications import service as notification_service
 ```
 
-### Layer-based organization (acceptable for small apps)
+### Layer-based organization
+
+Acceptable for small apps.
+Organizes code by technical layer rather than domain feature — simpler upfront, but harder to navigate as the codebase grows.
 
 ```text
 app/

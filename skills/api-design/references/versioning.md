@@ -5,7 +5,9 @@
 Version when you must make a **breaking change**.
 Non-breaking changes do not require a new version.
 
-### Breaking changes (require versioning)
+### Breaking changes
+
+The following changes break client compatibility and require a new version:
 
 - Removing or renaming an endpoint, field, or parameter
 - Changing a field's type or format (e.g., string to object, date format change)
@@ -14,7 +16,9 @@ Non-breaking changes do not require a new version.
 - Changing authentication or authorization requirements
 - Altering the semantics of an existing field
 
-### Non-breaking changes (no version needed)
+### Non-breaking changes
+
+The following changes are additive and do not require a new version:
 
 - Adding new endpoints
 - Adding new optional fields to responses
@@ -25,7 +29,9 @@ Non-breaking changes do not require a new version.
 
 ## Versioning Strategies
 
-### URL path versioning (common default)
+### URL path versioning
+
+This is the most common default and the recommended starting point for most REST APIs.
 
 ```text
 GET /v1/users
@@ -133,8 +139,8 @@ Link: <https://api.example.com/docs/migration/v1-to-v2>; rel="deprecation"
 
 ## Best Practices
 
-1. **Maintain at most 2-3 active versions.**
-   More than that creates unsustainable maintenance burden.
+1. **Prefer a small number of active versions when your support model allows it.**
+   More than 2-3 active versions creates unsustainable maintenance burden for most teams, but regulated environments, enterprise contracts, or large public APIs may require longer support windows.
 2. **Version the contract, not the implementation.**
    Rewriting Node.js in Rust with no API change should not create a new version.
 3. **Design for extensibility to minimize versioning.**

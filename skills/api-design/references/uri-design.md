@@ -25,21 +25,28 @@ GET /product              ✗
 
 ### Use lowercase with hyphens
 
-```text
-/user-profiles            ✓ hyphens for multi-word segments
-/user_profiles            ✗ underscores
-/userProfiles             ✗ camelCase
-/UserProfiles             ✗ PascalCase
-```
-
-### Use descriptive slugs, not database IDs (when feasible)
+RFC 3986 does not require lowercase or hyphens — these are conventions, not URI syntax rules.
+Consistency within an API matters more than any one naming style.
+That said, lowercase with hyphens is the dominant convention and avoids case-sensitivity surprises across servers and clients.
 
 ```text
-/products/ballpoint-pen   ✓ human-readable
-/products/23              ✗ opaque database ID (acceptable for internal APIs)
+/user-profiles            ✓ hyphens for multi-word segments (preferred)
+/user_profiles            ~ underscores (acceptable if consistent; some tools truncate under links)
+/userProfiles             ~ camelCase (uncommon; avoid for public APIs)
+/UserProfiles             ✗ PascalCase (avoid)
 ```
 
-For APIs where resources don't have natural slugs, UUIDs are preferred over sequential integers (they don't leak ordering or volume information).
+### Use descriptive slugs, not database IDs
+
+Where resources have natural names, use human-readable slugs over raw database IDs.
+This is a strong preference for public APIs; internal APIs may use opaque IDs where slugs add no value.
+
+```text
+/products/ballpoint-pen   ✓ human-readable slug
+/products/23              ~ opaque database ID (acceptable for internal APIs)
+```
+
+For APIs where resources don't have natural slugs, UUIDs are preferred over sequential integers — they don't leak ordering or volume information.
 
 ### No file extensions or technology markers
 
@@ -52,9 +59,12 @@ For APIs where resources don't have natural slugs, UUIDs are preferred over sequ
 
 ### No trailing slashes
 
+Trailing slashes are not forbidden by URI syntax, but including them creates ambiguity and inconsistency.
+The strong convention is to omit them; redirect to the canonical form if received.
+
 ```text
-/users                    ✓
-/users/                   ✗ (redirect to non-trailing if received)
+/users                    ✓ canonical form
+/users/                   ~ redirect to /users with 301 if received; don't treat as a separate resource
 ```
 
 ## Path Structure
@@ -111,14 +121,18 @@ Beyond 2 levels, either promote the sub-resource to a top-level resource or retu
 ## Actions That Don't Map to CRUD
 
 Some operations don't fit neatly into resource CRUD.
-Options:
+The REST API Design Rulebook calls these **controller resources** — a recognized archetype alongside documents, collections, and stores.
 
-1. **Sub-resource approach**: `POST /orders/{id}/cancellation` — treats the action as creating a sub-resource
-2. **State transition**: `PATCH /orders/{id}` with `{"status": "cancelled"}` — if the action is a state change
-3. **RPC-style endpoint** (last resort): `POST /orders/{id}/cancel` — acceptable for complex operations that don't map to resource state
+For the full decision tree, when-to-use guidance, and examples, see [rest-design.md § Resource Archetypes](rest-design.md).
 
-Prefer options 1 and 2.
-Use option 3 sparingly and document it clearly.
+In brief, prefer in this order:
+
+1. **State transition** — `PATCH /orders/{id}` with `{"status": "cancelled"}`
+2. **Sub-resource** — `POST /orders/{id}/cancellation`
+3. **Controller** — `POST /orders/{id}/cancel` (verb as the last URI segment, no children)
+
+Controllers are a pragmatic escape hatch, not a loophole.
+If you find yourself reaching for them frequently, reconsider whether your resource model is too fine-grained.
 
 ## Hackability
 
@@ -134,7 +148,9 @@ If a URI segment is removable, the truncated URI should return a meaningful resp
 
 ## Further Reading
 
+- Mark Massé, _REST API Design Rulebook_ (O'Reilly, 2011) — four resource archetypes and URI naming rules per archetype
 - [RFC 3986, URI Generic Syntax](https://www.rfc-editor.org/rfc/rfc3986)
 - [Microsoft REST API URL guidance](https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#uniform-resource-locators-urls)
 - [Google AIP-122, Resource names](https://google.aip.dev/122)
+- [Google AIP-136, Custom methods](https://google.aip.dev/136) — Google's approach to non-CRUD operations
 - [Zalando URL guidelines](https://opensource.zalando.com/restful-api-guidelines/#135)

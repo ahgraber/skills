@@ -2,7 +2,7 @@
 
 ## HTTP Status Code Reference
 
-### Success (2xx)
+### 2xx Success
 
 | Code             | Meaning           | When to Use                           |
 | ---------------- | ----------------- | ------------------------------------- |
@@ -10,7 +10,7 @@
 | `201 Created`    | Resource created  | POST; include `Location` header       |
 | `204 No Content` | Success, no body  | DELETE, PUT/PATCH when no body needed |
 
-### Client Error (4xx)
+### 4xx Client Errors
 
 | Code                         | Meaning                                   | When to Use                                              |
 | ---------------------------- | ----------------------------------------- | -------------------------------------------------------- |
@@ -26,7 +26,7 @@
 | `422 Unprocessable Entity`   | Semantically invalid                      | Well-formed JSON but validation or business rule failure |
 | `429 Too Many Requests`      | Rate limited                              | Always include `Retry-After` header                      |
 
-### Server Error (5xx)
+### 5xx Server Errors
 
 | Code                        | Meaning                           | When to Use                               |
 | --------------------------- | --------------------------------- | ----------------------------------------- |
@@ -35,9 +35,10 @@
 | `503 Service Unavailable`   | Temporary overload or maintenance | Include `Retry-After` header              |
 | `504 Gateway Timeout`       | Upstream service timeout          | Proxy/gateway timed out waiting           |
 
-## Error Response Format — RFC 7807 Problem Details
+## Error Response Format — RFC 9457 Problem Details
 
-Use RFC 7807 (`application/problem+json`) for structured error responses:
+Use RFC 9457 "Problem Details for HTTP APIs" (`application/problem+json`) for structured error responses.
+RFC 9457 obsoletes RFC 7807 (2023); use 9457 for new work.
 
 ```json
 {
@@ -170,8 +171,8 @@ For automated clients, optionally include retry guidance in the response:
 
 ## Further Reading
 
-- [RFC 7807, Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc7807)
-- [HTTP Semantics status codes](https://www.rfc-editor.org/rfc/rfc9110)
+- [RFC 9457, Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc9457.html) — current standard for structured error responses (obsoletes RFC 7807)
+- [RFC 9110, HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110) — authoritative status code definitions
 - [Google AIP-193, Errors](https://google.aip.dev/193)
 - [Stripe API Errors](https://docs.stripe.com/api/errors)
 - [GraphQL response and errors](https://graphql.org/learn/response/)

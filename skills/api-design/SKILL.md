@@ -29,19 +29,22 @@ When invoked by name, announce: "Using **api-design** to guide API design decisi
 
 These apply regardless of REST or GraphQL:
 
-1. **Design-first over code-first** for non-trivial APIs.
+1. **Prefer design-first for public, cross-team, or governance-heavy APIs.**
    Write the contract (OpenAPI spec or GraphQL schema) before implementation.
-   Code-first is acceptable for rapid prototypes or internal tools with stable requirements.
+   Code-first is the normal workflow for frameworks like FastAPI that generate the contract from code, and is acceptable for rapid prototypes or internal tools with stable requirements.
+   The choice is driven by governance needs, not protocol correctness.
 2. **Consistency is non-negotiable.**
    Pick conventions and apply them uniformly across every endpoint, field, and error response.
 3. **API surface is not database surface.**
    Never mirror internal data models in public contracts.
    Abstract so you can change internals without breaking clients.
+   See [rest-design.md § API Surface Is Not Database Surface](references/rest-design.md) for rationale, anti-patterns, and decoupling strategies.
 4. **Validate and shape at the boundary.**
    Enforce input constraints and response shaping at the API boundary.
-   Authenticate before business logic runs, but keep authorization policy in the domain/business layer.
+   Authenticate before business logic runs.
+   As a strong default, keep fine-grained authorization policy in the domain/business layer — but coarse access control (e.g., "only authenticated users") is legitimately enforced in gateways or middleware before the domain layer.
 5. **Evolve without breaking.**
-   Additive changes are safe.
+   Additive changes are usually safe, but verify compatibility against clients — adding a GraphQL enum value is schema-safe yet can surprise clients that assume exhaustive handling.
    Removal, renaming, and type changes require versioning (REST) or deprecation workflows (GraphQL).
 6. **Security is structural.**
    HTTPS, authentication, authorization, rate limiting, and input validation are not optional additions — they are part of the design.
@@ -58,7 +61,7 @@ Some references describe broad consensus, while others document strong defaults 
 | GraphQL schema/query/mutation design | [graphql-design.md](references/graphql-design.md)             | Designing GraphQL types, queries, mutations, subscriptions |
 | URI/URL naming                       | [uri-design.md](references/uri-design.md)                     | Naming endpoints, path segments, query parameters          |
 | API versioning                       | [versioning.md](references/versioning.md)                     | Planning version strategy, deprecation, migration          |
-| Error responses                      | [error-handling.md](references/error-handling.md)             | Designing error formats, status code usage, RFC 7807       |
+| Error responses                      | [error-handling.md](references/error-handling.md)             | Designing error formats, status code usage, RFC 9457       |
 | Pagination and filtering             | [pagination-filtering.md](references/pagination-filtering.md) | Lists, collections, search results, sorting                |
 | FastAPI implementation               | [fastapi-practices.md](references/fastapi-practices.md)       | Building APIs with FastAPI specifically                    |
 
@@ -68,21 +71,23 @@ For targeted questions (e.g., "how should we version this?"), load only that ref
 
 ## Quick Decision: REST vs GraphQL
 
-REST for simple CRUD, caching, and file handling.
-GraphQL for varied clients, nested data, and real-time.
-Need both?
-Hybrid works.
+- **REST:** simpler caching, lower learning curve, native file uploads, smaller security surface.
+- **GraphQL:** client-specified queries, nested data without over-fetching, built-in subscriptions — but requires depth/cost limiting, custom caching, and more schema governance.
+- **Hybrid:** can work, but increases operational and governance complexity.
+- **Caution:** GraphQL was not designed for file uploads; use multipart workarounds or a separate REST endpoint.
+  REST requires careful endpoint design to avoid N+1 orchestration.
+
 For the full decision tree and tradeoff matrix, load [rest-vs-graphql.md](references/rest-vs-graphql.md).
 
 ## Common Mistakes
 
-| Mistake                                                    | Fix                                                             |
-| ---------------------------------------------------------- | --------------------------------------------------------------- |
-| Verbs in REST URIs (`/getUsers`, `/createOrder`)           | Use nouns + HTTP methods (`GET /users`, `POST /orders`)         |
-| Exposing database IDs/structure in API                     | Abstract with slugs, UUIDs, and domain-oriented shapes          |
-| Inconsistent error formats across endpoints                | Define one error schema, use it everywhere                      |
-| No pagination on collection endpoints                      | Always paginate; set default and max page sizes                 |
-| Breaking changes without versioning                        | Use additive changes; version when breaking is unavoidable      |
-| Generic GraphQL mutations (`updateEntity`)                 | Use specific semantic mutations (`publishPost`, `archiveOrder`) |
-| Auth logic in resolvers/handlers instead of business layer | Delegate authorization to domain services                       |
-| Nullable everything / non-null everything                  | Be intentional: non-null only when you can guarantee presence   |
+| Mistake                                                    | Fix                                                                                                                                                          |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Verbs in REST URIs (`/getUsers`, `/createOrder`)           | Use nouns + HTTP methods for CRUD; verbs only for [controller resources](references/rest-design.md) (`POST /orders/{id}/cancel`)                             |
+| Exposing database IDs/structure in API                     | Abstract with slugs, UUIDs, and [domain-oriented shapes](references/rest-design.md); use a mapping layer, not auto-serialization                             |
+| Inconsistent error formats across endpoints                | Define one error schema, use it everywhere                                                                                                                   |
+| No pagination on collection endpoints                      | Paginate unbounded or growth-prone collections; small bounded reference data may not need it — always set default and max page sizes when pagination is used |
+| Breaking changes without versioning                        | Use additive changes; version when breaking is unavoidable                                                                                                   |
+| Generic GraphQL mutations (`updateEntity`)                 | Use specific semantic mutations (`publishPost`, `archiveOrder`)                                                                                              |
+| Auth logic in resolvers/handlers instead of business layer | Delegate authorization to domain services                                                                                                                    |
+| Nullable everything / non-null everything                  | Be intentional: non-null only when you can guarantee presence                                                                                                |

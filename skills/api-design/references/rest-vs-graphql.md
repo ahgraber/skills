@@ -71,7 +71,7 @@ Many production systems use both:
 | **Type safety**      | Optional (OpenAPI adds it)        | Built-in schema + type system                                                                     |
 | **Caching**          | Native HTTP caching               | Requires custom strategies (persisted queries, CDN with GET)                                      |
 | **Error handling**   | HTTP status codes (4xx, 5xx)      | HTTP status codes for transport/protocol errors; execution errors may return `data` plus `errors` |
-| **Versioning**       | URL/header versioning             | Continuous evolution via `@deprecated`                                                            |
+| **Versioning**       | URL/header versioning             | Usually versionless evolution via `@deprecated`, but explicit versioning is still possible        |
 | **File handling**    | Native multipart upload           | Requires workarounds (multipart spec or separate REST endpoint)                                   |
 | **Real-time**        | Requires SSE/WebSocket separately | Subscriptions built-in                                                                            |
 | **Discoverability**  | OpenAPI/Swagger docs              | Introspection + schema docs                                                                       |
@@ -84,8 +84,9 @@ Many production systems use both:
 
 This decision is orthogonal to REST vs GraphQL but affects both:
 
-### Design-first (recommended for non-trivial APIs)
+### Design-first
 
+Recommended for non-trivial APIs.
 Write the contract (OpenAPI spec or GraphQL schema) before implementation code.
 
 **Benefits:**
@@ -97,9 +98,10 @@ Write the contract (OpenAPI spec or GraphQL schema) before implementation code.
 
 **Best for:** Externally consumed APIs, multi-team projects, APIs with governance requirements.
 
-### Code-first (acceptable for prototypes and internal tools)
+### Code-first
 
-Implement the server, generate the spec from code annotations/decorators.
+Acceptable for prototypes, internal tools, and frameworks like FastAPI whose normal workflow generates the contract from code.
+Implement the server; generate the spec from code annotations/decorators.
 
 **Benefits:**
 

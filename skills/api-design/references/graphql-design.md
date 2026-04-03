@@ -81,6 +81,17 @@ type PageInfo {
 - Set a **default and server-side max** for `first`/`last` (e.g., default 20, max 100)
 - Use **input types** for complex filter objects and **enums** for sort fields/directions
 
+#### When simpler pagination is acceptable
+
+Relay-style connections carry real schema weight.
+For smaller internal schemas, admin tools, or list fields with naturally bounded results, simpler patterns are fine:
+
+- **Offset pagination** (`offset: Int, limit: Int`) — simple to implement; acceptable when total count is small and stable, but inconsistent under concurrent inserts
+- **Simple cursor** (single `after: String`, opaque) — lighter than full Relay; works when bidirectional pagination is not needed
+
+Use Relay-style as the default for public or long-lived schemas where forward/backward navigation and stable cursors matter.
+For internal or bounded lists, match the complexity to the actual need.
+
 ### Filtering and Sorting
 
 ```graphql
@@ -261,7 +272,7 @@ Layer defenses:
 
 - Use `@auth` directives for declarative field-level access, but the directive implementation should still delegate to the business layer
 
-- Disable introspection in production for non-public APIs
+- Consider disabling introspection for non-public APIs if you have an alternative discovery workflow — but depth limits, breadth limits, persisted queries, and complexity budgets matter more than introspection alone.
 
 ## Schema Evolution
 
