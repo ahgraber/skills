@@ -26,19 +26,31 @@ Produces either a change directory (for new/modified behavior) or baseline specs
 
 ## Determine Output Type
 
+Baseline specs (`.specs/specs/`) document **implemented** behavior — they are the source of truth for what the codebase currently does.
+Only write baseline specs when there is existing code to document.
+If the codebase has no relevant implementation yet, all specs are aspirational and belong in a change directory.
+
 ```dot
 digraph output_type {
     ".specs/specs/ exists?" [shape=diamond];
+    "Codebase has relevant\nimplementation?" [shape=diamond];
     "New or existing behavior?" [shape=diamond];
+    "Generate change directory\n(.specs/changes/<name>/)\nADDED-only delta specs" [shape=box];
     "Generate change directory\n(.specs/changes/<name>/)" [shape=box];
     "Generate baseline specs\n(.specs/specs/)" [shape=box];
 
+    ".specs/specs/ exists?" -> "Codebase has relevant\nimplementation?" [label="no"];
+    "Codebase has relevant\nimplementation?" -> "Generate baseline specs\n(.specs/specs/)" [label="yes — retroactive doc"];
+    "Codebase has relevant\nimplementation?" -> "Generate change directory\n(.specs/changes/<name>/)\nADDED-only delta specs" [label="no — greenfield"];
     ".specs/specs/ exists?" -> "New or existing behavior?" [label="yes"];
-    ".specs/specs/ exists?" -> "Generate baseline specs\n(.specs/specs/)" [label="no"];
     "New or existing behavior?" -> "Generate change directory\n(.specs/changes/<name>/)" [label="new or modified"];
     "New or existing behavior?" -> "Generate baseline specs\n(.specs/specs/)" [label="retroactive doc"];
 }
 ```
+
+**Greenfield check:** When `.specs/specs/` does not exist, survey the codebase (Phase 2) before deciding output type.
+If the survey finds no relevant implementation for the target capability, generate a change directory with ADDED-only delta specs — not baseline specs.
+This prevents `.specs/specs/` from asserting behavior that hasn't been built yet.
 
 ## Process
 
@@ -210,6 +222,7 @@ Report: capabilities covered, requirement count, assumptions made.
 - Using baseline format (no delta markers) in change directory specs
 - Generating specs without reading relevant code first
 - Speculating on scope rather than asking when the request is ambiguous
+- Writing baseline specs in a greenfield project — `.specs/specs/` asserts implemented behavior; if nothing is built yet, use a change directory with ADDED-only delta specs
 
 ## References
 

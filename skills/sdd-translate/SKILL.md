@@ -1,12 +1,12 @@
 ---
 name: sdd-translate
 description: |-
-  Use when translating or migrating existing specs from another tool or format (Spec Kit, Kiro, ADRs, Jira, Confluence, Word docs, or custom markdown requirements) into SDD baseline spec format. Also use when the user says "convert these specs", "migrate to SDD", "translate from X to SDD", or "import specs".
+  Use when translating or migrating existing specs from another tool or format (Spec Kit, Kiro, ADRs, Jira, Confluence, Word docs, or custom markdown requirements) into SDD spec format. Also use when the user says "convert these specs", "migrate to SDD", "translate from X to SDD", or "import specs".
 ---
 
 # SDD Translate
 
-Convert existing specifications from other frameworks, tools, or formats into SDD baseline `spec.md` files in `SPECS_ROOT/specs/<capability>/`.
+Convert existing specifications from other frameworks, tools, or formats into SDD spec files.
 
 > `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
 > Replace `.specs/` with your project's actual specs root in all paths below.
@@ -15,12 +15,32 @@ Convert existing specifications from other frameworks, tools, or formats into SD
 
 - Migrating from Spec Kit, Kiro, ADRs, Jira, Confluence, or similar
 - Converting structured requirements documents into SDD format
-- Reverse-engineering third-party spec output into `.specs/specs/`
+- Reverse-engineering third-party spec output into SDD specs
 
 ## When Not to Use
 
 - No existing specs to translate — use `sdd-derive` instead
 - Already in SDD format — run `sdd-verify` to check completeness
+
+## Determine Output Type
+
+Baseline specs (`.specs/specs/`) document **implemented** behavior.
+Translated specs should only go to baseline when the codebase already implements the described behavior.
+
+```dot
+digraph output_type {
+    "Codebase implements\nthe described behavior?" [shape=diamond];
+    "Translate to baseline specs\n(.specs/specs/)" [shape=box];
+    "Translate to change directory\n(.specs/changes/<name>/)\nADDED-only delta specs" [shape=box];
+
+    "Codebase implements\nthe described behavior?" -> "Translate to baseline specs\n(.specs/specs/)" [label="yes — documenting what exists"];
+    "Codebase implements\nthe described behavior?" -> "Translate to change directory\n(.specs/changes/<name>/)\nADDED-only delta specs" [label="no — greenfield or aspirational"];
+}
+```
+
+**How to check:** After inventorying source specs (Phase 1), survey the codebase for relevant implementation.
+If the capabilities described in the source specs have no corresponding code, the translated specs are aspirational — generate a change directory with ADDED-only delta specs, a `proposal.md`, and optionally a `tasks.md`.
+If the codebase already implements the described behavior, translate directly to baseline.
 
 ## Process
 
@@ -65,9 +85,15 @@ Proceed with this split? (or suggest changes)
 
 ### Phase 3: Translate Each Capability
 
-For each capability, produce `.specs/specs/<capability>/spec.md` following SDD baseline format.
+**Output path depends on the output type decision above:**
 
-See `references/sdd-spec-formats.md` for the baseline spec and scenario formats.
+- **Baseline** (code exists): produce `.specs/specs/<capability>/spec.md` following SDD baseline format.
+- **Change directory** (greenfield/aspirational): create `.specs/changes/<name>/` with:
+  - `proposal.md` — intent, scope, approach (see `references/sdd-change-formats.md`)
+  - `specs/<capability>/spec.md` — ADDED-only delta specs
+  - `tasks.md` — when implementation steps are clear (optional)
+
+See `references/sdd-spec-formats.md` for both baseline and delta spec formats.
 
 Add a source attribution blockquote at the top of each generated spec (see format reference Section 2):
 
@@ -93,18 +119,29 @@ Add a source attribution blockquote at the top of each generated spec (see forma
 - Requirements describe WHAT, not HOW
 - Every scenario must have **GIVEN**, **WHEN**, **THEN** (bold labels, exact casing)
 - Scenarios use `####` (4 hashtags), requirements use `###` (3 hashtags)
-- No delta markers (ADDED/MODIFIED/REMOVED) — these are baseline specs
+- **Baseline output:** no delta markers (ADDED/MODIFIED/REMOVED)
+- **Change directory output:** use ADDED sections only (all behavior is new); no `## Purpose` or `## Technical Notes`
 
 ### Phase 4: Validate Output
+
+**Common to both output types:**
 
 - [ ] Every `### Requirement:` uses RFC 2119 keywords (SHALL/MUST/SHOULD/MAY)
 - [ ] Every scenario uses **GIVEN**/**WHEN**/**THEN** with bold labels
 - [ ] No implementation details in requirements (class names, SQL, library choices)
-- [ ] `## Purpose` section present in each spec
 - [ ] Scenarios use `####` heading level (not `###` or `#####`)
+- [ ] Implementation details from source were moved to `## Technical Notes` (baseline) or omitted (change directory)
+
+**Baseline output only:**
+
+- [ ] `## Purpose` section present in each spec
 - [ ] No delta markers (ADDED/MODIFIED/REMOVED)
-- [ ] No implementation details copied into requirement text (class names, SQL, library choices, technology decisions)
-- [ ] Implementation details from source were moved to `## Technical Notes` where present
+
+**Change directory output only:**
+
+- [ ] All specs use ADDED sections only (delta format)
+- [ ] `proposal.md` exists with Intent, Scope, Approach
+- [ ] No `## Purpose` or `## Technical Notes` in delta specs
 
 ### Phase 5: Schema Snapshot (if schemas configured)
 
@@ -122,8 +159,17 @@ If no schema config and no artifacts detected, skip silently.
 
 ## Output
 
+**Baseline (code exists):**
+
 - `.specs/specs/<capability>/spec.md` per capability
-- Summary: capabilities created, requirement count per capability, translation notes and assumptions
+
+**Change directory (greenfield/aspirational):**
+
+- `.specs/changes/<name>/proposal.md`
+- `.specs/changes/<name>/specs/<capability>/spec.md` (ADDED-only delta format)
+- `.specs/changes/<name>/tasks.md` (when applicable)
+
+Summary: capabilities created, requirement count per capability, translation notes and assumptions.
 
 ## Common Mistakes
 
@@ -132,6 +178,7 @@ If no schema config and no artifacts detected, skip silently.
 - One giant spec instead of capability decomposition for large surface areas
 - Including delta markers (ADDED/MODIFIED) in baseline specs
 - Not reading all source files before generating output
+- Writing baseline specs for a greenfield project — `.specs/specs/` asserts implemented behavior; if nothing is built yet, use a change directory with ADDED-only delta specs
 
 ## References
 
