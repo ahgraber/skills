@@ -2,6 +2,7 @@
 
 # dot-directories, unless explicitly kept
 .*/
+!.claude/
 !.github/
 !.renovate/
 
@@ -103,6 +104,9 @@ data/
 TODO.md
 chromium-profile
 chrome-profile
+
+# ai
+docs/superpowers
 
 # retain files
 !.gitkeep
