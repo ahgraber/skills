@@ -11,6 +11,10 @@ Complete a change by moving its directory to the archive.
 > `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
 > Replace `.specs/` with your project's actual specs root in all paths below.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `sdd-archive`.
+
 ## When to Use
 
 - All tasks in `tasks.md` are complete (`- [x]`)

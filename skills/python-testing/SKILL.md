@@ -57,7 +57,7 @@ When a default conflicts with project constraints, suggest a better-fit alternat
 
 ## Invocation Notice
 
-- Inform the user when this skill is being invoked by name: `python-design-modularity`.
+- Inform the user when this skill is being invoked by name: `python-testing`.
 
 ## References
 

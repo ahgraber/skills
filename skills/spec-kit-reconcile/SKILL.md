@@ -8,6 +8,10 @@ description: |-
 
 Close specification drift by updating existing Spec Kit artifacts in-place.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `spec-kit-reconcile`.
+
 ## When to Use
 
 - You discover specification drift at any stage (specify, clarify, plan, tasks, analyze, or implement) and need artifacts realigned before continuing.

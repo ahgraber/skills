@@ -6,6 +6,10 @@ description: |-
 
 # Code Review
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `code-review`.
+
 ## Overview
 
 Structured, actionable code review focused on correctness, bugs, style, and maintainability.

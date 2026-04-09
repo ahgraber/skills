@@ -8,6 +8,10 @@ description: |-
 
 Produce a transfer-ready handoff for in-progress work.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `handoff`.
+
 ## Critical Constraints
 
 - Assume the recipient can only see the handoff output and nothing else.

@@ -8,6 +8,10 @@ description: |-
 
 Run a non-destructive cross-artifact quality audit before implementation.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `spec-kit-analyze`.
+
 ## When to Use
 
 - `tasks.md` exists and you want a pre-implementation consistency check across spec/plan/tasks.

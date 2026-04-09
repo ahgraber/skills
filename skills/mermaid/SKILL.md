@@ -8,6 +8,10 @@ description: |-
 
 Use this skill to create Mermaid diagrams that render well in Markdown chat interfaces, validate their syntax locally, and render images without calling a web service.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `mermaid`.
+
 ## Workflow
 
 1. Identify the diagram type (flowchart, sequenceDiagram, stateDiagram-v2) based on the request.

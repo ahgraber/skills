@@ -10,6 +10,10 @@ Thinking partner for spec-driven development.
 No fixed steps, no mandatory output.
 Available before or during any SDD path.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `sdd-explore`.
+
 ## When to Use
 
 - Before starting any SDD workflow — explore before speccing

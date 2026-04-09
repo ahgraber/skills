@@ -8,6 +8,10 @@ description: |-
 
 Resolve high-impact ambiguity in the active feature specification before planning.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `spec-kit-clarify`.
+
 ## When to Use
 
 - `spec.md` already exists but has high-impact uncertainty.

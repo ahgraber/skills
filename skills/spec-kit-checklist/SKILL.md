@@ -8,6 +8,10 @@ description: |-
 
 Generate domain-specific checklists that evaluate requirement quality in Spec Kit artifacts.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `spec-kit-checklist`.
+
 ## When to Use
 
 - `spec.md` exists and you need a checklist to review requirement quality before implementation.

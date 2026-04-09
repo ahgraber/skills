@@ -8,6 +8,10 @@ description: |-
 
 Use this skill to create, review, or improve SKILL.md-based skills so they trigger correctly, stay concise, and execute reliably.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `optimize-skills`.
+
 ## When to Use
 
 - Creating a new reusable skill from repeated work patterns.

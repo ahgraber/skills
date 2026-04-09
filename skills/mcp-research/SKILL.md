@@ -6,6 +6,10 @@ description: |-
 
 # MCP Docs and Research (Context7, Exa, Jina)
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `mcp-research`.
+
 ## Overview
 
 Use MCP-provided tools to retrieve current, verifiable information instead of relying on memory for fast-changing libraries, APIs, and ecosystem guidance.

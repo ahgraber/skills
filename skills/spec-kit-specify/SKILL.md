@@ -8,6 +8,10 @@ description: |-
 
 Create or refresh the feature specification for the active Spec Kit feature.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `spec-kit-specify`.
+
 ## When to Use
 
 - Start a new feature and create the first `spec.md`.

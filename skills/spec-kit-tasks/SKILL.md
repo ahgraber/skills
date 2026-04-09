@@ -8,6 +8,10 @@ description: |-
 
 Generate an implementation-ready `tasks.md` from Spec Kit design artifacts.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `spec-kit-tasks`.
+
 ## When to Use
 
 - `plan.md` and `spec.md` exist and you need executable tasks for implementation.

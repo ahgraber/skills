@@ -12,6 +12,10 @@ Generates artifacts in dependency order: proposal → delta specs → design →
 > `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
 > Replace `.specs/` with your project's actual specs root in all paths below.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `sdd-propose`.
+
 ## When to Use
 
 - Starting a new feature or behavioral change

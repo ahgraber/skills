@@ -8,6 +8,10 @@ description: |-
 
 Generate implementation design artifacts from the approved feature specification.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `spec-kit-plan`.
+
 ## When to Use
 
 - `spec.md` exists and you need `plan.md` plus Phase 0/1 design outputs for task generation.

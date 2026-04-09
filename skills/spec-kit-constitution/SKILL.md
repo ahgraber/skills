@@ -8,6 +8,10 @@ description: |-
 
 Create or amend the project constitution and keep dependent templates aligned.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `spec-kit-constitution`.
+
 ## When to Use
 
 - User asks to create the first constitution for a Spec Kit project.

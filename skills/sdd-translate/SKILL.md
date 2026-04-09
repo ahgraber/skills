@@ -11,6 +11,10 @@ Convert existing specifications from other frameworks, tools, or formats into SD
 > `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
 > Replace `.specs/` with your project's actual specs root in all paths below.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `sdd-translate`.
+
 ## When to Use
 
 - Migrating from Spec Kit, Kiro, ADRs, Jira, Confluence, or similar

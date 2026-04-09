@@ -12,6 +12,10 @@ Applies each delta marker intelligently, preserving existing content not mention
 > `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
 > Replace `.specs/` with your project's actual specs root in all paths below.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `sdd-sync`.
+
 ## When to Use
 
 - After `sdd-verify` passes — implementation is confirmed correct

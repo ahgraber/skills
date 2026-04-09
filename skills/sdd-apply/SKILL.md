@@ -12,6 +12,10 @@ Check off each task as it completes.
 > `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
 > Replace `.specs/` with your project's actual specs root in all paths below.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `sdd-apply`.
+
 ## Hard Gate
 
 **If `tasks.md` does not exist for the active change: STOP.**

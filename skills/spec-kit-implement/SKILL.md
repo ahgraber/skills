@@ -8,6 +8,10 @@ description: |-
 
 Execute approved feature tasks in dependency order and keep `tasks.md` status accurate.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `spec-kit-implement`.
+
 ## When to Use
 
 - `tasks.md` exists and you need to execute it phase-by-phase to deliver the feature.

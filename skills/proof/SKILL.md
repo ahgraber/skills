@@ -8,6 +8,10 @@ description: |-
 
 Proofread and lightly copy edit text while preserving wording, order, tone, and meaning.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `proof`.
+
 ## Critical Constraints
 
 - Apply only spelling, punctuation, capitalization, agreement, and minor grammar fixes.

@@ -12,6 +12,10 @@ Produces a structured report across four dimensions with three severity levels.
 > `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
 > Replace `.specs/` with your project's actual specs root in all paths below.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `sdd-verify`.
+
 ## When to Use
 
 - After completing some or all tasks — check coverage and correctness

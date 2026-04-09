@@ -12,6 +12,10 @@ Produces either a change directory (for new/modified behavior) or baseline specs
 > `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
 > Replace `.specs/` with your project's actual specs root in all paths below.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `sdd-derive`.
+
 ## When to Use
 
 - User describes a feature to specify: "derive SDD specs for the auth flow"

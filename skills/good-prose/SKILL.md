@@ -9,6 +9,10 @@ description: |-
 Use this skill to draft or revise prose that can stand in professional correspondence, public blogs, newspaper opinion pieces, or longform emails with friends or family.
 Aim for clarity, specificity, and a measured tone without slang or hype.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `good-prose`.
+
 ## Directives
 
 Use these as the core craft rules.

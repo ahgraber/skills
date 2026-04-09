@@ -8,6 +8,10 @@ description: |-
 
 Draft a Conventional Commit message from staged changes.
 
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `commit-message`.
+
 ## Critical Constraints
 
 - Use only staged changes (`--cached` / staged SCM state) as input.
