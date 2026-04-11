@@ -69,6 +69,12 @@ Before collecting findings:
 - Optionally split analysis by module and use subagents/parallel review passes when available.
 - Consolidate findings into one prioritized report after parallel passes.
 
+**Git diagnostics** (useful for unfamiliar codebases or large diffs — see `references/git-diagnostics-before-review.md`):
+
+1. Check file churn and bug clusters to identify which changed files historically attract the most defects.
+2. Review team composition and recent contributor activity for bus-factor context.
+3. Look for firefighting patterns (reverts, hotfixes) that signal stability risks in the areas under review.
+
 **Graph-aided triage** (if `code-review-graph` MCP tools are available):
 
 1. Run `get_impact_radius_tool` on key changed files to surface callers, dependents, and test coverage gaps.
@@ -158,3 +164,4 @@ When a default conflicts with project constraints, suggest a better-fit alternat
 
 - `assets/issue-template.md` — issue type/priority legends and suggestion format.
 - `references/review-best-practices-links.md` — external review best-practice links used by this skill.
+- `references/git-diagnostics-before-review.md` — git commands for assessing codebase health before reviewing.
