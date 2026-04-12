@@ -1,7 +1,7 @@
 ---
 name: receiving-feedback
 description: >-
-  Use when receiving feedback on any text-based work artifact — code, specs, design docs, PRDs, proposals, plans, or prose — before implementing suggestions, especially if feedback seems unclear or technically questionable.
+  You MUST use this when receiving feedback on any text-based work artifact — code, specs, design docs, PRDs, proposals, plans, or prose — before implementing suggestions, especially if feedback seems unclear or technically questionable.
 ---
 
 # Receiving Feedback
