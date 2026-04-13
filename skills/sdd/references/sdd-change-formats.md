@@ -42,8 +42,15 @@ Rules:
 - Intent is the "why" — not the "what" or "how"
 - Scope prevents scope creep — be explicit about boundaries
 - Open Questions is optional — omit if there are none
+- **Approach** is the draft sandbox for mechanism thinking during spec authoring.
+  Early algorithm, heuristic, or strategy ideas that surface while writing the contract belong here until they are formalized into `design.md`.
+  This keeps mechanism out of `spec.md` without losing the thinking.
 
 ## 2. Design Format
+
+`design.md` is the **legitimate home for mechanism** — chosen algorithms, heuristics, thresholds, data structures, strategies, retry policies, model choices, similarity metrics, and architectural decisions.
+If a draft spec sentence names one of these, it probably belongs here rather than in `spec.md`.
+See `sdd-spec-formats.md` § 1.3 for the spec/design/tasks responsibility split.
 
 Location: `.specs/changes/<name>/design.md`
 
@@ -100,6 +107,6 @@ Location: `.specs/changes/<name>/tasks.md`
 Rules:
 
 - Tasks are atomic — each task is a single, completable unit of work
-- Tasks describe implementation actions, not outcomes
+- Tasks describe implementation actions, not outcomes (the outcomes live in `spec.md`)
 - Groups organize by component or phase (e.g., 'Backend', 'Frontend', 'Tests')
 - Use `- [x]` to mark completed tasks

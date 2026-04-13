@@ -80,9 +80,18 @@ If no schema config exists and `.specs/schemas/` is empty or absent, skip silent
 
 Create `.specs/changes/<name>/specs/<capability>/spec.md` for each affected capability.
 
-See `references/sdd-spec-formats.md` for the delta spec format.
+**Read `references/sdd-spec-formats.md` § 1 before writing any requirement.**
+It defines what a requirement is (contract shapes, authoring primitive, artifact separation) and is the primary guidance for this phase.
 
-Rules:
+For each affected capability, ask: **what new contract are we adding, changing, or removing?**
+State each requirement as a contract statement (guarantee, invariant, prohibition, precondition-consequence, or observable-state relationship — see § 1.1).
+Lean toward universal claims where they apply.
+
+Mechanism thinking is expected here — algorithms, thresholds, strategies, data structures.
+Park those thoughts in the proposal's `## Approach` section as they surface; they formalize in Phase 5 (`design.md`).
+Do not put mechanism into the spec itself.
+
+Delta-format rules:
 
 - Read the existing baseline spec before writing the delta
 - Only include capabilities that actually change
@@ -126,6 +135,8 @@ Rules:
 - [ ] Change directory exists: `.specs/changes/<name>/`
 - [ ] `proposal.md` has Intent, Scope (in/out), Approach
 - [ ] Delta specs use only ADDED/MODIFIED/REMOVED/RENAMED sections (no baseline format)
+- [ ] Each requirement is a contract statement — a property about observable state that stands on its own without its scenarios (see `references/sdd-spec-formats.md` § 1)
+- [ ] Mechanism (algorithms, thresholds, strategies, retry policies) appears in `design.md` or the proposal's Approach, not in spec text
 - [ ] `design.md` has at least one Decision with rationale
 - [ ] `tasks.md` has atomic, ordered tasks
 - [ ] No delta markers in `.specs/specs/` (baseline specs untouched)
@@ -143,6 +154,7 @@ Summary: change name, capabilities affected, task count.
 
 - Not reading existing baseline specs before writing deltas
 - Writing baseline format in change specs (missing ADDED/MODIFIED/REMOVED markers)
+- Writing scenarios that carry the contract instead of illustrating it — if deleting the scenarios leaves the requirement untestable, the requirement text is under-specified (see `references/sdd-spec-formats.md` § 1.5)
 - Creating tasks that are too coarse (one task = "implement auth" instead of atomic steps)
 - Generating all artifacts without pausing for user confirmation between phases
 - Using non-kebab-case change names

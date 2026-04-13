@@ -64,8 +64,9 @@ This prevents `.specs/specs/` from asserting behavior that hasn't been built yet
 - [ ] Phase 2: Analyze Existing Code
 - [ ] Phase 3: Schema Discovery
 - [ ] Phase 4: Assess Scope and Plan Decomposition
-- [ ] Phase 5: Generate Artifacts
-- [ ] Phase 6: Validate
+- [ ] Phase 5: Lift Behaviors to Contracts
+- [ ] Phase 6: Generate Artifacts
+- [ ] Phase 7: Validate
 
 ### Phase 1: Understand User Intent
 
@@ -163,7 +164,37 @@ This covers 3 capabilities. I'll generate:
 Proceed with this split? (or suggest changes)
 ```
 
-### Phase 5A: Change Directory (new or modified behavior)
+### Phase 5: Lift Behaviors to Contracts
+
+`sdd-derive` starts from mechanism — the code you just surveyed _is_ the implementation.
+Before writing any requirement, translate from "what the code does" to "what property the code maintains."
+This lift step is the skill's distinguishing move; without it, requirements echo code structure instead of stating contracts.
+
+**Read `references/sdd-spec-formats.md` § 1 before lifting.**
+It defines contract shapes (guarantee / invariant / prohibition / precondition-consequence / observable-state relationship) and the authoring primitive.
+
+**For each observable behavior from Phase 2, ask: what property of the system does this code maintain?**
+
+Worked example:
+
+| Observed in code                                                                                                        | Naive echo (wrong)                                                                                 | Lifted contract (right)                                                                                                                   |
+| ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `UserService.activate()` runs `db.users.update(is_active=True, updated_at=now())` and enqueues a confirmation email job | "The system SHALL update `users.is_active` to true and send a confirmation email on `activate()`." | "Given an inactive user account, when the account is activated, the account SHALL be in the active state and the user SHALL be notified." |
+| `search()` filters by `tfidf_score > 0.3` then sorts descending                                                         | "The search SHALL filter terms by TF-IDF > 0.3 and sort descending."                               | "The search SHALL return documents ranked by relevance to the query, with the most relevant first."                                       |
+
+Rules for lifting:
+
+- Pair each code behavior with the property it serves.
+  One-to-many is fine; a single code path often serves several properties.
+- Name the property, not the path.
+  If you can't articulate the property, you don't have a requirement yet — you have a mechanism.
+- When a chosen algorithm, threshold, or data structure appears in the code, record it as a design note for Phase 6 generation (it will surface later if the user runs `sdd-propose` for a full artifact set).
+  The _property the algorithm produces_ is the contract; the algorithm is not.
+- If the property is universal over a space of inputs, state it universally — "for any {input class}, the system SHALL {outcome}."
+
+Output of this phase: a list of lifted contracts per capability, ready to format in Phase 6.
+
+### Phase 6A: Change Directory (new or modified behavior)
 
 Create `.specs/changes/<change-name>/` with artifacts in this order:
 
@@ -176,12 +207,15 @@ If the user needs a full artifact set including design decisions, use `sdd-propo
 
 See `references/sdd-change-formats.md` (proposal, tasks) and `references/sdd-spec-formats.md` (delta specs) for the formats.
 
+Write each requirement from the lifted contracts produced in Phase 5 — not from the code directly.
+If a draft requirement still names a function, class, table, or library from the code, return to Phase 5 and re-lift that behavior.
+
 Add a generation note at the top of each delta spec:
 
 > Generated from code analysis on {date}
 > Source files: {list of analyzed files}
 
-### Phase 5B: Baseline Specs (retroactive documentation)
+### Phase 6B: Baseline Specs (retroactive documentation)
 
 Create `.specs/specs/<capability>/spec.md` per capability.
 
@@ -192,17 +226,16 @@ Add a generation note at the top of each spec:
 > Generated from code analysis on {date}
 > Source files: {list of analyzed files}
 
-### Phase 6: Validate
+### Phase 7: Validate
 
 - [ ] Requirements use RFC 2119 keywords (SHALL/MUST/SHOULD/MAY)
 - [ ] Scenarios use `#### Scenario:` with **GIVEN**/**WHEN**/**THEN** (bold, exact casing)
-- [ ] Specs describe observable behavior, not implementation internals
+- [ ] Each requirement is a lifted contract, not a restatement of code structure — states the property the code maintains, not the code's actions (see `references/sdd-spec-formats.md` § 1 and the Phase 5 worked example)
 - [ ] Delta specs (change directory) use ADDED/MODIFIED/REMOVED sections
 - [ ] Baseline specs have no delta markers
 - [ ] Baseline specs include a `## Purpose` section
 - [ ] Each generated spec has a generation note blockquote (date and source files listed)
 - [ ] Large surface areas are decomposed into multiple capability specs
-- [ ] No implementation details copied into requirement text (class names, SQL, library choices)
 
 ## Output
 
@@ -220,7 +253,7 @@ Report: capabilities covered, requirement count, assumptions made.
 
 ## Common Mistakes
 
-- Writing implementation details (class names, SQL, library choices) into requirements
+- Skipping the Phase 5 lift step and writing requirements directly from code — this is the dominant failure mode in `sdd-derive` and produces specs that faithfully describe mechanism instead of contract
 - Generating one massive spec for a large surface area instead of decomposing by capability
 - Using delta format (ADDED/MODIFIED/REMOVED) in baseline `.specs/specs/` files
 - Using baseline format (no delta markers) in change directory specs

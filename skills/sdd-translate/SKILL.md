@@ -104,23 +104,28 @@ Add a source attribution blockquote at the top of each generated spec (see forma
 > Translated from {source tool/format} on {date}
 > Source: {source file or description}
 
+**Read `references/sdd-spec-formats.md` § 1 before translating.**
+The translation is from the source doc's grammar into SDD contract statements (see § 1.1 contract shapes).
+Source docs from other tools (Spec Kit, Jira, ADRs, prose) commonly mix WHAT and HOW in the same sentence; translate only the contract, and route mechanism detail to `design.md` or discard it.
+
 **Translation rules:**
 
-| Source pattern                                 | SDD translation                                                       |
-| ---------------------------------------------- | --------------------------------------------------------------------- |
-| "Users can X"                                  | `The system SHALL allow users to X`                                   |
-| Acceptance criteria bullets                    | `#### Scenario:` entries with GIVEN/WHEN/THEN                         |
-| "It should Y"                                  | `The system SHOULD Y`                                                 |
-| "Required: Z"                                  | `The system MUST Z`                                                   |
-| Implementation detail (class names, libraries) | Move to `## Technical Notes` or omit                                  |
-| Phase-gated steps (plan.md, tasks.md)          | Omit — not behavior                                                   |
-| "As a user, I want X so that Y"                | `The system SHALL allow users to X` (discard the "so that" rationale) |
-| "Shall not / Must not"                         | `The system SHALL NOT / MUST NOT {prohibited behavior}`               |
-| Numbered requirement IDs (e.g., `REQ-001:`)    | Strip the ID prefix; preserve the requirement text                    |
+| Source pattern                                                                               | SDD translation                                                                                                                     |
+| -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| "Users can X"                                                                                | `The system SHALL allow users to X`                                                                                                 |
+| Acceptance criteria bullets                                                                  | `#### Scenario:` entries with GIVEN/WHEN/THEN (as evidence of the requirement — see § 1.5)                                          |
+| "It should Y"                                                                                | `The system SHOULD Y`                                                                                                               |
+| "Required: Z"                                                                                | `The system MUST Z`                                                                                                                 |
+| Implementation detail (class names, libraries)                                               | Move to `## Technical Notes` (baseline) or `design.md` (change directory); omit from the requirement                                |
+| Named algorithm / threshold / strategy (e.g., "use TF-IDF bottom quartile", "retry 3 times") | Translate to the property it produces (e.g., "queries that produce no relevant documents"); route the named strategy to `design.md` |
+| Phase-gated steps (plan.md, tasks.md)                                                        | Omit — not behavior                                                                                                                 |
+| "As a user, I want X so that Y"                                                              | `The system SHALL allow users to X` (discard the "so that" rationale)                                                               |
+| "Shall not / Must not"                                                                       | `The system SHALL NOT / MUST NOT {prohibited behavior}`                                                                             |
+| Numbered requirement IDs (e.g., `REQ-001:`)                                                  | Strip the ID prefix; preserve the requirement text                                                                                  |
 
 **Critical rules:**
 
-- Requirements describe WHAT, not HOW
+- Every translated requirement is a contract statement in one of the shapes from `references/sdd-spec-formats.md` § 1.1 (guarantee, invariant, prohibition, precondition-consequence, observable-state relationship)
 - Every scenario must have **GIVEN**, **WHEN**, **THEN** (bold labels, exact casing)
 - Scenarios use `####` (4 hashtags), requirements use `###` (3 hashtags)
 - **Baseline output:** no delta markers (ADDED/MODIFIED/REMOVED)
@@ -132,9 +137,9 @@ Add a source attribution blockquote at the top of each generated spec (see forma
 
 - [ ] Every `### Requirement:` uses RFC 2119 keywords (SHALL/MUST/SHOULD/MAY)
 - [ ] Every scenario uses **GIVEN**/**WHEN**/**THEN** with bold labels
-- [ ] No implementation details in requirements (class names, SQL, library choices)
+- [ ] Each requirement is a contract statement in one of the shapes from `references/sdd-spec-formats.md` § 1.1 — a property about observable state that stands on its own without its scenarios
 - [ ] Scenarios use `####` heading level (not `###` or `#####`)
-- [ ] Implementation details from source were moved to `## Technical Notes` (baseline) or omitted (change directory)
+- [ ] Implementation details and named strategies from source were routed to `## Technical Notes` (baseline) or `design.md` (change directory), not left in the requirement text
 
 **Baseline output only:**
 
@@ -177,7 +182,9 @@ Summary: capabilities created, requirement count per capability, translation not
 
 ## Common Mistakes
 
-- Copying implementation detail from source files into requirements
+- Translating source-doc grammar without translating the _content_ — a Jira ticket saying "POST to `/users` then insert into `users` table" is mechanism in both the source and a literal translation.
+  Translate to the property the source was trying to guarantee ("a user account is created") and route the mechanism to `design.md`.
+  See `references/sdd-spec-formats.md` § 1.
 - Using non-RFC-2119 language ("the system will", "users can") instead of SHALL/MUST/SHOULD
 - One giant spec instead of capability decomposition for large surface areas
 - Including delta markers (ADDED/MODIFIED) in baseline specs
