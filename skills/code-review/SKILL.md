@@ -113,6 +113,12 @@ If the `code-review-graph` MCP plugin is available, probe and ensure freshness:
 When the graph is available, follow `references/code-review-graph-integration.md` for enhanced analysis at each subsequent step.
 The reference doc specifies required and optional tool calls per phase, with decision criteria for when to use each.
 
+**Parallel subagent gate:**
+
+If the `Agent` tool is available and the change is non-trivial, plan to use the parallel-subagent path in Step 2.
+See `references/parallel-subagent-review.md` for the thresholds, dispatch pattern, and prompt templates.
+Otherwise continue with the single-agent path.
+
 ### Step 1 — Triage & Context
 
 Build a prioritized review plan before reading any code in detail.
@@ -138,6 +144,16 @@ Build a prioritized review plan before reading any code in detail.
 **Triage output:** Produce a prioritized file list and a brief review plan identifying the highest-risk areas to focus on.
 
 ### Step 2 — Structured Review (No Edits)
+
+Pick the path set at the Step 0 parallel subagent gate.
+
+**Parallel-subagent path** (when gate is active):
+
+Follow `references/parallel-subagent-review.md` — fan out three opus subagents (architecture, quality, spec compliance) in parallel, synthesize, dispatch a red-team opus subagent, then do final synthesis and tiebreak yourself.
+Clarify author intent with the user before dispatching; subagents have no conversation history.
+Skip the single-agent steps below — the reference doc drives this path end-to-end through Step 3.
+
+**Single-agent path** (default):
 
 For each changed file or module, summarize what changed and why.
 Evaluate each area in the Quick Reference table above.
@@ -194,3 +210,4 @@ When a default conflicts with project constraints, suggest a better-fit alternat
 - `references/review-best-practices-links.md` — external review best-practice links used by this skill.
 - `references/git-diagnostics-before-review.md` — git commands for assessing codebase health before reviewing.
 - `references/code-review-graph-integration.md` — tool dispatch playbook for `code-review-graph` MCP plugin (required + optional tools per phase, decision guide).
+- `references/parallel-subagent-review.md` — parallel-subagent dispatch path: thresholds, agent prompt templates, synthesis and red-team steps.
