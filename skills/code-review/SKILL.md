@@ -149,7 +149,8 @@ Pick the path set at the Step 0 parallel subagent gate.
 
 **Parallel-subagent path** (when gate is active):
 
-Follow `references/parallel-subagent-review.md` — fan out three opus subagents (architecture, quality, spec compliance) in parallel, synthesize, dispatch a red-team opus subagent, then do final synthesis and tiebreak yourself.
+Follow `references/parallel-subagent-review.md` — fan out quality and spec-compliance subagents in parallel (plus architecture when warranted), synthesize, dispatch a devil's-advocate subagent for a challenge pass, then do final synthesis and tiebreak yourself.
+Include the architecture subagent when: pre-merge / pre-PR review, the user mentions "merge", the user explicitly requests architectural review, or you judge it necessary (confirm with the user before dispatching).
 Clarify author intent with the user before dispatching; subagents have no conversation history.
 Skip the single-agent steps below — the reference doc drives this path end-to-end through Step 3.
 
