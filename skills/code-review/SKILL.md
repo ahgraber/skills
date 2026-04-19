@@ -40,16 +40,16 @@ Act as a senior engineer: thorough, pragmatic, impact-first.
 
 ## Quick Reference
 
-| Area                        | Look for                                            |
-| --------------------------- | --------------------------------------------------- |
-| Correctness & Logic         | Wrong behavior, broken contracts, off-by-one        |
-| Bugs & Edge Cases           | Nil/null paths, boundary values, error propagation  |
-| Code Quality & Style        | Naming, readability, idiomatic usage                |
-| Structure & Maintainability | Coupling, duplication, separation of concerns       |
-| Best Practices              | Language/framework conventions, SOLID, DRY          |
-| Test Adequacy               | Missing tests for behavior changes, regression gaps |
-| Security & Risk             | Input validation, auth, secrets, dependency risk    |
-| Documentation               | Misleading comments, missing doc for public API     |
+| Area                        | Look for                                                                                                                     |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Correctness & Logic         | Wrong behavior, broken contracts, off-by-one                                                                                 |
+| Bugs & Edge Cases           | Nil/null paths, boundary values, error propagation                                                                           |
+| Code Quality & Style        | Naming, readability, idiomatic usage                                                                                         |
+| Structure & Maintainability | Coupling, duplication, separation of concerns                                                                                |
+| Best Practices              | Language/framework conventions, SOLID, DRY                                                                                   |
+| Test Adequacy               | Missing tests for behavior changes, regression gaps                                                                          |
+| Security & Risk             | OWASP Top 10: access control, injection, crypto, auth, supply chain, logging, error handling — use `securing-code` checklist |
+| Documentation               | Misleading comments, missing doc for public API                                                                              |
 
 ## Common Mistakes
 
@@ -149,7 +149,8 @@ Pick the path set at the Step 0 parallel subagent gate.
 
 **Parallel-subagent path** (when gate is active):
 
-Follow `references/parallel-subagent-review.md` — fan out quality and spec-compliance subagents in parallel (plus architecture when warranted), synthesize, dispatch a devil's-advocate subagent for a challenge pass, then do final synthesis and tiebreak yourself.
+Follow `references/parallel-subagent-review.md` — fan out quality, spec-compliance, and security subagents in parallel (plus architecture when warranted), synthesize, dispatch a devil's-advocate subagent for a challenge pass, then do final synthesis and tiebreak yourself.
+The security subagent (Agent 4) is always dispatched; it uses the OWASP Top 10:2025 checklist from `securing-code` skill references.
 Include the architecture subagent when: pre-merge / pre-PR review, the user mentions "merge", the user explicitly requests architectural review, or you judge it necessary (confirm with the user before dispatching).
 Clarify author intent with the user before dispatching; subagents have no conversation history.
 Skip the single-agent steps below — the reference doc drives this path end-to-end through Step 3.
@@ -171,6 +172,7 @@ Rules:
 - Style comments are non-blocking unless they map to project conventions.
 - Dependency manifest or lockfile changes → assess supply-chain risk and compatibility.
 - Call out TODO comments and their implications.
+- For security & risk: use `securing-code` skill's `references/tier2-review.md` checklist (OWASP-mapped) as the evaluation framework.
 
 **When graph is available** (see `references/code-review-graph-integration.md` Phase 2):
 
@@ -212,3 +214,4 @@ When a default conflicts with project constraints, suggest a better-fit alternat
 - `references/git-diagnostics-before-review.md` — git commands for assessing codebase health before reviewing.
 - `references/code-review-graph-integration.md` — tool dispatch playbook for `code-review-graph` MCP plugin (required + optional tools per phase, decision guide).
 - `references/parallel-subagent-review.md` — parallel-subagent dispatch path: thresholds, agent prompt templates, synthesis and red-team steps.
+- `securing-code` skill (`references/tier2-review.md`, `references/tier3-*.md`) — OWASP-mapped security checklist used by the security subagent and single-agent security lens.
