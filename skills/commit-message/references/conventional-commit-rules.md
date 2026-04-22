@@ -68,7 +68,7 @@ Guidelines:
 
 - One blank line between subject and body.
 - Wrap lines at 72 chars.
-- Explain what changed and why (not diff-level implementation detail).
+- Concisely, succinctly explain what changed and why (not diff-level implementation detail).
 - Use bullets for multi-part changes.
 - Do not restate subject text.
 
