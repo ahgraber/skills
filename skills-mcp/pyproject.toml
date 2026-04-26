@@ -1,0 +1,62 @@
+[build-system]
+requires = ["uv_build>=0.11,<0.12"]
+build-backend = "uv_build"
+
+[project]
+name = "skills-mcp"
+description = "Stdio MCP server that aggregates and deduplicates agent skills from well-known vendor locations."
+version = "0.1.0"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11,<3.15"
+classifiers = [
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+  "fastmcp>=3.2.0",
+]
+
+[project.scripts]
+skills-mcp = "skills_mcp.server:main"
+
+[dependency-groups]
+dev = [
+  "ipykernel>=6.30.1",
+]
+lint = [
+  "ruff>=0.12.0",
+]
+test = [
+  "pytest>=8.3.4",
+  "pytest-asyncio>=0.24",
+]
+type = []
+
+[tool.uv.build-backend]
+module-name = "skills_mcp"
+module-root = "src/"
+
+[tool.uv]
+package = true
+default-groups = ["dev", "lint", "test", "type"]
+python-preference = "managed"
+exclude-newer = "3 days"
+
+[tool.uv.sources]
+skills_mcp = { path = "src/skills_mcp", editable = true }
+
+[tool.pytest.ini_options]
+addopts = """
+  -ra
+  --strict-markers
+  --import-mode=importlib
+  --tb=short
+"""
+asyncio_mode = "auto"
+python_files = ["test_*.py", "*_test.py"]
+pythonpath = "src"
+testpaths = ["tests"]
