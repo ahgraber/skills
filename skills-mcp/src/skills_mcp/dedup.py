@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from dataclasses import dataclass, field
+from collections.abc import Iterator
+from dataclasses import dataclass
 import hashlib
 import logging
 from pathlib import Path
@@ -16,21 +17,9 @@ class ResolvedSkill:
     """A skill folder that survived deduplication and should be exposed."""
 
     display_name: str  # Name used in `skill://{display_name}/...` URIs.
-    canonical_name: str  # Original directory name (pre-namespacing).
     root_label: str  # Label of the root the skill came from.
     skill_dir: Path  # Resolved on-disk directory.
     namespaced: bool  # True if the bare name was already taken.
-
-
-@dataclass
-class DedupReport:
-    """Summary of dedup decisions for inspection / logging."""
-
-    resolved: list[ResolvedSkill] = field(default_factory=list)
-    collapsed_symlinks: int = 0  # Same realpath after `resolve()`.
-    collapsed_hash: int = 0  # Distinct path, identical SKILL.md content.
-    namespace_collisions: list[tuple[str, list[str]]] = field(default_factory=list)
-    # ^ (canonical_name, [root_label, ...]) - one entry per name with content drift.
 
 
 def _hash_main_file(skill_dir: Path, main_file_name: str) -> str | None:
@@ -46,7 +35,7 @@ def _hash_main_file(skill_dir: Path, main_file_name: str) -> str | None:
         return None
 
 
-def _iter_skill_dirs(root: Path, main_file_name: str):
+def _iter_skill_dirs(root: Path, main_file_name: str) -> Iterator[Path]:
     """Yield first-level subdirectories of `root` that contain `main_file_name`."""
     try:
         entries = sorted(root.iterdir())
@@ -64,8 +53,7 @@ def dedup_skills(
     roots: list[RootSpec],
     *,
     main_file_name: str = "SKILL.md",
-    namespace_separator: str = "--",
-) -> DedupReport:
+) -> list[ResolvedSkill]:
     """Walk roots in precedence order; collapse duplicates, namespace true collisions.
 
     Pipeline per skill name:
@@ -75,13 +63,7 @@ def dedup_skills(
            content (different paths, same SKILL.md).
         4. If multiple hash groups remain, keep the first-precedence one with the
            bare name. Each *additional* hash group emits one warning and is
-           exposed under a namespaced display name `{root_label}{sep}{name}`.
-
-    Notes
-    -----
-    Hashing is done on the main file only - cheap, and good enough to identify
-    "the same skill, vendored twice." Supporting-file drift between identical
-    SKILL.md files would not trigger namespacing.
+           exposed under a namespaced display name `{root_label}--{name}`.
     """
     # Step 1: gather all candidates per canonical name, in precedence order.
     candidates: dict[str, list[tuple[str, Path]]] = defaultdict(list)
@@ -89,8 +71,9 @@ def dedup_skills(
         for skill_dir in _iter_skill_dirs(root.path, main_file_name):
             candidates[skill_dir.name].append((root.label, skill_dir.resolve()))
 
-    report = DedupReport()
+    resolved: list[ResolvedSkill] = []
     used_display_names: set[str] = set()
+    collapsed_symlinks = collapsed_hash = 0
 
     for canonical_name in sorted(candidates):
         entries = candidates[canonical_name]
@@ -100,21 +83,21 @@ def dedup_skills(
         unique_by_path: list[tuple[str, Path]] = []
         for label, path in entries:
             if path in seen_paths:
-                report.collapsed_symlinks += 1
+                collapsed_symlinks += 1
                 continue
             seen_paths.add(path)
             unique_by_path.append((label, path))
 
         # Step 3: collapse by SKILL.md hash (preserves first-seen group order).
         seen_hashes: dict[str, tuple[str, Path]] = {}
-        ordered_groups: list[tuple[str, str, Path]] = []  # (hash, label, path)
+        ordered_groups: list[tuple[str, str, Path]] = []
         for label, path in unique_by_path:
             digest = _hash_main_file(path, main_file_name)
             if digest is None:
                 logger.warning("Could not read %s for skill '%s' at %s", main_file_name, canonical_name, path)
                 continue
             if digest in seen_hashes:
-                report.collapsed_hash += 1
+                collapsed_hash += 1
                 continue
             seen_hashes[digest] = (label, path)
             ordered_groups.append((digest, label, path))
@@ -123,11 +106,10 @@ def dedup_skills(
             continue
 
         # Step 4: first group wins the bare name; subsequent groups get namespaced.
-        first_digest, first_label, first_path = ordered_groups[0]
-        report.resolved.append(
+        _first_digest, first_label, first_path = ordered_groups[0]
+        resolved.append(
             ResolvedSkill(
                 display_name=canonical_name,
-                canonical_name=canonical_name,
                 root_label=first_label,
                 skill_dir=first_path,
                 namespaced=False,
@@ -138,24 +120,22 @@ def dedup_skills(
         if len(ordered_groups) > 1:
             collision_labels = [first_label]
             for _digest, label, path in ordered_groups[1:]:
-                base = f"{label}{namespace_separator}{canonical_name}"
+                base = f"{label}--{canonical_name}"
                 display = base
                 n = 2
                 while display in used_display_names:
                     display = f"{base}{n}"
                     n += 1
                 used_display_names.add(display)
-                report.resolved.append(
+                resolved.append(
                     ResolvedSkill(
                         display_name=display,
-                        canonical_name=canonical_name,
                         root_label=label,
                         skill_dir=path,
                         namespaced=True,
                     )
                 )
                 collision_labels.append(label)
-            report.namespace_collisions.append((canonical_name, collision_labels))
             logger.warning(
                 "Skill name collision: '%s' has differing content across roots %s; "
                 "exposing first as bare name and others under namespaced URIs.",
@@ -163,4 +143,8 @@ def dedup_skills(
                 collision_labels,
             )
 
-    return report
+    logger.debug(
+        "Dedup: resolved %d skills (collapsed %d symlinked, %d byte-identical)",
+        len(resolved), collapsed_symlinks, collapsed_hash,
+    )
+    return resolved

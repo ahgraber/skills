@@ -17,7 +17,6 @@ class RootSpec:
 HOME = Path.home()
 
 KNOWN_ROOTS: tuple[RootSpec, ...] = (
-    RootSpec("project", Path.cwd() / ".claude" / "skills"),
     RootSpec("agents", HOME / ".agents" / "skills"),
     RootSpec("claude", HOME / ".claude" / "skills"),
     RootSpec("cursor", HOME / ".cursor" / "skills"),
@@ -75,7 +74,6 @@ def discover_roots(
     include_env: bool = True,
     include_labels: Iterable[str] | None = None,
     exclude_labels: Iterable[str] = (),
-    require_exists: bool = True,
 ) -> list[RootSpec]:
     """Resolve the ordered list of skill roots to scan.
 
@@ -90,7 +88,6 @@ def discover_roots(
         include_env: Read `SKILLS_MCP_ROOTS` env var.
         include_labels: If set, restrict KNOWN_ROOTS to these labels.
         exclude_labels: Drop these labels from KNOWN_ROOTS.
-        require_exists: Drop entries whose path does not exist.
 
     Returns
     -------
@@ -105,7 +102,10 @@ def discover_roots(
     if include_known:
         include_set = set(include_labels) if include_labels is not None else None
         exclude_set = set(exclude_labels)
-        for spec in KNOWN_ROOTS:
+        # project root is evaluated at call time so it reflects the cwd when the
+        # server starts, not when the module was imported.
+        known = (RootSpec("project", Path.cwd() / ".claude" / "skills"),) + KNOWN_ROOTS
+        for spec in known:
             if include_set is not None and spec.label not in include_set:
                 continue
             if spec.label in exclude_set:
@@ -117,7 +117,7 @@ def discover_roots(
     result: list[RootSpec] = []
     for spec in ordered:
         path = spec.path.expanduser()
-        if require_exists and not path.exists():
+        if not path.exists():
             continue
         try:
             real = path.resolve()
