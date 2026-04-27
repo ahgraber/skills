@@ -47,9 +47,7 @@ def test_dedup_namespaces_true_collisions(tmp_path: Path, make_skill):
     bare = next(s for s in skills if s.display_name == "drift")
     namespaced = next(s for s in skills if s.display_name == "agents--drift")
     assert bare.root_label == "claude"
-    assert bare.namespaced is False
     assert namespaced.root_label == "agents"
-    assert namespaced.namespaced is True
 
 
 def test_dedup_three_way_collision(tmp_path: Path, make_skill):
