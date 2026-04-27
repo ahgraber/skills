@@ -78,7 +78,7 @@ uv tool install --editable /path/to/skills-mcp
 ls ~/.local/bin/skills-mcp   # confirm
 ```
 
-The shim is the `skills-mcp` entry point declared in `pyproject.toml`, so `args` accepts any flag from `skills-mcp --help` (`--root`, `--include`, `--exclude`, `--no-vendor`, `--reload`, `--log-level`, …).
+The shim is the `skills-mcp` entry point declared in `pyproject.toml`, so `args` accepts any flag from `skills-mcp --help` (`--root`, `--include`, `--exclude`, `--no-vendor`, `--no-env`, `--reload`, `--expose`, `--log-level`).
 None are required — the bare command auto-discovers known vendor roots.
 
 ```json
@@ -126,7 +126,7 @@ Pair `--no-vendor` with at least one `--root` to restrict discovery to specific 
 
 - `skill://{name}/SKILL.md` — the skill's main instruction file.
 - `skill://{name}/_manifest` — synthetic JSON listing of all files in the skill.
-- `skill://{name}/{path}` — supporting files (lazy template by default).
+- `skill://{name}/{path}` — supporting files within the skill directory.
 
 ## Tools-only clients (`--expose`)
 
@@ -144,7 +144,7 @@ uv run skills-mcp --expose resources   # only native MCP resources
 
 Progressive disclosure is preserved without bloating the tool list:
 
-- **Tier 1** — the MCP `instructions` field is populated with a compact index of every available skill (name + frontmatter description) plus the URI scheme cheat-sheet, so the agent sees what's available ambiently in the system prompt.
+- **Tier 1** — the MCP `instructions` field is populated with a compact index of every available skill (name + frontmatter `description:`) plus the URI scheme cheat-sheet, so the agent sees what's available ambiently in the system prompt.
 - **Tier 2** — `read_resource("skill://name/SKILL.md")` loads the full instruction body on demand.
 - **Tier 3** — `read_resource("skill://name/_manifest")` enumerates supporting files; `read_resource("skill://name/path/to/file")` fetches them.
 

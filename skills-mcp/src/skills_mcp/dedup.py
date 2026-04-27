@@ -19,7 +19,6 @@ class ResolvedSkill:
     display_name: str  # Name used in `skill://{display_name}/...` URIs.
     root_label: str  # Label of the root the skill came from.
     skill_dir: Path  # Resolved on-disk directory.
-    namespaced: bool  # True if the bare name was already taken.
 
 
 def _hash_main_file(skill_dir: Path, main_file_name: str) -> str | None:
@@ -107,14 +106,7 @@ def dedup_skills(
 
         # Step 4: first group wins the bare name; subsequent groups get namespaced.
         _first_digest, first_label, first_path = ordered_groups[0]
-        resolved.append(
-            ResolvedSkill(
-                display_name=canonical_name,
-                root_label=first_label,
-                skill_dir=first_path,
-                namespaced=False,
-            )
-        )
+        resolved.append(ResolvedSkill(display_name=canonical_name, root_label=first_label, skill_dir=first_path))
         used_display_names.add(canonical_name)
 
         if len(ordered_groups) > 1:
@@ -127,14 +119,7 @@ def dedup_skills(
                     display = f"{base}{n}"
                     n += 1
                 used_display_names.add(display)
-                resolved.append(
-                    ResolvedSkill(
-                        display_name=display,
-                        root_label=label,
-                        skill_dir=path,
-                        namespaced=True,
-                    )
-                )
+                resolved.append(ResolvedSkill(display_name=display, root_label=label, skill_dir=path))
                 collision_labels.append(label)
             logger.warning(
                 "Skill name collision: '%s' has differing content across roots %s; "

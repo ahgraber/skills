@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import logging
 import os
 from pathlib import Path
 from typing import Iterable
+
+logger = logging.getLogger("skills_mcp.discovery")
 
 
 @dataclass(frozen=True)
@@ -127,13 +130,10 @@ def discover_roots(
             continue
         seen_real.add(real)
 
-        # Disambiguate label collisions across equally-named user roots.
         label = spec.label
         if label in used_labels:
-            n = 2
-            while f"{label}{n}" in used_labels:
-                n += 1
-            label = f"{label}{n}"
+            logger.warning("Skipping root %s: label %r already in use; set an explicit label with LABEL=PATH", real, label)
+            continue
         used_labels.add(label)
 
         result.append(RootSpec(label=label, path=real))
