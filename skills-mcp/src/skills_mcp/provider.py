@@ -9,6 +9,7 @@ from fastmcp.server.providers.skills.skill_provider import SkillProvider
 
 from skills_mcp.dedup import ResolvedSkill, dedup_skills
 from skills_mcp.discovery import RootSpec
+from skills_mcp.validation import SAFE_SKILL_NAME_RE, ValidationResult, validate_skill
 
 logger = logging.getLogger("skills_mcp.provider")
 
@@ -40,6 +41,7 @@ class DedupSkillsDirectoryProvider(SkillsDirectoryProvider):
 
     def __init__(self, roots: Sequence[RootSpec], *, reload: bool = False) -> None:
         self._root_specs: list[RootSpec] = list(roots)
+        self.validations: dict[Path, ValidationResult] = {}
         # Hand the base class the bare paths so its bookkeeping (and __repr__)
         # still works; we then immediately replace what `_discover_skills`
         # produced with our deduplicated set.
@@ -50,12 +52,25 @@ class DedupSkillsDirectoryProvider(SkillsDirectoryProvider):
 
     def _discover_skills(self) -> None:
         self.providers.clear()
+        self.validations.clear()
         for resolved in dedup_skills(self._root_specs, main_file_name=self._main_file_name):
+            validation = validate_skill(resolved.skill_dir)
+            if not validation.valid:
+                logger.warning(
+                    "Skill %r loaded with errors: %s",
+                    resolved.display_name,
+                    "; ".join(str(i) for i in validation.issues),
+                )
             try:
                 provider = self._build_provider(resolved)
             except (OSError, RuntimeError):
                 logger.exception("Failed to load skill: %s", resolved.skill_dir)
                 continue
+            name = (provider.skill_info.name or "").strip()
+            if not SAFE_SKILL_NAME_RE.fullmatch(name):
+                logger.warning("Skipping skill: display name %r failed safety check", name)
+                continue
+            self.validations[resolved.skill_dir] = validation
             self.providers.append(provider)
         self._discovered = True
         logger.info("Loaded %d skills", len(self.providers))

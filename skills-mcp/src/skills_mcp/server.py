@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import argparse
 import logging
-from pathlib import Path
-import re
 import sys
 from typing import Literal
 
@@ -17,76 +15,6 @@ logger = logging.getLogger("skills_mcp.server")
 
 ExposeMode = Literal["resources", "tools", "both"]
 
-_DESCRIPTION_CHAR_BUDGET = 240
-# Same allowlist as dedup._SAFE_SKILL_NAME_RE — checked again here because
-# info.name may come from SKILL.md frontmatter, not the directory name.
-_SAFE_SKILL_NAME_RE = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9 ._-]{0,63}$")
-
-# --- Description sanitization patterns (applied in order inside _sanitize_description) ---
-
-# Unicode invisible characters: Tag Block (U+E0000–U+E007F), zero-width chars
-# (U+200B–U+200D, U+2060, U+FEFF), and variation selectors (U+FE00–U+FE0F).
-# These pass visually as empty space but LLMs may decode and act on them.
-_UNICODE_INVISIBLE_RE = re.compile(
-    r"[​-‍⁠﻿︀-️\U000e0000-\U000e007f]"
-)
-# ChatML / Llama-3 special tokens: <|...|>, <|begin_of_text|>, <|eot_id|>, etc.
-# Must be stripped before the angle-bracket pass so the full pattern is matched.
-_SPECIAL_TOKEN_RE = re.compile(r"<\|[^|>\n]{0,40}\|>")
-# Bracket-delimited instruction tokens used by Llama-2 / Mistral:
-# [INST], [/INST], <<SYS>>, <</SYS>>, [AVAILABLE_TOOLS], [TOOL_RESULTS], etc.
-_BRACKET_TOKEN_RE = re.compile(
-    r"\[/?(?:INST|SYS|AVAILABLE_TOOLS|TOOL_CALLS|TOOL_RESULTS)\]"
-    r"|<{1,2}/?SYS>{1,2}",
-    re.IGNORECASE,
-)
-# Markdown link / HTML-tag forming characters: must run after the pattern passes above.
-_MARKDOWN_LINK_CHARS_RE = re.compile(r"[\[\]()<>]")
-
-
-_FRONTMATTER_BLOCK_RE = re.compile(r'\A---\r?\n(.*?)\r?\n---', re.DOTALL)
-_FRONTMATTER_DESC_RE = re.compile(r'^description:\s*(.+?)$', re.MULTILINE)
-
-
-def _read_frontmatter_description(skill_path: Path) -> str | None:
-    """Return the raw `description:` value from SKILL.md frontmatter, or None.
-
-    Returns None when the field is absent, empty, or the file is unreadable.
-    Deliberately ignores the skill body and FastMCP's synthesised fallbacks —
-    we only trust what the skill author explicitly wrote in the frontmatter.
-
-    Note: reads sp._skill_path, a FastMCP private attribute.  It is stable
-    across all tested versions and is the only way to reach the raw file without
-    re-running discovery.
-    """
-    try:
-        text = (skill_path / "SKILL.md").read_text(encoding="utf-8")
-    except OSError:
-        return None
-    fm = _FRONTMATTER_BLOCK_RE.match(text)
-    if not fm:
-        return None
-    m = _FRONTMATTER_DESC_RE.search(fm.group(1))
-    return m.group(1).strip() if m else None
-
-
-def _sanitize_description(text: str) -> str:
-    """Strip prompt-injection vectors from a skill description before it enters the index.
-
-    Layers (applied in order — earlier passes remove structured patterns before
-    individual-character passes would fragment them):
-      1. Unicode invisible / zero-width characters
-      2. ChatML special tokens  (<|im_start|> etc.)
-      3. Bracket-delimited instruction tokens ([INST], <<SYS>>, …)
-      4. Remaining Markdown link / HTML characters ([]()<>)
-      5. Bold markers and newline normalisation
-    """
-    text = _UNICODE_INVISIBLE_RE.sub("", text)
-    text = _SPECIAL_TOKEN_RE.sub("", text)
-    text = _BRACKET_TOKEN_RE.sub("", text)
-    text = _MARKDOWN_LINK_CHARS_RE.sub("", text)
-    text = text.replace("**", "").strip().replace("\n", " ")
-    return text
 
 _USING_SKILLS = """\
 If you have not yet used the `skills__list_resources` tool you MUST use it immediately \
@@ -213,19 +141,11 @@ def _format_skill_index(provider: DedupSkillsDirectoryProvider, expose: ExposeMo
     for sp in skills:
         info = sp.skill_info
         name = (info.name or "").strip()
-        if not _SAFE_SKILL_NAME_RE.fullmatch(name):
-            logger.warning("Omitting skill from index: name %r failed safety check", name)
-            continue
-        raw_desc = _read_frontmatter_description(sp._skill_path)
-        if raw_desc is None:
-            logger.warning("Omitting skill from index: %r has no frontmatter description", name)
-            continue
-        desc = _sanitize_description(raw_desc)
+        validation = provider.validations.get(sp._skill_path)
+        desc = validation.sanitized_description if validation else None
         if not desc:
-            logger.warning("Omitting skill from index: %r description empty after sanitization", name)
+            logger.warning("Omitting skill from index: %r has no usable description", name)
             continue
-        if len(desc) > _DESCRIPTION_CHAR_BUDGET:
-            desc = desc[: _DESCRIPTION_CHAR_BUDGET - 1].rstrip() + "…"
         lines.append(f"- **{name}** — {desc}")
 
     lines.append("")
