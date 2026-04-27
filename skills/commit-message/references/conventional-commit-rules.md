@@ -64,13 +64,19 @@ If breaking:
 
 Include a body when subject alone is insufficient.
 
-Guidelines:
+### Rules
 
 - One blank line between subject and body.
 - Wrap lines at 72 chars.
-- Concisely, succinctly explain what changed and why (not diff-level implementation detail).
-- Use bullets for multi-part changes.
-- Do not restate subject text.
+- **Organize by logical/topical concern** — one entry per theme, not per file or function.
+  Do not use label-style section headers (`Topic: content`, `**Label**:`, etc.).
+- **Be concise**, not every change requires attention:
+  - Prioritize changes that influence external/user-facing surface and why.
+  - Internal-only refactoring with no external surface change can collapse to a phrase or be omitted.
+  - State outcomes, not mechanisms — drop implementation detail the reader doesn't need to act on.
+  - Omit diff-level detail (file paths, parameter lists, function names) unless directly relevant.
+- **Format freely:** bullets may aid scannability for multi-part changes; a short paragraph works when the change is a single cohesive thought.
+  Either is acceptable.
 
 ## Footers
 
@@ -103,6 +109,56 @@ Use the active agent identity for `<AGENT>` (for example, `OpenAI Codex`).
 - Output must be directly usable with `git commit -F -`.
 
 ## Examples
+
+**Don't** — verbose, file-per-change, label-style headers:
+
+```text
+refactor(skills-mcp): harden instructions surface, simplify internals, track lockfile
+
+Security:
+- Validate skill names in _format_skill_index against an allowlist regex, reject names
+  containing the "--" namespace separator, and strip "**" — prevents prompt injection
+  via crafted SKILL.md frontmatter
+- Defer `project` root from import-time Path.cwd() to discover_roots() call time
+- Assert _skill_info is not None in NamespacedSkillProvider; expand _discover_skills
+  except clause to (OSError, AssertionError)
+
+Instructions & docs:
+- Prepend "Using Skills" rule block and skills__list_resources call-to-action to the
+  MCP instructions field; append stale-index note for --reload sessions
+- Document empty-roots Path.cwd() fallback and --reload index staleness in README
+
+KISS/YAGNI:
+- Remove DedupReport; dedup_skills() returns list[ResolvedSkill] directly, counters
+  kept as locals for DEBUG logging
+- Drop ResolvedSkill.canonical_name (never read outside dedup.py)
+- Inline hardcoded "--" separator; remove namespace_separator parameter chain
+- Remove require_exists parameter from discover_roots (was always True)
+- Merge _run_dedup into _discover_skills; correct misleading hasattr guard comment
+- Fix tautological assertion in test_parse_env_roots_empty
+
+Build:
+- Track uv.lock (removed from .gitignore per supply-chain hardening)
+
+AI-assistant: Claude Code
+```
+
+**Do** — outcomes over mechanisms, internal changes collapsed:
+
+```text
+refactor(skills-mcp): harden instructions surface, simplify internals, track lockfile
+
+Skill names are now validated against an allowlist regex before being
+included in the index, closing a prompt-injection path through crafted
+SKILL.md frontmatter.
+
+The MCP instructions field gains a preamble explaining how to use
+skills and when to call the list-resources tool.
+
+Removed overcomplex abstractions.
+
+AI-assistant: Claude Code
+```
 
 ### Simple feature
 
