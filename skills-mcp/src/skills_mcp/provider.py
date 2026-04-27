@@ -8,7 +8,7 @@ from typing import Literal
 from fastmcp.server.providers.skills.directory_provider import SkillsDirectoryProvider
 from fastmcp.server.providers.skills.skill_provider import SkillProvider
 
-from skills_mcp.dedup import DedupReport, ResolvedSkill, dedup_skills
+from skills_mcp.dedup import ResolvedSkill, dedup_skills
 from skills_mcp.discovery import RootSpec
 
 logger = logging.getLogger("skills_mcp.provider")
@@ -36,8 +36,11 @@ class NamespacedSkillProvider(SkillProvider):
         )
         # SkillInfo is a plain dataclass; mutating `name` here changes the URI
         # advertised by all subsequent `_list_resources` / `_get_resource` calls.
-        if self._skill_info is not None:
-            self._skill_info.name = display_name
+        if self._skill_info is None:
+            raise RuntimeError(
+                f"SkillProvider loaded {skill_path!r} without _skill_info; FastMCP API may have changed"
+            )
+        self._skill_info.name = display_name
 
 
 class DedupSkillsDirectoryProvider(SkillsDirectoryProvider):
@@ -54,11 +57,8 @@ class DedupSkillsDirectoryProvider(SkillsDirectoryProvider):
         reload: bool = False,
         main_file_name: str = "SKILL.md",
         supporting_files: Literal["template", "resources"] = "template",
-        namespace_separator: str = "--",
     ) -> None:
         self._root_specs: list[RootSpec] = list(roots)
-        self._namespace_separator = namespace_separator
-        self._last_report: DedupReport | None = None
         # Hand the base class the bare paths so its bookkeeping (and __repr__)
         # still works; we then immediately replace what `_discover_skills`
         # produced with our deduplicated set.
@@ -70,39 +70,22 @@ class DedupSkillsDirectoryProvider(SkillsDirectoryProvider):
         )
 
     def _discover_skills(self) -> None:
-        # Called by the base `__init__` before our attributes are set, and again
-        # on reload. Skip the first call - our `__init__` runs `_run_dedup` once
-        # the base class is done.
+        # `_root_specs` is set before super().__init__() is called, so the
+        # hasattr check is always True in practice. It remains as a failsafe
+        # in case a future FastMCP version changes initialization order.
         if not hasattr(self, "_root_specs"):
             self.providers.clear()
             return
-        self._run_dedup()
-
-    def _run_dedup(self) -> None:
         self.providers.clear()
-        report = dedup_skills(
-            self._root_specs,
-            main_file_name=self._main_file_name,
-            namespace_separator=self._namespace_separator,
-        )
-        self._last_report = report
-
-        for resolved in report.resolved:
+        for resolved in dedup_skills(self._root_specs, main_file_name=self._main_file_name):
             try:
                 provider = self._build_provider(resolved)
-            except (FileNotFoundError, PermissionError, OSError):
+            except (OSError, RuntimeError):
                 logger.exception("Failed to load skill: %s", resolved.skill_dir)
                 continue
             self.providers.append(provider)
-
         self._discovered = True
-        logger.info(
-            "Loaded %d skills (collapsed %d symlinked, %d byte-identical, %d collisions namespaced)",
-            len(self.providers),
-            report.collapsed_symlinks,
-            report.collapsed_hash,
-            len(report.namespace_collisions),
-        )
+        logger.info("Loaded %d skills", len(self.providers))
 
     def _build_provider(self, resolved: ResolvedSkill) -> SkillProvider:
         if resolved.namespaced:
@@ -117,11 +100,6 @@ class DedupSkillsDirectoryProvider(SkillsDirectoryProvider):
             main_file_name=self._main_file_name,
             supporting_files=self._supporting_files,
         )
-
-    @property
-    def last_report(self) -> DedupReport | None:
-        """Most recent dedup report (None until first discovery completes)."""
-        return self._last_report
 
     def __repr__(self) -> str:
         return (

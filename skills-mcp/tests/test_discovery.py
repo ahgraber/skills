@@ -37,9 +37,10 @@ def test_parse_env_roots_colon_separated(tmp_path: Path):
     assert [s.path for s in specs] == [a, b]
 
 
-def test_parse_env_roots_empty():
+def test_parse_env_roots_empty(monkeypatch):
+    monkeypatch.delenv("SKILLS_MCP_ROOTS", raising=False)
     assert parse_env_roots("") == []
-    assert parse_env_roots(None) == [] or isinstance(parse_env_roots(None), list)
+    assert parse_env_roots(None) == []
 
 
 def test_discover_roots_filters_nonexistent(tmp_path: Path):

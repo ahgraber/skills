@@ -117,6 +117,11 @@ With explicit flags, e.g. restricting to your two main roots and adding an extra
 CLI `--root` entries → `SKILLS_MCP_ROOTS` env → known vendor roots in this order: `project` (`$CWD/.claude/skills`), `claude`, `agents`, `cursor`, `codex`, `gemini`, `copilot`, `opencode`, `goose`.
 Earlier entries win name collisions.
 
+The `project` root resolves against the working directory **at server startup**, not at install time.
+
+When `--no-vendor` and `--no-env` are both set with no `--root` entries the server has no configured roots and falls back to scanning `$CWD`.
+Pair `--no-vendor` with at least one `--root` to restrict discovery to specific directories.
+
 ## URIs
 
 - `skill://{name}/SKILL.md` — the skill's main instruction file.
@@ -165,6 +170,7 @@ Useful checks when iterating:
 - **Dedup result** — `list_resources` should show one entry per resolved skill; namespaced collisions appear as `skill://{label}--{name}/SKILL.md`.
 - **Tools-only path** — under `tools/list` you should see `list_resources` and `read_resource`; calling `read_resource` with a `skill://...` URI must return the same bytes as a native resource read.
 - **Reload** — start with `--reload`, edit a `SKILL.md`, then refetch the resource to confirm the change is picked up without restarting.
+  Note: the skill index in the MCP `instructions` field is a startup snapshot and does not update under `--reload`; use `list_resources` for the current set, or restart the server to refresh the index.
 
 Bump `--log-level DEBUG` if you want to see per-skill load and dedup decisions in the server's stderr.
 
