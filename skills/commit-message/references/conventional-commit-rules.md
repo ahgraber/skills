@@ -75,6 +75,8 @@ Include a body when subject alone is insufficient.
   - Internal-only refactoring with no external surface change can collapse to a phrase or be omitted.
   - State outcomes, not mechanisms — drop implementation detail the reader doesn't need to act on.
   - Omit diff-level detail (file paths, parameter lists, function names) unless directly relevant.
+- **Never reference ephemeral scaffolding** — task IDs, group numbers, sprint names, todo-list item numbers, or other planning-artifact identifiers that won't persist after the work concludes.
+  Describe _what changed and why_; where it came from in the task list is irrelevant to future readers.
 - **Format freely:** bullets may aid scannability for multi-part changes; a short paragraph works when the change is a single cohesive thought.
   Either is acceptable.
 

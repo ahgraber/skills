@@ -72,6 +72,11 @@ For each unchecked task:
 Follow design decisions in `design.md` — don't diverge without reason.
 Follow behavioral requirements in delta specs — these define what "correct" means.
 
+**Never reference task IDs, task numbers, or group names in code, comments, or commit messages.**
+Tasks and groups are ephemeral scaffolding — only the spec name persists after the change is archived.
+References like `# Task 7.4` or `"""Unit tests for Group 8: ...` become meaningless noise once the change is closed.
+Name things after _what they do_, not where they came from in the task list.
+
 If `.specs/.sdd/schema-config.yaml` exists and a task consumes a schema contract that is not yet defined, pause before implementing it.
 Surface the dependency gap and confirm with the user whether to reorder tasks in `tasks.md` first.
 
@@ -101,6 +106,7 @@ This skill can be invoked at any point after `tasks.md` exists — not only when
 - Continuing past a failed task without resolving it
 - Diverging from design decisions without documenting why
 - Treating artifacts as frozen when implementation reveals issues (update them)
+- Referencing task IDs, task numbers, or group names in code, comments, or commit messages (tasks and groups are ephemeral; name things after what they do)
 
 ## References
 
