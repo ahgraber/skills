@@ -10,6 +10,9 @@ Thinking partner for spec-driven development.
 No fixed steps, no mandatory output.
 Available before or during any SDD path.
 
+> `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
+> Replace `.specs/` with your project's actual specs root in all paths below.
+
 ## Invocation Notice
 
 - Inform the user when this skill is being invoked by name: `sdd-explore`.
@@ -50,11 +53,11 @@ Common entry points:
 
 Before forming opinions:
 
-1. Check `.specs/specs/` for existing baseline specs
-2. Check `.specs/changes/` for active changes
+1. Check `SPECS_ROOT/specs/` for existing baseline specs
+2. Check `SPECS_ROOT/changes/` for active changes
 3. Read relevant code files if the user wants codebase investigation
 
-**One-time suggestion (codebase investigation only):** If the user wants to investigate the codebase, check `.specs/.sdd/suggested-tools`.
+**One-time suggestion (codebase investigation only):** If the user wants to investigate the codebase, check `SPECS_ROOT/.sdd/suggested-tools`.
 
 - If `code-review-graph` is not listed: present the suggestion below, then append `code-review-graph` to that file (create the file and directory if needed).
   Do this once and only once.

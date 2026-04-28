@@ -1,7 +1,7 @@
 ---
 name: sdd
 description: |-
-  Use when the user wants to do any spec-driven development work — creating, deriving, or inheriting specs, managing changes, implementing from specs, or verifying implementations. Triggers: 'spec this out', 'create a spec', 'implement from spec', 'apply tasks', 'verify implementation', 'sync specs', 'archive change', 'sdd', any mention of .specs/ directory or spec-driven workflow.
+  Use when the user wants any spec-driven development action — exploring before speccing, deriving specs from code or translating specs from another system, proposing a change, applying or implementing, verifying, syncing delta specs, or archiving. Triggers: 'spec this out', 'create a change', 'apply tasks', 'verify implementation', 'sync specs', 'archive change', or any mention of 'specs' or 'sdd'.
 ---
 
 # SDD — Spec Driven Development
@@ -23,25 +23,35 @@ Should trigger:
 - "Verify that I implemented everything correctly"
 - "Sync the delta specs into main"
 - "Archive the auth-refactor change"
-- "I want to think through this before speccing it"
 
 Should not trigger:
 
+- "Help me brainstorm"
 - "Write a commit message"
 - "Debug this Python error"
 - "Review my PR"
 
 ## Locate Specs Root
 
-Before routing, resolve the specs root for this session:
+Before routing, run the discovery script and parse its JSON:
 
-1. Use `Glob` with pattern `**/.specs/**` to find files inside any `.specs/` directory, then extract the unique `.specs/` parent paths from results. (Glob matches files only — searching for files _inside_ `.specs/` is how you locate the directories.)
-2. **Multiple found** — list them and ask the user which to use.
-3. **Exactly one found** — use it; announce the resolved path.
-4. **None found** — ask the user where to initialize `.specs/` (default: repo root).
-5. **User specifies a path explicitly** — use that path regardless of search results.
+```sh
+skills/sdd/scripts/find-specs-roots.py [--explicit PATH]
+```
 
-> **Escape hatch:** If discovery requires more complex logic (empty directories, unusual nesting, or large monorepos), add a helper script at `skills/sdd/scripts/find-specs-roots.sh` and reference it here. Until then, fall back to `find . -type d -name ".specs" -maxdepth 4` via Bash if Glob returns no results.
+Pass `--explicit PATH` only if the user named a specific directory.
+The script anchors at the repo root (or cwd when not in a git repo), discovers `.specs/` candidates, analyzes any `SPECS_ROOT` pointer files, and falls back to `specs/` discovery if no `.specs/` is found.
+
+The agent — not the script — drives the user-facing dialogue.
+See `references/find-specs-roots.md` for the **output schema, decision branches, and `SPECS_ROOT` pointer-file format**.
+
+Summary of behavior:
+
+- Multiple `.specs/` candidates → ask which to use.
+- Single `.specs/` with a valid pointer → follow it once; surface any malformed/broken/out-of-workspace pointer instead of silently falling back.
+- No `.specs/` but `specs/` fallback hits → confirm with user (default: parent of `specs/`).
+- Nothing found → ask where to initialize.
+- Always announce the resolved path; if a pointer was followed, announce both marker and target.
 
 Call the resolved path `SPECS_ROOT`.
 All child skills use `SPECS_ROOT` in place of `.specs/`.
@@ -60,6 +70,8 @@ All child skills use `SPECS_ROOT` in place of `.specs/`.
 | Complete and archive a change            | `sdd-archive`   | Requires active change |
 
 ## Routing Flowchart
+
+> The chart focuses on intent routing. Discovery details (the `specs/` fallback and `SPECS_ROOT` pointer-file redirect) are described in **Locate Specs Root** above and elided here for readability.
 
 ```dot
 digraph sdd_router {
@@ -186,3 +198,5 @@ Schema snapshots travel with the change directory into the archive — no separa
 - `references/sdd-change-formats.md` — proposal, design, tasks formats
 - `references/sdd-schema.md` — schema artifacts and lifecycle policy
 - `references/sdd-router.dot` — canonical DOT source for the routing flowchart above
+- `references/find-specs-roots.md` — output schema for the discovery script used in **Locate Specs Root**
+- `scripts/find-specs-roots.py` — discovery script that resolves `.specs/`, fallback `specs/`, and `SPECS_ROOT` pointer files
