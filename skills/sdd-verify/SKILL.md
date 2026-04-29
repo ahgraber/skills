@@ -63,15 +63,27 @@ Read all available artifacts (graceful degradation — proceed with what exists)
 - `.specs/changes/<name>/specs/` — delta specs (if exist)
 - `.specs/specs/` — baseline specs for full context
 
-### Phase 2: Check Completeness
+### Phase 2: Run Test Suite
+
+Run the project's full test suite before any other checks.
+Verification claims rest on observed behavior, so a green suite is the baseline evidence that the implementation actually works.
+
+1. Run the project's standard test command (e.g., `pytest`, `npm test`, `cargo test`, the project's `nox`/`tox` session, or whatever the repo's contributor docs specify).
+   Run the **full** suite — do not narrow to changed files or a single test path.
+2. If any tests fail or error, flag each failure as CRITICAL in the report and stop further verification of the affected area until they are addressed.
+   A failing suite invalidates Contract, Coverage, and Coherence conclusions.
+3. If the project has no runnable test suite, note this in the report as a WARNING and continue.
+4. Do not modify, skip, or `xfail` tests to make the suite pass — that is a CRITICAL finding, not a fix.
+
+### Phase 3: Check Completeness
 
 1. Count checked tasks vs. total tasks in `tasks.md`
 2. For each delta spec requirement, verify a corresponding implementation exists in the codebase
 3. Flag missing implementations as CRITICAL (SHALL requirement) or WARNING (SHOULD/MAY)
 
-### Phase 3: Check Contract Satisfaction
+### Phase 4: Check Contract Satisfaction
 
-Skip requirements already flagged as missing in Phase 2 — check contract satisfaction only for requirements that are implemented.
+Skip requirements already flagged as missing in Phase 3 — check contract satisfaction only for requirements that are implemented.
 
 For each implemented requirement:
 
@@ -81,7 +93,7 @@ For each implemented requirement:
 4. Consider whether the implementation honors the broader claim beyond the stated scenarios (e.g., if the requirement says "for any query satisfying C, the system SHALL return no relevant results," check that the implementation doesn't only work on the scenario examples).
 5. Flag deviations as CRITICAL (contradicts requirement or scenario) or WARNING (partially meets it, or honors scenarios but appears to violate the broader claim).
 
-### Phase 4: Check Scenario Coverage
+### Phase 5: Check Scenario Coverage
 
 For each requirement, assess whether its scenarios meaningfully sample the contract claim.
 This is a coverage heuristic, not a formal check — it guards against requirements whose scenarios are too thin to catch a plausible failure.
@@ -99,7 +111,7 @@ Coverage smells to flag as WARNING:
 
 Flag as SUGGESTION (not WARNING) if the requirement is narrow and a single scenario is adequate.
 
-### Phase 5: Check Conformance (if schemas configured)
+### Phase 6: Check Conformance (if schemas configured)
 
 If `.specs/.sdd/schema-config.yaml` exists:
 
@@ -120,14 +132,14 @@ If `.specs/.sdd/schema-config.yaml` exists:
 If no schema config exists, skip silently.
 Note in report if `schemas/expected.md` exists but extraction was not configured.
 
-### Phase 6: Check Coherence
+### Phase 7: Check Coherence
 
 If `design.md` exists:
 
 1. For each decision in `design.md`, verify the implementation follows it
 2. Flag deviations as CRITICAL (contradicts explicit decision) or WARNING (diverges without documentation)
 
-### Phase 7: Produce Report
+### Phase 8: Produce Report
 
 ```markdown
 # Verification Report: {Change Name}
@@ -187,6 +199,7 @@ Ready for `sdd-sync`.
 ## Common Mistakes
 
 - Failing to read all artifacts before reporting
+- Skipping the full test suite, narrowing to changed files only, or trusting a prior local run instead of executing it now — verification rests on observed behavior, so the suite must run as part of this skill
 - Treating SUGGESTION-level issues as blockers
 - Skipping graceful degradation — running verify is valid even with incomplete artifacts
 - Not reading baseline specs for full behavioral context
