@@ -24,6 +24,37 @@ Check off each task as it completes.
 
 Do not proceed without tasks.md.
 
+## Critical Constraints
+
+**Never reference ephemeral scaffolding in any persisted artifact.**
+
+Ephemeral scaffolding includes:
+
+- Task IDs and task numbers (e.g. `Task 7.4`, `T12`)
+- Group names and group numbers (e.g. `Group 8`, `G3`)
+- Design-section IDs (e.g. `D12`, `design §4.2`)
+- Other planning-artifact identifiers that won't outlive the change
+
+These must not appear in:
+
+- Code, symbols, or filenames
+- Comments or docstrings
+- Commit messages (subject, body, or footer)
+- PR titles or descriptions
+- Any other artifact that persists after the change is archived
+
+Tasks, groups, and design-section IDs are scaffolding for the current change.
+Once archived, only the spec name persists — references to ephemeral IDs become meaningless noise to future readers.
+Name things after _what they do_, not where they came from in `tasks.md` or `design.md`.
+If you catch yourself writing "D12 wiring" or "Task 7.4 implementation," restate it in terms of the behavior or component being changed.
+
+**This applies whether or not the `commit-message` skill is available.**
+When drafting a commit message during apply:
+
+- Prefer invoking `commit-message` if it is loadable in this environment.
+- Otherwise, draft a Conventional Commit (`type(scope): subject`) that describes _what changed and why_, and apply the constraints above.
+- Do not paste design or task identifiers into the message even if they appear in the surrounding tasks/design files.
+
 ## When to Use
 
 - A change has `tasks.md` and implementation should begin or continue
@@ -71,11 +102,7 @@ For each unchecked task:
 
 Follow design decisions in `design.md` — don't diverge without reason.
 Follow behavioral requirements in delta specs — these define what "correct" means.
-
-**Never reference task IDs, task numbers, or group names in code, comments, or commit messages.**
-Tasks and groups are ephemeral scaffolding — only the spec name persists after the change is archived.
-References like `# Task 7.4` or `"""Unit tests for Group 8: ...` become meaningless noise once the change is closed.
-Name things after _what they do_, not where they came from in the task list.
+Apply the **Critical Constraints** above to every artifact you produce — code, comments, and commit messages alike.
 
 If `.specs/.sdd/schema-config.yaml` exists and a task consumes a schema contract that is not yet defined, pause before implementing it.
 Surface the dependency gap and confirm with the user whether to reorder tasks in `tasks.md` first.
@@ -106,7 +133,8 @@ This skill can be invoked at any point after `tasks.md` exists — not only when
 - Continuing past a failed task without resolving it
 - Diverging from design decisions without documenting why
 - Treating artifacts as frozen when implementation reveals issues (update them)
-- Referencing task IDs, task numbers, or group names in code, comments, or commit messages (tasks and groups are ephemeral; name things after what they do)
+- Referencing ephemeral scaffolding — task IDs, group names, design-section IDs (e.g. `D12`) — in code, comments, commit messages, or PR descriptions (see **Critical Constraints**)
+- Drafting a commit message inline without invoking `commit-message` when it is available, or without applying the **Critical Constraints** when it is not
 
 ## References
 
