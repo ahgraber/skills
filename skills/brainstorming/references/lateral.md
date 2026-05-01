@@ -44,6 +44,10 @@ Three default lenses, all domain-agnostic — must be instantiated for the curre
 - **Analogist** — asks "what is this like in [unrelated domain]?"
   (nature, cooking, sports, architecture, jazz, games, storytelling).
   Good for structural reframings.
+  **Structural, not surface.**
+  "Uber for X" is surface analogy (borrowing a brand shape).
+  "A two-sided marketplace solving a trust problem between strangers" is structural (borrowing the mechanism).
+  Reject angles that name a famous product as the analogy without naming the underlying mechanism — they import the surface and miss the transferable insight.
 - **Trickster** — child-like literal curiosity fused with mischief.
   Asks dumb/obvious questions, subverts framing, proposes the "wrong" version to expose hidden assumptions.
 

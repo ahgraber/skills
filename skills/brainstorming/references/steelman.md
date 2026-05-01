@@ -93,6 +93,34 @@ Pick the 2–4 lenses most relevant for the domain.
 - Software rollout: adversary + future-self + audience
 - Compliance review: skeptic + adversary
 
+## Assumption-audit triage
+
+Always available as a structuring pass during arbiter synthesis — separates kill-risks from nice-to-haves so the user knows what has to be true before committing.
+
+Sort the proposal's load-bearing assumptions into three buckets:
+
+- **Must-be-true (kill-risks)** — if wrong, the proposal doesn't work at all.
+  Validate before building.
+- **Should-be-true (shape-risks)** — if wrong, the proposal still works but the approach has to change (different go-to-market, different mechanism, different audience).
+  Validate early.
+- **Might-be-true (nice-to-haves)** — secondary or optimization assumptions.
+  Don't validate until the core is proven.
+
+Useful when the user is enthusiastic but hasn't named what they're betting on, or when the proposal smuggles assumptions that look like premises.
+Surface kill-risks explicitly in the refined proposal — never bury them under shape-risks.
+
+## Domain-specific lenses (product / software)
+
+Use these in addition to the general lenses when the proposal is a product or feature, not when steelmanning a talk, blog post, name, or activity.
+
+- **Painkiller vs. vitamin** — does this solve an acute, frequent problem people have built workarounds for, or is it a "nice to have" they'll nod at and ignore?
+  Signs of painkiller: users describe the problem with emotion, have hacked together substitutes, will switch from current behavior.
+  Signs of vitamin: "that's cool" then no behavior change.
+  Vitamins are not disqualifying, but they need a different go-to-market story and the user should know which they're building.
+- **Differentiation hierarchy** — rank the proposal's claim to be different on this scale (strongest to weakest): new capability (previously impossible) → 10x improvement on a key dimension → new audience (existing capability for excluded users) → new context (works where existing solutions fail) → better UX (same capability, simpler) → cheaper (same thing, lower cost).
+  "Cheaper" and "better UX" are durable only with a structural reason — otherwise easily competed away.
+  If the differentiation is entirely about the builder's tech stack, not the user's experience, flag it.
+
 ## Arbiter output
 
 Refined proposal that:
