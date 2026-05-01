@@ -9,6 +9,9 @@ description: |-
 Generate SDD artifacts from user intent and existing code.
 Produces either a change directory (for new/modified behavior) or baseline specs (for retroactive documentation).
 
+This skill is an **orchestrator** that coordinates a multi-phase workflow.
+The orchestrator holds full context across phases; subagents are dispatched for scoped work that benefits from context isolation.
+
 > `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
 > Replace `.specs/` with your project's actual specs root in all paths below.
 
@@ -27,6 +30,7 @@ Produces either a change directory (for new/modified behavior) or baseline specs
 
 - Translating specs from another tool — use `sdd-translate`
 - No codebase and no existing behavior — use `sdd-propose` directly
+- Exploring a problem before deciding what to spec — use `sdd-explore`
 
 ## Determine Output Type
 
@@ -52,21 +56,71 @@ digraph output_type {
 }
 ```
 
-**Greenfield check:** When `.specs/specs/` does not exist, survey the codebase (Phase 2) before deciding output type.
-If the survey finds no relevant implementation for the target capability, generate a change directory with ADDED-only delta specs — not baseline specs.
+**Greenfield check:** When `.specs/specs/` does not exist, run discovery (Phase 2) before deciding output type.
+If discovery finds no relevant implementation for the target capability, generate a change directory with ADDED-only delta specs — not baseline specs.
 This prevents `.specs/specs/` from asserting behavior that hasn't been built yet.
 
-## Process
+## Workflow
 
 ### Checklist
 
 - [ ] Phase 1: Understand User Intent
-- [ ] Phase 2: Analyze Existing Code
-- [ ] Phase 3: Schema Discovery
-- [ ] Phase 4: Assess Scope and Plan Decomposition
-- [ ] Phase 5: Lift Behaviors to Contracts
-- [ ] Phase 6: Generate Artifacts
-- [ ] Phase 7: Validate
+- [ ] Phase 2: Discovery (explore + synthesize)
+- [ ] Phase 3: Pre-flight Consent
+- [ ] Phase 4: Per-Capability Derive (Observe + Lift)
+- [ ] Phase 5: Validate
+- [ ] Phase 6: Generate Output
+
+### Subagent Protocol
+
+**Subagents always write to disk.**
+Every subagent (explorer, synthesizer, observer, lifter) persists its output before returning.
+This is unconditional — not gated by capability count or workflow size.
+
+**Output paths are literal absolute paths — never variables.**
+The orchestrator MUST resolve `$TMPDIR` (and any other shell variables) before composing a subagent prompt.
+Subagent prompts MUST contain literal absolute paths only — `/tmp/claude-501/sdd-derive/<run-id>/...`, never `$TMPDIR/...`.
+Subagents do not consistently expand shell variables; passing the literal `$TMPDIR` produces silent write failures or splits artifacts across `/tmp`, `/var/tmp`, and `$TMPDIR` resolutions.
+
+**Subagents must verify their write and report the byte count.**
+Every subagent's prompt MUST require a verification step: after writing, run `ls -la <path>` and report the byte count inline.
+The orchestrator MUST check that the file exists at the expected path before treating the dispatch as successful.
+A subagent that reports "path written" without verification has not necessarily written anything.
+
+**Subagents read references directly; orchestrator passes only scope.**
+Role-specific instructions (observer discipline, lifter rules, etc.) live in `references/<role>.md` and are dispatched by reference, not by inline duplication.
+The orchestrator's subagent prompt is roughly:
+
+> Read `/absolute/path/to/skills/sdd-derive/references/<role>.md` and follow it as your job description. Below is your specific scope.
+>
+> Capability: `<name>`
+> Files in scope: `<list>`
+> External-surface candidates (user-confirmed): `<list>`
+> Output path: `<literal absolute path>`
+>
+> After writing, run `ls -la <path>` and report byte count.
+
+This keeps orchestrator prompts ~80 words each and centralizes role discipline in one canonical location.
+
+**Subagents return decision-relevant data, not artifact content.**
+Full artifact prose (observation lists, spec text, validation details) lives on disk.
+What the orchestrator needs inline varies by subagent role:
+
+| Subagent    | Return inline                                                                             |
+| ----------- | ----------------------------------------------------------------------------------------- |
+| Explorer    | path written, byte count, technique, finding count, anomalies                             |
+| Synthesizer | **full capability menu** (needed for Phase 3 consent), path written, byte count           |
+| Observer    | path written, byte count, observation count, surface item count, anomalies                |
+| Lifter      | path written, byte count, requirement count, scenario count, uncertainty count, anomalies |
+
+The synthesizer is the exception: its capability menu is structured, bounded, and the orchestrator must present it to the user — return it inline.
+For all other subagents, if the orchestrator needs more detail than the summary provides, it reads the specific file.
+
+**The orchestrator tracks a manifest, not content.**
+The orchestrator's job is: decide what runs, track what completed (file path + counts + status), detect failures, and trigger the next phase.
+It never holds artifact text in context — that lives on disk.
+To review or act on a specific artifact, the orchestrator reads or searches within that one file.
+It does not re-ingest all outputs at once.
 
 ### Phase 1: Understand User Intent
 
@@ -81,7 +135,23 @@ Extract from the request:
 
 Don't speculate on large surface areas — confirm scope before generating anything.
 
-### Phase 2: Analyze Existing Code
+### Phase 2: Discovery
+
+Discovery is a phase, not a single subagent.
+The orchestrator makes two sequential calls:
+
+1. **`discovery-explore`** — fan out parallel explorer subagents, one per technique (call graph, naive AST, data-flow / channel inventory, port / interface inventory, schema artifacts, test-suite — see `references/discovery.md` for the full set and per-explorer guidance).
+   Each explorer emits structured findings using the explorer schema.
+
+2. **`discovery-synthesize`** — single synthesizer subagent consumes all explorer outputs, reconciles agreements and disagreements, and produces a **capability menu** containing:
+
+   - Candidate capabilities with file scope and cost estimate
+   - Overlaps between capabilities (call graph + state coupling)
+   - External-surface candidates (consumed and exposed)
+   - Axis disagreements (where explorers disagreed about boundaries)
+   - Gotchas (god-modules, single-cluster degeneracy, missing language coverage, etc.)
+
+See `references/discovery.md` for the full explorer schema, synthesizer expectations, and loop semantics.
 
 **One-time suggestion:** Check `.specs/.sdd/suggested-tools`.
 
@@ -90,152 +160,119 @@ Don't speculate on large surface areas — confirm scope before generating anyth
 - If already listed: skip the suggestion.
 
 > **Suggestion (first run only):**
-> `code-review-graph` is a CLI tool that builds a structural AST graph of your codebase. It improves codebase analysis — entry points, dependency chains, and capability boundaries — compared to ad-hoc file reading. Install: `uv tool install code-review-graph`. Say "skip" to dismiss. This won't appear again.
+> `code-review-graph` is a CLI tool that builds a structural AST graph of your codebase. It improves discovery's call-graph explorer with communities, bridge nodes, and impact-radius signals. Install: `uv tool install code-review-graph`. Say "skip" to dismiss. This won't appear again.
 
-**Optional: Graph-Aided Survey** (if `code-review-graph` is installed)
+If `code-review-graph` is not installed, the call-graph explorer falls back to a naive AST traversal — discovery still functions, with reduced fidelity for community detection.
 
-1. Build or update the graph: `code-review-graph build`
-2. Query entry points and blast radius for the target capability
-3. Use graph findings to guide the targeted file reading below — skip files the graph shows are unrelated
+**Schema config suggestion (when applicable, one-time):** if the schema-artifact explorer detected schema files (OpenAPI, Protobuf, GraphQL, SQL schemas, etc.) and `.specs/.sdd/schema-config.yaml` does not exist, present the suggestion below.
+This is a separate one-time prompt from the `code-review-graph` suggestion above; track via `.specs/.sdd/suggested-tools` with the marker `schema-config`.
 
-If not installed, proceed with the manual survey.
+> **Suggestion (first run only when schemas detected):**
+> Detected schema artifacts: `<files>`. Consider creating `.specs/.sdd/schema-config.yaml` to configure schema extraction commands. This enables the schema-artifact explorer to generate snapshots, diff authored vs generated schemas, and surface drift. See `references/sdd-schema.md` § 3 for the format. Say "skip" to dismiss. This won't appear again.
 
-**Code Survey**
+If declined, the schema-artifact explorer reports `not_applicable` for snapshot generation and runs detection-only.
 
-Survey the codebase for the relevant capability:
+### Phase 3: Pre-flight Consent
 
-1. **Find high-value files:**
+Users typically lack the architectural ground-truth to answer overlap-ownership and external-surface-classification questions.
+The orchestrator therefore commits sensible defaults and only escalates to the user on flagged conditions.
 
-   - Entry points, routes, controllers
-   - Service / business logic files
-   - Schema / model / type files
-   - Config or environment files
+**Default decisions (applied silently unless an escalation condition fires):**
 
-2. **Extract observable behavior** (not internals):
+- **Capability selection** — pre-select all candidates with `confidence >= medium` from the synthesizer's menu.
+- **Overlap primary-owner** — capability with the most edges to the bridge wins; ties broken alphabetically.
+- **External-surface owned vs 3rd-party** — take each candidate's classification as-is when explorer confidence is `>= medium`.
 
-   - What inputs are accepted?
-     What are the shapes?
-   - What outputs or side effects occur?
-   - What validations or business rules apply?
-   - What error conditions exist?
+**Escalation conditions (orchestrator MUST prompt the user):**
 
-3. **Identify capability boundaries** — if the request spans multiple unrelated concerns, plan decomposition.
+- **Single-cluster degeneracy** flagged by the synthesizer (decomposition is non-trivial; user picks the partitioning axis).
+- **Axis disagreements** between explorers on capability boundaries (user resolves which boundary to keep).
+- **Universally low confidence** on capability candidates (< medium across the menu).
+- **Cost threshold exceeded** — capability count > 6 OR file count > 100.
+  Show estimated dispatches and file count; user confirms before proceeding.
+- **External-surface classification has medium-vs-high split** (e.g., one explorer says owned, another says 3rd-party).
 
-### Phase 3: Schema Discovery (if applicable)
+When no escalation condition fires, present a brief summary (capabilities + counts + cost) and proceed.
+When any condition fires, present only the flagged item and ask one targeted question.
 
-After the code survey, check for machine-readable schema artifacts.
-This runs in parallel with the code survey — use whichever source provides higher-fidelity evidence.
+**Loop semantics:** if the user requests refinement, the orchestrator must clarify the request unless it is entirely unambiguous.
+Refinement options:
 
-1. **Detect schema artifacts** — look for: committed specs (`openapi.yaml`, `swagger.json`, `openapi.json`, `docs/api/`, `openapi/`); schema files (`.proto`, `.graphql`, `.prisma`, `.avsc`, `schema.sql`); or framework markers implying runtime schema generation (FastAPI, NestJS, Spring Boot, DRF, Rails API, Go Echo/Gin, Laravel, GraphQL servers, gRPC).
-   See `references/sdd-schema.md` § 3 for config examples.
+- Re-run synthesizer alone with new instructions (cheap — preferred for "treat A and B as one")
+- Re-run a specific explorer with adjusted scope (medium — for "ignore vendor/")
+- Re-run all explorers (expensive — only if scope changes substantively)
 
-2. **Check for `.specs/.sdd/schema-config.yaml`** — if it exists, use the configured extraction commands.
-   If not, and schema artifacts were detected, suggest creating one (one-time, using the `suggested-tools` pattern):
+### Phase 4: Per-Capability Derive
 
-   > "Detected `<files>`. > Consider creating `.specs/.sdd/schema-config.yaml` to configure schema extraction for SDD verification. > See `references/sdd-schema.md` § 3 for the format. > Say 'skip' to dismiss."
+For each selected capability, dispatch sequentially:
 
-3. **Generate snapshots** — if extraction is configured, run the commands and store output in `.specs/schemas/`.
+1. **Observer subagent** — reads the capability's file scope (community + bridges + schema/test artifacts).
+   Emits:
 
-4. **Diff authored vs. generated** — if the repo contains a committed authored schema (e.g., `docs/openapi.yaml`) and a generated snapshot was produced, diff them:
+   - **Observations list** (behavior-grain entries with code references, evidence-class tags, confidence)
+   - **Surface inventory** (env vars, CLI flags, public routes, exported symbols, etc.)
 
-   - Paths in authored but not generated → aspirational (planned but not yet implemented)
-   - Paths in generated but not authored → undocumented drift
-   - Type or shape mismatches → potential bugs or stale spec
-     Use these findings to inform requirement writing: aspirational paths suggest ADDED candidates; undocumented drift suggests missing requirements.
+The observer's full job description lives in `references/observer.md`.
+The orchestrator dispatches by reference (see § Subagent Protocol), passing only the per-capability scope.
 
-5. **Enrich generated specs** — where a requirement maps to a specific schema path, add a `**Schema reference:**` annotation to the relevant scenario (see `references/sdd-schema.md` § 1 for the format).
+2. **Lifter subagent** — reads observations + surface inventory + capability metadata.
+   Has bounded source access for **verification** (not exploration).
+   Emits:
 
-### Phase 4: Assess Scope and Plan Decomposition
+   - Lifted contracts and spec content (delta or baseline format per Output Type decision)
+   - Optional `## Uncertainties` section (omitted when empty)
 
-| Signal            | Action                                       |
-| ----------------- | -------------------------------------------- |
-| ≤ 8 requirements  | Single capability, proceed                   |
-| 9–20 requirements | Split into 2–4 capabilities, proceed         |
-| 20+ requirements  | Present split to user, wait for confirmation |
+   The lifter's full job description (lift rules per tag, verification discipline, self-check checklist) lives in `references/lifter.md`.
 
-When splitting, tell the user before generating:
+Capabilities run in parallel across each other; observer/lifter is sequential within a capability.
 
-```text
-This covers 3 capabilities. I'll generate:
-- auth/         → login, session, token management
-- profile/      → user settings, preferences
-- permissions/  → role-based access control
+### Phase 5: Validate
 
-Proceed with this split? (or suggest changes)
+Validation runs in two places — at the lifter (per capability, before return) and at the orchestrator (across the whole run).
+
+**Per-capability validation (lifter, in Phase 4).**
+Each lifter runs the validator against its own output before returning:
+
+```bash
+uv run --quiet <skill_root>/references/validate.py --single <observations.yaml> <spec.md>
 ```
 
-### Phase 5: Lift Behaviors to Contracts
+If the validator returns FAIL, the lifter fixes the listed failures and re-runs until PASS.
+This catches format drift at write time and avoids round-tripping a corrective lifter pass through the orchestrator.
+See `references/lifter.md` § Self-check before returning.
 
-`sdd-derive` starts from mechanism — the code you just surveyed _is_ the implementation.
-Before writing any requirement, translate from "what the code does" to "what property the code maintains."
-This lift step is the skill's distinguishing move; without it, requirements echo code structure instead of stating contracts.
+**Aggregate validation (orchestrator, this phase).**
+After all capabilities have lifted, the orchestrator runs the validator across the whole run:
 
-**Read `references/sdd-spec-formats.md` § 1 before lifting.**
-It defines contract shapes (guarantee / invariant / prohibition / precondition-consequence / observable-state relationship) and the authoring primitive.
+```bash
+uv run --quiet <skill_root>/references/validate.py <observations_dir> <specs_dir>
+```
 
-**For each observable behavior from Phase 2, ask: what property of the system does this code maintain?**
+The aggregate report covers:
 
-Worked example:
+- **Format check** (regex) — generation note, `## Purpose` (baseline), `### Requirement: <Name>` headings, `#### Scenario:` blocks with bold `**GIVEN**`/`**WHEN**`/`**THEN**`, no delta markers in baseline, `## Uncertainties` only-when-non-empty.
+- **YAML parse check** — every observation YAML must `yaml.safe_load` cleanly; failures surface file:line.
+- **Surface coverage diff** (kind-aware) — public-consumer surfaces (`http_route`, `cli_command`, `published_event`, `exported_symbol`) absent from spec are **gaps**; internal-knob surfaces (`env_var`, `config_key`, `cli_flag`) absent are **acknowledged-without-scenario** (lift discipline correctly excludes most config from contracts).
+- **Uncertainty review** — count items in each spec's `## Uncertainties` section.
 
-| Observed in code                                                                                                        | Naive echo (wrong)                                                                                 | Lifted contract (right)                                                                                                                   |
-| ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `UserService.activate()` runs `db.users.update(is_active=True, updated_at=now())` and enqueues a confirmation email job | "The system SHALL update `users.is_active` to true and send a confirmation email on `activate()`." | "Given an inactive user account, when the account is activated, the account SHALL be in the active state and the user SHALL be notified." |
-| `search()` filters by `tfidf_score > 0.3` then sorts descending                                                         | "The search SHALL filter terms by TF-IDF > 0.3 and sort descending."                               | "The search SHALL return documents ranked by relevance to the query, with the most relevant first."                                       |
+The aggregate run should be a no-op for format/YAML if lifters did their per-capability validation — failures here indicate a lifter that skipped its self-check.
+Surface coverage gaps and uncertainty totals are the substantive output of this phase; the orchestrator surfaces them in the final report.
 
-Rules for lifting:
+If a spec fails format check at this stage, dispatch a corrective lifter pass with the specific failures cited.
+If an observation YAML fails parse, dispatch a corrective observer pass.
+See `references/validate.md` for severity rules and report format.
 
-- Pair each code behavior with the property it serves.
-  One-to-many is fine; a single code path often serves several properties.
-- Name the property, not the path.
-  If you can't articulate the property, you don't have a requirement yet — you have a mechanism.
-- When a chosen algorithm, threshold, or data structure appears in the code, record it as a design note for Phase 6 generation (it will surface later if the user runs `sdd-propose` for a full artifact set).
-  The _property the algorithm produces_ is the contract; the algorithm is not.
-- If the property is universal over a space of inputs, state it universally — "for any {input class}, the system SHALL {outcome}."
+### Phase 6: Generate Output
 
-Output of this phase: a list of lifted contracts per capability, ready to format in Phase 6.
+Write the spec artifacts.
+Add a generation note at the top of each generated spec:
 
-### Phase 6A: Change Directory (new or modified behavior)
+> Generated from code analysis on {date}, as-of commit {sha}
 
-Create `.specs/changes/<change-name>/` with artifacts in this order:
+Clear ephemeral observations once specs are written.
+The commit SHA is the canonical anchor for re-derivation.
 
-1. `proposal.md` — intent, scope, approach
-2. `specs/<capability>/spec.md` — delta specs (ADDED/MODIFIED/REMOVED sections)
-3. `tasks.md` — when implementation steps are clear from code analysis
-
-Note: sdd-derive produces a **partial** change directory — no `design.md`.
-If the user needs a full artifact set including design decisions, use `sdd-propose` instead. sdd-derive is optimized for code-first derivation; sdd-propose is the complete change creation workflow.
-
-See `references/sdd-change-formats.md` (proposal, tasks) and `references/sdd-spec-formats.md` (delta specs) for the formats.
-
-Write each requirement from the lifted contracts produced in Phase 5 — not from the code directly.
-If a draft requirement still names a function, class, table, or library from the code, return to Phase 5 and re-lift that behavior.
-
-Add a generation note at the top of each delta spec:
-
-> Generated from code analysis on {date}
-> Source files: {list of analyzed files}
-
-### Phase 6B: Baseline Specs (retroactive documentation)
-
-Create `.specs/specs/<capability>/spec.md` per capability.
-
-See `references/sdd-spec-formats.md` for the baseline spec format.
-
-Add a generation note at the top of each spec:
-
-> Generated from code analysis on {date}
-> Source files: {list of analyzed files}
-
-### Phase 7: Validate
-
-- [ ] Requirements use RFC 2119 keywords (SHALL/MUST/SHOULD/MAY)
-- [ ] Scenarios use `#### Scenario:` with **GIVEN**/**WHEN**/**THEN** (bold, exact casing)
-- [ ] Each requirement is a lifted contract, not a restatement of code structure — states the property the code maintains, not the code's actions (see `references/sdd-spec-formats.md` § 1 and the Phase 5 worked example)
-- [ ] Delta specs (change directory) use ADDED/MODIFIED/REMOVED sections
-- [ ] Baseline specs have no delta markers
-- [ ] Baseline specs include a `## Purpose` section
-- [ ] Each generated spec has a generation note blockquote (date and source files listed)
-- [ ] Large surface areas are decomposed into multiple capability specs
+See `references/derive-spec-additions.md` for the `## Uncertainties` section format and the as-of anchor placement.
 
 ## Output
 
@@ -249,21 +286,34 @@ Add a generation note at the top of each spec:
 
 - `.specs/specs/<capability>/spec.md` per capability
 
-Report: capabilities covered, requirement count, assumptions made.
+Note: `sdd-derive` produces a **partial** change directory — no `design.md`.
+If the user needs a full artifact set including design decisions, use `sdd-propose` instead.
+
+Report after generation: capabilities covered, requirement count, uncertainties count, surface coverage gaps.
 
 ## Common Mistakes
 
-- Skipping the Phase 5 lift step and writing requirements directly from code — this is the dominant failure mode in `sdd-derive` and produces specs that faithfully describe mechanism instead of contract
-- Generating one massive spec for a large surface area instead of decomposing by capability
-- Using delta format (ADDED/MODIFIED/REMOVED) in baseline `.specs/specs/` files
-- Using baseline format (no delta markers) in change directory specs
-- Generating specs without reading relevant code first
-- Speculating on scope rather than asking when the request is ambiguous
-- Writing baseline specs in a greenfield project — `.specs/specs/` asserts implemented behavior; if nothing is built yet, use a change directory with ADDED-only delta specs
+- **Skipping the lift step** — writing requirements directly from observations.
+  The lifter must translate "what code does" to "what property the code maintains" per the evidence-class taxonomy in `references/evidence-class-taxonomy.md`.
+- **Promoting an algorithm to a contract** — when the `algorithmic` tag is set, the lifter must apply the strategy check and emit an Uncertainty rather than freezing the algorithm as the contract.
+- **Generating one massive spec for a large surface area** — discovery's capability menu is the decomposition; respect it.
+- **Lifter exploring source instead of verifying** — source access is reactive (in response to a specific question raised by an observation), not proactive.
+  See `references/lifter.md` § Verification Discipline.
+- **Using delta format in baseline `.specs/specs/`** or vice versa — the Output Type decision determines which.
+- **Writing baseline specs in a greenfield project** — `.specs/specs/` asserts implemented behavior.
+  If nothing is built yet, use a change directory with ADDED-only delta specs.
+- **Silently truncating when an observer hits its budget** — if a capability is too large to observe in one pass, the orchestrator must split before dispatch (Phase 3 pre-flight).
+  Mid-run truncation is forbidden.
 
 ## References
 
-- `references/sdd-spec-formats.md` — baseline spec, delta spec, scenario formats
-- `references/sdd-change-formats.md` — proposal, design, tasks formats
-- `references/sdd-schema.md` — schema artifacts and lifecycle policy
+- `references/discovery.md` — explorer schema, synthesizer expectations, loop semantics
+- `references/evidence-class-taxonomy.md` — the 7+1 tag definitions and composition rules
+- `references/observer.md` — observation entry shape, surface inventory shape, observer prompt template
+- `references/lifter.md` — lift rules per tag, verification discipline, lifter prompt template
+- `references/validate.md` — surface coverage diff, Phase 7 checklist
+- `references/derive-spec-additions.md` — `## Uncertainties` section, as-of anchor (derive-specific spec additions)
+- `references/sdd-spec-formats.md` — baseline spec, delta spec, scenario formats (shared)
+- `references/sdd-change-formats.md` — proposal, design, tasks formats (shared)
+- `references/sdd-schema.md` — schema artifacts and lifecycle policy (shared)
 - `references/sdd-derive-output-type.dot` — canonical DOT source for the output type decision above
