@@ -61,25 +61,31 @@ For each change:
 4. **Orphaned code**: when functions were deleted or replaced, verify nothing was left unreferenced.
    When graph is available: use `refactor_tool(mode="dead_code")` per the integration reference.
 
+Before recommending deletion of code that looks redundant or dead, apply Chesterton's Fence: check git blame, nearby comments, and tests to understand _why_ it was written.
+If the original reason still applies (platform quirk, perf workaround, edge case), keep it.
+"I don't see why this is here" is not the same as "this isn't needed."
+
 ### Agent 2: Code Quality Review
 
 Review the same changes for hacky patterns:
 
-1. **Redundant state**: state that duplicates existing state, cached values that could be derived, observers/effects that could be direct calls
-2. **Parameter sprawl**: adding new parameters to a function instead of generalizing or restructuring existing ones
-3. **Copy-paste with slight variation**: near-duplicate code blocks that should be unified with a shared abstraction
-4. **Leaky abstractions**: exposing internal details that should be encapsulated, or breaking existing abstraction boundaries.
-   When graph is available: use `get_impact_radius_tool` per the integration reference.
-5. **Stringly-typed code**: using raw strings where constants, enums (string unions), or branded types already exist in the codebase
-6. **Oversized functions**: functions that have grown beyond reasonable length.
-   When graph is available: use `find_large_functions_tool` per the integration reference.
-7. **Broken contracts**: changed function signatures, return types, or behavioral contracts that leave callers out of sync.
-   Grep for callers in the codebase and verify they still match.
-   When graph is available: use `query_graph_tool("callers_of")` and `query_graph_tool("inheritors_of")` per the integration reference.
-8. **Test coverage gaps**: behavior changes without corresponding test updates.
-   Search for test files that exercise the changed functions.
-   When graph is available: use `query_graph_tool("tests_for")` per the integration reference.
-9. **Unnecessary comments**: comments explaining WHAT the code does (well-named identifiers already do that), narrating the change, or referencing the task/caller — delete; keep only non-obvious WHY (hidden constraints, subtle invariants, workarounds)
+01. **Redundant state**: state that duplicates existing state, cached values that could be derived, observers/effects that could be direct calls
+02. **Parameter sprawl**: adding new parameters to a function instead of generalizing or restructuring existing ones
+03. **Copy-paste with slight variation**: near-duplicate code blocks that should be unified with a shared abstraction
+04. **Leaky abstractions**: exposing internal details that should be encapsulated, or breaking existing abstraction boundaries.
+    When graph is available: use `get_impact_radius_tool` per the integration reference.
+05. **Stringly-typed code**: using raw strings where constants, enums (string unions), or branded types already exist in the codebase
+06. **Oversized functions**: functions that have grown beyond reasonable length.
+    When graph is available: use `find_large_functions_tool` per the integration reference.
+07. **Broken contracts**: changed function signatures, return types, or behavioral contracts that leave callers out of sync.
+    Grep for callers in the codebase and verify they still match.
+    When graph is available: use `query_graph_tool("callers_of")` and `query_graph_tool("inheritors_of")` per the integration reference.
+08. **Test coverage gaps**: behavior changes without corresponding test updates.
+    Search for test files that exercise the changed functions.
+    When graph is available: use `query_graph_tool("tests_for")` per the integration reference.
+09. **Unnecessary comments**: comments explaining WHAT the code does (well-named identifiers already do that), narrating the change, or referencing the task/caller — delete; keep only non-obvious WHY (hidden constraints, subtle invariants, workarounds)
+10. **Poor names**: generic placeholders (`data`, `result`, `tmp`, `val`, `item`) where a content-bearing name fits; non-standard abbreviations (`usr`, `cfg`, `evt`) where full words read better; misleading names (a `get*` that mutates, an `is*` that returns a non-boolean).
+    Match the codebase's existing naming conventions rather than imposing new ones.
 
 ### Agent 3: Efficiency Review
 
@@ -102,6 +108,14 @@ Review the same changes for efficiency:
 Wait for all three agents to complete.
 Aggregate their findings and fix each issue directly.
 If a finding is a false positive or not worth addressing, note it and move on — do not argue with the finding, just skip it.
+
+**Preserve behavior exactly.**
+Fixes must keep inputs, outputs, side effects, ordering, and error paths identical.
+If a fix requires editing existing tests to pass, that's a signal you changed behavior — revert and reconsider rather than updating the tests to match.
+
+**Stay in scope.**
+Fix what the agents flagged in the changed code; don't drive-by refactor unrelated code.
+If a fix's blast radius grows beyond the original diff, surface it to the user instead of silently expanding the change.
 
 When done, briefly summarize what was fixed (or confirm the code was already clean).
 
