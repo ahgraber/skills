@@ -48,6 +48,7 @@ Act as a senior engineer: thorough, pragmatic, impact-first.
 | Structure & Maintainability | Coupling, duplication, separation of concerns                                                                                |
 | Best Practices              | Language/framework conventions, SOLID, DRY                                                                                   |
 | Test Adequacy               | Missing tests for behavior changes, regression gaps                                                                          |
+| Performance                 | N+1 queries, unbounded loops/fan-out, missing pagination, sync calls in hot paths, large allocations, missed async           |
 | Security & Risk             | OWASP Top 10: access control, injection, crypto, auth, supply chain, logging, error handling — use `securing-code` checklist |
 | Documentation               | Misleading comments, missing doc for public API                                                                              |
 
@@ -158,7 +159,9 @@ Skip the single-agent steps below — the reference doc drives this path end-to-
 **Single-agent path** (default):
 
 For each changed file or module, summarize what changed and why.
-Evaluate each area in the Quick Reference table above.
+Review tests before implementation: do tests exist for the changed behavior, do they assert behavior (not internals), do they cover edge cases and regressions?
+Test gaps shape what to scrutinize in the implementation pass.
+Then evaluate each area in the Quick Reference table above.
 
 Rules:
 
