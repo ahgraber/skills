@@ -5,15 +5,15 @@ digraph output_type {
     // Greenfield projects (no code) always use a change directory.
 
     ".specs/specs/ exists?" [shape=diamond];
-    "Codebase has relevant\nimplementation?" [shape=diamond];
+    "Codebase has relevant\nimplementation?\n(answered by Phase 2 discovery)" [shape=diamond];
     "New or existing behavior?" [shape=diamond];
     "Generate change directory\n(.specs/changes/<name>/)\nADDED-only delta specs" [shape=box];
     "Generate change directory\n(.specs/changes/<name>/)" [shape=box];
     "Generate baseline specs\n(.specs/specs/)" [shape=box];
 
-    ".specs/specs/ exists?" -> "Codebase has relevant\nimplementation?" [label="no"];
-    "Codebase has relevant\nimplementation?" -> "Generate baseline specs\n(.specs/specs/)" [label="yes — retroactive doc"];
-    "Codebase has relevant\nimplementation?" -> "Generate change directory\n(.specs/changes/<name>/)\nADDED-only delta specs" [label="no — greenfield"];
+    ".specs/specs/ exists?" -> "Codebase has relevant\nimplementation?\n(answered by Phase 2 discovery)" [label="no"];
+    "Codebase has relevant\nimplementation?\n(answered by Phase 2 discovery)" -> "Generate baseline specs\n(.specs/specs/)" [label="yes — retroactive doc"];
+    "Codebase has relevant\nimplementation?\n(answered by Phase 2 discovery)" -> "Generate change directory\n(.specs/changes/<name>/)\nADDED-only delta specs" [label="no — greenfield"];
     ".specs/specs/ exists?" -> "New or existing behavior?" [label="yes"];
     "New or existing behavior?" -> "Generate change directory\n(.specs/changes/<name>/)" [label="new or modified"];
     "New or existing behavior?" -> "Generate baseline specs\n(.specs/specs/)" [label="retroactive doc"];

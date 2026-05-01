@@ -1,0 +1,45 @@
+digraph phase_2_discovery {
+    // Phase 2 explore -> synthesize -> escalation/refinement loop.
+    // KEY INVARIANT: orchestrator commits synthesizer defaults silently
+    // unless an escalation condition fires. Refinement loops choose by cost tier.
+
+    start [label="Phase 2 starts", shape=doublecircle];
+    explorers [label="Dispatch parallel explorers\n(call-graph, data-flow, ports,\nschema, tests)", shape=box];
+    findings [label="Explorers emit findings YAML", shape=box];
+    synth [label="Dispatch synthesizer\nwith all explorer paths", shape=box];
+    menu [label="Synthesizer emits capability menu\n+ escalation flags", shape=box];
+
+    flagged [label="Escalation flagged?", shape=diamond];
+    defaults [label="Apply defaults silently\n(confidence>=medium,\nalpha tiebreak)", shape=box];
+    ask [label="Present flagged item;\nask one targeted question", shape=box];
+
+    decide [label="User continues or refines?", shape=diamond];
+    phase3 [label="Trigger Phase 3", shape=doublecircle];
+    cost [label="Choose refinement cost tier", shape=diamond];
+
+    cheap [label="Re-run synthesizer only\n(cheap)", shape=box];
+    medium [label="Re-run one explorer with\nadjusted scope (medium)", shape=box];
+    expensive [label="Re-run all explorers\n(expensive)", shape=box];
+
+    start -> explorers;
+    explorers -> findings;
+    findings -> synth;
+    synth -> menu;
+    menu -> flagged;
+
+    flagged -> defaults [label="no"];
+    flagged -> ask [label="yes"];
+    defaults -> phase3;
+
+    ask -> decide;
+    decide -> phase3 [label="continue"];
+    decide -> cost [label="refine"];
+
+    cost -> cheap [label="treat A & B as one"];
+    cost -> medium [label="ignore vendor/"];
+    cost -> expensive [label="substantive scope change"];
+
+    cheap -> synth;
+    medium -> findings;
+    expensive -> explorers;
+}

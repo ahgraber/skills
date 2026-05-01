@@ -1,22 +1,20 @@
 # Validate Phase
 
-The validate phase checks the generated specs against three signals: surface coverage, uncertainty count, and Phase 7 quality (format compliance).
-It is **deterministic** — runs as a Python script, not a subagent.
+Check generated specs against three signals: surface coverage, uncertainty count, Phase 7 quality (format compliance).
+**Deterministic** — runs as a Python script, not a subagent.
 
-Validation runs in two places:
+## Where validate runs
 
-- **Per-capability** (lifter, during Phase 4) — each lifter runs `validate.py --single` against its own output before returning.
-  Catches format drift at write time; the lifter fixes failures in place and re-runs until PASS.
-  This avoids round-tripping a corrective lifter pass through the orchestrator.
-- **Aggregate** (orchestrator, this phase) — once all capabilities have completed, the orchestrator runs `validate.py` across the whole run.
-  Aggregate format / YAML / coverage / uncertainty counts feed the final report.
-  If lifters did their self-check, format and YAML failures should be zero here; surface gaps and uncertainty totals are the substantive output.
+- **Per-capability** (lifter, Phase 4): each lifter runs `validate.py --single` on its own output, fixes failures in place, re-runs until PASS.
+  Catches format drift at write time; avoids round-tripping a corrective dispatch.
+- **Aggregate** (orchestrator, Phase 5): once all capabilities complete, run `validate.py` across the whole run.
+  Surface gaps and uncertainty totals are the substantive output; format/YAML failures should be zero if lifters self-checked.
 
 ```bash
-# Lifter mode (single capability; used inside Phase 4)
+# Lifter mode (single capability; Phase 4)
 uv run --quiet <skill_root>/references/validate.py --single <observations.yaml> <spec.md>
 
-# Aggregate mode (whole run; used at Phase 5)
+# Aggregate mode (whole run; Phase 5)
 uv run --quiet <skill_root>/references/validate.py <observations_dir> <specs_dir>
 ```
 
@@ -28,41 +26,35 @@ uv run --quiet <skill_root>/references/validate.py <observations_dir> <specs_dir
 
 ## Surface coverage diff
 
-The diff is **kind-aware** — different surface kinds have different coverage expectations.
+Diff is **kind-aware**: surface kinds have different coverage expectations.
 
-Public-consumer surfaces (callers depend on these directly):
+- **Public-consumer** (callers depend on these directly): `http_route`, `grpc_method`, `cli_command`, `published_event`, `exported_symbol`.
+- **Internal-knob** (operator-tunable; lift correctly excludes most per `sdd-spec-formats.md` § 1.3): `env_var`, `config_key`, `cli_flag`.
 
-- `http_route`, `grpc_method`, `cli_command`, `published_event`, `exported_symbol`
-
-Internal-knob surfaces (operator-tunable; lift discipline correctly excludes most of these from contracts per `sdd-spec-formats.md` § 1.3):
-
-- `env_var`, `config_key`, `cli_flag`
-
-Severity rules:
+Severity:
 
 | Surface kind    | Absent from spec entirely                                             | Mentioned but no scenario         |
 | --------------- | --------------------------------------------------------------------- | --------------------------------- |
 | Public-consumer | **Gap** — flag for user review                                        | **Acknowledged-without-scenario** |
 | Internal-knob   | **Acknowledged-without-scenario** (default — lift correctly excluded) | **Acknowledged-without-scenario** |
 
-Why the asymmetry: contracts state what callers depend on, not internal knobs.
-A `POST /users` route absent from a baseline `conversion-api` spec is a real gap — external consumers depend on the route.
-An env var `AIZK_WORKER_POLL_INTERVAL_SECONDS` absent from the spec is the lifter doing its job — the contract is "a worker SHALL begin processing a queued job within bounded latency", not "polls every 2 seconds."
+Rationale: contracts state what callers depend on, not internal knobs.
+A `POST /users` route absent from a `conversion-api` baseline is a real gap.
+An env var like `AIZK_WORKER_POLL_INTERVAL_SECONDS` absent is the lifter doing its job — the contract is "a worker SHALL begin processing within bounded latency", not "polls every 2 seconds."
 
 Examples:
 
-- A `POST /users` route in inventory that doesn't appear in the spec → **Gap** (consumers break if it changes).
-- A `--verbose` CLI flag absent from spec → **Acknowledged-without-scenario** (operator ergonomics, not contract).
-- An env var `DATABASE_URL` absent from spec → **Acknowledged-without-scenario** (configuration knob).
-- An exported symbol `WorkspaceEscape` absent from spec → **Gap** (callers depend on the exception type).
+- `POST /users` in inventory but not in spec → **Gap**.
+- `--verbose` CLI flag absent → **Acknowledged-without-scenario**.
+- Exported symbol `WorkspaceEscape` absent → **Gap** (callers depend on the exception type).
 
-The validate report groups gaps by capability and lists them.
-Gaps require user review; acknowledged-without-scenario is informational only.
+Group gaps by capability.
+Gaps require user review; acknowledged-without-scenario is informational.
 
 ## Uncertainty review
 
-For each spec, count items in the `## Uncertainties` section (if present).
-Surface to user grouped by capability:
+Count items in each spec's `## Uncertainties` section (if present).
+Surface grouped by capability:
 
 ```text
 Capability "search": 1 uncertainty
@@ -75,14 +67,13 @@ Capability "auth": 2 uncertainties
   - Verified gap in src/auth/middleware.py:42: ...
 ```
 
-A spec with zero uncertainties is the typical, healthy outcome.
-A spec with many uncertainties (>5) suggests insufficient observer scope or unclear capability boundaries — surface this as a meta-concern in the report.
+Zero uncertainties is the typical, healthy outcome. **>5 uncertainties** in one capability suggests insufficient observer scope or unclear capability boundaries — surface as a meta-concern.
 
 ## Phase 7 quality checklist
 
 - [ ] Requirements use RFC 2119 keywords (SHALL/MUST/SHOULD/MAY)
 - [ ] Scenarios use `#### Scenario:` with **GIVEN**/**WHEN**/**THEN** (bold, exact casing)
-- [ ] Each requirement is a lifted contract, not a restatement of code structure — states the property the code maintains, not the code's actions (see `evidence-class-taxonomy.md` for tag-driven rules)
+- [ ] Each requirement is a lifted contract, not a restatement of code structure (see `evidence-class-taxonomy.md` for tag-driven rules)
 - [ ] Algorithm names, thresholds, and hand-tuned constants do NOT appear in contracts unless `algorithmic` strategy was explicitly preserved (with corresponding Uncertainty resolution)
 - [ ] External-surface contracts preserve the external interface verbatim (endpoints, table columns, topic names)
 - [ ] Public-API contracts preserve interface details (route + method, command + flags, exported signatures)
@@ -93,12 +84,10 @@ A spec with many uncertainties (>5) suggests insufficient observer scope or uncl
 - [ ] Baseline specs have no delta markers
 - [ ] Baseline specs include a `## Purpose` section
 - [ ] Each generated spec has a generation note blockquote with date and as-of commit SHA
-- [ ] Large surface areas were decomposed into multiple capability specs (verified by checking the synthesizer's capability menu)
+- [ ] Large surface areas were decomposed into multiple capability specs
 - [ ] `## Uncertainties` section is omitted when empty; present and non-empty when uncertainties exist
 
 ## Validate report format
-
-The orchestrator emits a brief report after validate completes:
 
 ```text
 SDD Derive — Validate Report
@@ -127,15 +116,15 @@ Action items for user:
 3. Add generation note to billing spec
 ```
 
-Action items are listed in priority order: gaps → uncertainties → quality issues.
+Action items in priority order: gaps → uncertainties → quality issues.
 
 ## When validate triggers re-derive
 
-Validate may surface conditions that warrant re-derivation:
+Validate may surface conditions warranting re-derivation:
 
-- Many uncertainties in one capability (>5) — observer scope likely insufficient
-- Many surface coverage gaps — observer missed enumeration
-- Phase 7 quality failures concentrated in one capability — lift discipline failure
+- Many uncertainties in one capability (>5) — observer scope likely insufficient.
+- Many surface coverage gaps — observer missed enumeration.
+- Phase 7 quality failures concentrated in one capability — lift discipline failure.
 
 The orchestrator does NOT auto-trigger re-derive.
-The user decides; re-derive is a user-initiated workflow.
+Re-derive is user-initiated.

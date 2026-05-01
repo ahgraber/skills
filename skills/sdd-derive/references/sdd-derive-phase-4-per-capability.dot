@@ -1,0 +1,30 @@
+digraph phase_4_per_capability {
+    // Phase 4 per-capability flow: observer -> lifter (with self-validate loop).
+    // KEY INVARIANT: lifter self-validates and fixes format drift in place;
+    // the orchestrator never round-trips a corrective dispatch for format failures.
+
+    selected [label="Capability selected\nfrom menu", shape=ellipse];
+    obs_dispatch [label="Dispatch observer\n(file scope, surface candidates,\noutput path)", shape=box];
+    obs_out [label="Observer writes observations.yaml\n(behaviors + tags + surface inventory)", shape=box];
+
+    lift_dispatch [label="Dispatch lifter\n(observations path, metadata,\noutput type, as-of anchor)", shape=box];
+    lift_work [label="Lifter consumes observations\n+ verifies source as needed", shape=box];
+    lift_out [label="Lifter writes spec.md", shape=box];
+
+    validate [label="uv run validate.py --single\n<observations> <spec>", shape=plaintext];
+    pass [label="PASS?", shape=diamond];
+    fix [label="Lifter fixes failures in spec", shape=box];
+
+    done [label="Capability complete:\nreturn path + counts", shape=doublecircle];
+
+    selected -> obs_dispatch;
+    obs_dispatch -> obs_out;
+    obs_out -> lift_dispatch;
+    lift_dispatch -> lift_work;
+    lift_work -> lift_out;
+    lift_out -> validate;
+    validate -> pass;
+    pass -> done [label="yes"];
+    pass -> fix [label="no"];
+    fix -> validate;
+}

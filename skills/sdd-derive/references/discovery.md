@@ -3,30 +3,27 @@
 Discovery is a phase, not a single subagent.
 The orchestrator makes two sequential calls:
 
-1. **`discovery-explore`** — fan out parallel explorer subagents, each running a methodologically distinct technique.
-   Each emits structured findings.
-2. **`discovery-synthesize`** — single synthesizer subagent consumes all explorer outputs, reconciles agreements and disagreements, produces a capability menu with overlaps, external-surface candidates, and gotchas.
+1. **`discovery-explore`** — fan out parallel explorers, each running a methodologically distinct technique.
+2. **`discovery-synthesize`** — single synthesizer reconciles all explorer outputs into a capability menu.
 
-The orchestrator then presents the menu to the user for Pre-flight Consent (SKILL.md Phase 3).
+The orchestrator then presents the menu for Pre-flight Consent (SKILL.md Phase 3).
 
 ## Why parallel explorers + synthesizer
 
-Each explorer is methodologically distinct (graph algorithm, AST traversal, data-flow analysis, framework recognition, schema parsing, test-suite analysis).
 Different techniques surface different signals:
 
-- Call graph alone misses state coupling (shared DB writes, shared topics)
-- AST alone misses runtime DI registration
-- Schema artifacts alone miss undocumented behavior
+- Call graph misses state coupling.
+- AST misses runtime DI.
+- Schema artifacts miss undocumented behavior.
 
-Parallel fan-out gives each technique its own context budget for its own job.
-The synthesizer's role is reconciliation, not exploration — its prompt is specifically about "where do these signals agree, disagree, and what gotchas should the user know about?"
+Fan-out gives each technique its own context budget.
+The synthesizer reconciles; it does not explore.
 
-This is **not** greenfield-style fan-out (many roles wearing one analyzer skill).
-The discriminator is methodological distinctness: each explorer has a different _technique_, not just a different label.
+The discriminator is **methodological distinctness**: each explorer must use a different _technique_, not just a different label.
 
 ## Explorer set
 
-Default explorer set (extensible):
+Default explorers (extensible):
 
 | Explorer          | Technique                                                                                | When to run                                         |
 | ----------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------- |
@@ -38,115 +35,99 @@ Default explorer set (extensible):
 
 Each explorer reports `status: ran | not_applicable | failed` with a one-line `status_reason` when not run.
 
-## Per-explorer guidance
+## Per-explorer instructions
 
-Each explorer has a methodologically distinct procedure.
-The orchestrator dispatches each subagent with the appropriate procedure embedded in its prompt.
+### `call-graph`
 
-### `call-graph` explorer
+Prefer `code-review-graph` (CLI tool building structural AST graph with communities, bridges, hubs, impact radius).
+Fall back to naive AST traversal only if unavailable.
 
-Preferred technique: `code-review-graph` (a CLI tool building a structural AST graph with communities, bridges, hubs, impact radius).
-Fallback: naive AST traversal across the codebase.
+**With `code-review-graph`:**
 
-**With `code-review-graph` available:**
+1. Build/update graph: `code-review-graph build`.
+2. Query communities, hub nodes, and bridges in regions matching user intent.
+3. Query impact radius from entry points to detect cross-region blast.
+4. Drive `references` from graph findings (hub objects, community members, bridge nodes).
+5. Skip files the graph shows are unrelated.
 
-1. Build or update the graph: `code-review-graph build`
-2. Query communities, hub nodes, and bridges in the codebase region matching the user's intent
-3. For each candidate capability, query impact radius from its entry points to detect blast into other regions
-4. Use graph findings to drive `references` in findings — hub objects, community member files, bridge nodes
-5. Skip files the graph shows are unrelated to any candidate capability
+**AST fallback:**
 
-**Without `code-review-graph` (AST fallback):**
+1. Walk imports and call edges from likely entry points (`main`, route handlers, CLI entries, test fixtures).
+2. Cluster files by import locality + filename heuristics.
+3. Mark `confidence: medium` or `low` on heuristic-only candidates.
+4. Surface a `gotcha` for language-coverage gaps.
 
-1. Walk imports and call edges from likely entry points (`main`, route handlers, CLI entry points, test fixtures)
-2. Cluster files by import locality + filename heuristics (directory structure, naming conventions)
-3. Mark `confidence: medium` or `low` for capability candidates derived from heuristics alone
-4. Surface a `gotcha` if the codebase has language coverage gaps the AST walker can't span
+Fallback findings are strictly less rich; the synthesizer weights accordingly.
 
-The fallback explorer's findings are strictly less rich than the graph version; the synthesizer weights them accordingly.
+### `data-flow`
 
-### `data-flow` explorer
+Catches cross-capability state coupling that the call graph misses.
+Primary defense against the "call graph misses shared writes to the same DB row" failure mode.
 
-Scans for cross-capability state coupling that the call graph misses.
+1. Extract string literals: SQL table/column names, queue/topic names, file paths, env vars, cache keys, config paths.
+2. Group by literal — sites sharing a literal across capability candidates are _synthetic bridges_.
+3. Emit `kind: overlap` with `kind: state` for each synthetic bridge (distinct from call-graph `kind: call`).
+4. Emit `kind: external_surface_candidate` for literals matching known external system patterns.
 
-1. Extract string literals matching: SQL table/column references, queue/topic names, file paths, env var keys, cache key patterns, config file paths
-2. Group by literal — sites that share a literal across capability candidates are _synthetic bridges_ (state-coupling overlaps)
-3. Emit `kind: overlap` findings for each synthetic bridge with `kind: state` (distinguishing from call-graph `kind: call` overlaps)
-4. Emit `kind: external_surface_candidate` for literals matching known external system patterns (e.g., HTTP hosts, third-party DB schemas)
-
-This explorer is the primary defense against the "call graph misses shared writes to the same DB row" failure mode.
-
-### `port-interface` explorer
+### `port-interface`
 
 Framework-aware extraction of interface declarations and registrations.
 
-1. Detect framework patterns (Spring `@Module`/`@Component`, NestJS controllers/providers, FastAPI route decorators, Rails controllers, Django views, gRPC service definitions)
-2. Extract declared interfaces, ports, and DI bindings
-3. Emit `kind: capability_candidate` based on interface boundaries — these may agree or disagree with call-graph communities
-4. Emit `kind: external_surface_candidate` for declared public APIs (HTTP routes, gRPC methods, CLI commands, library exports)
-5. Apply framework heuristics conditionally — skip steps that don't match detected frameworks
+1. Detect framework patterns (Spring `@Module`/`@Component`, NestJS controllers/providers, FastAPI route decorators, Rails controllers, Django views, gRPC service definitions).
+2. Extract declared interfaces, ports, and DI bindings.
+3. Emit `kind: capability_candidate` based on interface boundaries.
+4. Emit `kind: external_surface_candidate` for declared public APIs (HTTP routes, gRPC methods, CLI commands, library exports).
+5. Skip framework steps for frameworks not detected.
 
-When call-graph and port-interface explorers disagree about capability boundaries, the synthesizer surfaces this as an `axis_disagreement` rather than picking one.
+When call-graph and port-interface disagree on boundaries, the synthesizer surfaces an `axis_disagreement` rather than picking.
 
-### `schema-artifact` explorer
+### `schema-artifact`
 
-Detects schema artifacts and runs the snapshot lifecycle.
-This explorer is the canonical home for schema discovery.
+Canonical home for schema discovery.
+Runs the snapshot lifecycle.
 
-**Step 1: Detect schema artifacts.**
-Look for:
+**1.**
+**Detect artifacts.**
+Look for committed specs (`openapi.yaml`, `swagger.json`, `docs/api/`, `openapi/`), schema files (`.proto`, `.graphql`, `.prisma`, `.avsc`, `schema.sql`, migrations), or framework markers implying runtime schema generation (FastAPI, NestJS, Spring Boot, DRF, Rails API, Echo/Gin, Laravel, GraphQL, gRPC).
+If none, report `status: not_applicable`.
 
-- Committed specs: `openapi.yaml`, `swagger.json`, `openapi.json`, `docs/api/`, `openapi/`
-- Schema files: `.proto`, `.graphql`, `.prisma`, `.avsc`, `schema.sql`, migrations directories
-- Framework markers implying runtime schema generation: FastAPI, NestJS, Spring Boot, DRF, Rails API, Go Echo/Gin, Laravel, GraphQL servers, gRPC
+**2.**
+**Check `.specs/.sdd/schema-config.yaml`.**
+If present, use configured extraction commands.
+If absent and artifacts were detected, emit a `kind: anomaly` finding so the orchestrator can prompt for one (one-time suggestion, see SKILL.md).
+Don't block; proceed with detection-only.
+See `sdd-schema.md` for config format.
 
-If no schema artifacts are detected, report `status: not_applicable` with a one-line reason.
+**3.**
+**Generate snapshots** (when extraction is configured).
+Run configured commands, store output in `.specs/schemas/`.
 
-**Step 2: Check for `.specs/.sdd/schema-config.yaml`.**
+**4.**
+**Diff authored vs generated.**
+When both exist:
 
-- If present: use the configured extraction commands.
-- If absent and schema artifacts were detected: report this in findings as a `kind: anomaly` so the orchestrator can prompt the user to create one (one-time suggestion, see SKILL.md).
-  Do not block on this; proceed with detection-only findings.
+- Authored ∖ generated → **aspirational** → `kind: capability_candidate`, `confidence: low`, signal `aspirational_only`.
+- Generated ∖ authored → **undocumented drift** → `kind: anomaly`, signal `undocumented_drift`.
+- Type/shape mismatches → `kind: anomaly`, signal `schema_mismatch`.
 
-See `sdd-schema.md` for the config file format.
+**5.**
+**Surface schema-anchored findings.**
+For each schema path mapping to a capability candidate, include the path in `signals` (e.g., `signals: [schema_path:/users/{id}]`).
+The lifter uses these for `**Schema reference:**` annotations — see `lifter.md`.
 
-**Step 3: Generate snapshots (when extraction is configured).**
-Run the configured commands and store output in `.specs/schemas/`.
-This produces a generated schema snapshot reflecting the runtime/code state.
+### `test-suite`
 
-**Step 4: Diff authored vs generated.**
-If the repo contains both a committed authored schema (e.g., `docs/openapi.yaml`) and a generated snapshot, diff them:
+Corroborates other explorers; rarely emits standalone candidates.
 
-- Paths in authored but not generated → **aspirational** (planned but not yet implemented)
-- Paths in generated but not authored → **undocumented drift**
-- Type or shape mismatches → **potential bugs or stale spec**
-
-Emit findings:
-
-- Aspirational paths → `kind: capability_candidate` with `confidence: low` and signal `aspirational_only` (the lifter may handle these as ADDED-only delta candidates)
-- Undocumented drift → `kind: anomaly` with signal `undocumented_drift`
-- Mismatches → `kind: anomaly` with signal `schema_mismatch`
-
-**Step 5: Surface schema-anchored findings.**
-For each schema path that maps to a capability candidate, include the schema path in the finding's `signals` (e.g., `signals: [schema_path:/users/{id}]`).
-The lifter uses these to add `**Schema reference:**` annotations to relevant scenarios — see `lifter.md`.
-
-### `test-suite` explorer
-
-Identifies test files and links them to capability candidates.
-
-1. Detect test directories (`tests/`, `__tests__/`, `*_test.go`, `*.spec.ts`, etc.)
-2. Match test files to capability candidates via filename, import patterns, and fixtures
-3. Emit findings as `kind: capability_candidate` evidence — test files appear in `references` with `relationship: test`, strengthening capability proposals
-4. Tests that assert on specific behaviors (assertions, expected outputs) are higher-weight evidence than tests that only exercise the code path
-
-This explorer corroborates other explorers' findings; it rarely emits standalone capability candidates.
+1. Detect test directories (`tests/`, `__tests__/`, `*_test.go`, `*.spec.ts`, etc.).
+2. Match test files to candidates via filename, import patterns, fixtures.
+3. Emit findings as `kind: capability_candidate` evidence — test files appear in `references` with `relationship: test`.
+4. Weight tests asserting specific behaviors higher than tests that only exercise the code path.
 
 ## Explorer output schema
 
-Each explorer's output is a report with metadata + a flat list of findings.
-A finding is one cohesive observation the explorer wants to make: "I think there's a search capability here," "I noticed an algorithmic region in `ranker.py`," "this looks like an external API call to OpenAI."
-A single explorer typically emits multiple findings of mixed kinds.
+A finding is one cohesive observation ("there's a search capability here," "algorithmic region in `ranker.py`").
+One explorer typically emits multiple findings of mixed kinds.
 
 ```yaml
 explorer: <name>
@@ -162,29 +143,23 @@ findings:
         relationship: primary_implementation | entry_point | caller | callee | 
           consumer | producer | test | config | schema | bridge | <custom>
         rationale: <optional, brief — why this specific reference>
-    rationale: <required, brief — overall reasoning for this finding>
+    rationale: <required, brief — overall reasoning>
     signals: [<explorer-specific signal names>]
     confidence: high | medium | low
 ```
 
-### Field notes
+### Field rules
 
-- **`kind`** — canonical values listed above; explorers may emit custom string kinds when something genuinely novel surfaces.
-  The synthesizer treats unknown kinds as `anomaly`-class for processing but preserves the original label for user display.
-- **`references`** — flexible code pointers.
-  File-level alone is fine; object-level (function/class/method) preferred when the explorer has that grain; line-level optional.
-- **`relationship`** — captures the reference's role in _this finding_.
-  The set above; explorers may add custom relationships when needed.
-- **Capability naming** — explorers do NOT commit to capability names.
-  They emit signals (file overlaps, hub identifiers, signal co-occurrence).
-  The synthesizer assigns canonical names from heuristics across explorers.
-  This makes overlap detection cleaner (file/object intersection > name match).
-- **`rationale`** — brief; one sentence or fragment.
-  Per-reference rationale only when distinct from finding-level rationale.
-- **`signals`** — free-form per explorer (each explorer's own taxonomy).
-  Synthesizer reads signals across findings to detect alignment ("graph signal `community_overlap_high` + port signal `shared_interface` → strong agreement").
+- **`kind`** — use canonical values; emit custom strings only when something genuinely novel surfaces.
+  Synthesizer treats unknown kinds as `anomaly`-class but preserves the original label.
+- **`references`** — file-level alone is fine; object-level preferred when available.
+- **`relationship`** — the reference's role in _this finding_; custom values allowed.
+- **Capability naming** — do NOT commit to capability names.
+  The synthesizer assigns canonical names from cross-explorer heuristics.
+  Naming via the synthesizer keeps overlap detection cleaner (file/object intersection > name match).
+- **`signals`** — free-form per explorer; the synthesizer reads them across findings to detect alignment.
 - **`confidence`** — explorer self-assessment.
-  Different explorers measure differently (graph modularity ≠ AST heuristic); the synthesizer's cross-explorer agreement count is the real confidence signal.
+  Cross-explorer agreement count is the real confidence signal.
 
 ### Worked example
 
@@ -224,35 +199,31 @@ findings:
 
 ## Synthesizer
 
-The synthesizer consumes all explorer outputs and produces the capability menu.
+Consume all explorer outputs; produce the capability menu.
+Tasks:
 
-Its job:
+- Reconcile cross-explorer findings via reference overlap and signal co-occurrence.
+- Assign canonical capability names.
+- Surface axis disagreements (explorers proposed conflicting boundaries).
+- Identify gotchas (god-modules, single-cluster degeneracy, missing language coverage).
+- Estimate per-capability cost (file count, line count, token estimate).
+- Propose primary owners for overlaps (default: most edges to bridge wins; ties alphabetical).
 
-- Reconcile cross-explorer findings via reference overlap and signal co-occurrence
-- Assign canonical capability names from heuristics
-- Surface axis disagreements (where explorers proposed conflicting boundaries)
-- Identify gotchas (god-modules, single-cluster degeneracy, missing language coverage)
-- Estimate per-capability cost (line count, token estimate, file count)
-- Propose primary owners for overlaps (default: capability with most edges to bridge wins; ties default to alphabetical order)
-
-### Synthesizer output (capability menu)
-
-> The detailed shape of the synthesizer's output is pending validation through experiment.
-> Current target structure (subject to refinement):
+### Capability menu
 
 ```yaml
 capability_menu:
-  - name: <canonical name assigned by synthesizer>
+  - name: <canonical name>
     files_in_scope:
       - <path>
     evidence_per_axis:
-      call_graph: <summary of call-graph findings supporting this capability>
+      call_graph: <summary>
       port_interface: <summary>
       ...
     overlaps:
-      - with: <other capability name>
+      - with: <other capability>
         kind: call | state | port
-        proposed_owner: <capability name>
+        proposed_owner: <capability>
         bridge_references: [<path/object>]
     external_surfaces:
       - kind: consumed | exposed
@@ -273,46 +244,98 @@ gotchas:
     affected_capabilities: [<names>]
 ```
 
-The synthesizer emits structured markdown matching this conceptual shape; a JSON/YAML schema is not required (the orchestrator and synthesizer share an LLM session).
+Emit structured markdown matching this conceptual shape; a JSON/YAML schema is not required.
 
-## Loop semantics
+### Escalation flags
 
-The orchestrator presents the capability menu to the user **only when an escalation condition fires** (see `SKILL.md` § Phase 3).
-For runs with no flagged conditions, the orchestrator commits the synthesizer's defaults silently and proceeds to per-capability derive.
+Output MUST surface conditions warranting user prompt.
+The orchestrator reads these and decides whether Phase 3 escalates.
 
-When the user is prompted, they may:
-
-- **Continue** — accept the menu and proceed to per-capability derive
-- **Loop** — request refinement
-
-If the user requests refinement, the orchestrator must clarify the request unless it is entirely unambiguous.
-Refinement options, by cost:
-
-- **Synthesizer-only re-run (cheap)** — apply new synthesis instructions to the existing explorer outputs (e.g., "treat A and B as one capability", "promote the test-suite signals to higher weight")
-- **Single-explorer re-run (medium)** — re-run one explorer with adjusted scope (e.g., "ignore `vendor/`", "expand to include `examples/`")
-- **Full re-explore (expensive)** — re-run all explorers, typically when scope changes substantively
-
-The orchestrator confirms the chosen refinement type before dispatching.
-
-### Synthesizer escalation flags
-
-The synthesizer's output MUST surface any condition that warrants user prompt.
-The orchestrator reads these flags and decides whether Phase 3 escalates or proceeds silently.
-
-Flags the synthesizer emits (when applicable):
-
-- `escalation: single_cluster_degeneracy` — call-graph found one giant community; the synthesizer fell back to alternative partitioning.
-  User must confirm the axis.
-- `escalation: axis_disagreement` — explorers proposed materially different boundaries (e.g., call-graph clusters A+B together; ports separate them).
+- `escalation: single_cluster_degeneracy` — call-graph found one giant community; synthesizer fell back to alternative partitioning.
+  User confirms axis.
+- `escalation: axis_disagreement` — explorers proposed materially different boundaries.
   User picks resolution.
-- `escalation: low_confidence` — capability candidates' average confidence is below `medium`.
-  User confirms the menu is usable.
-- `escalation: external_surface_split` — an external-surface candidate has explorer-confidence split (one says owned, one says 3rd-party).
+- `escalation: low_confidence` — average confidence below `medium`.
+  User confirms menu is usable.
+- `escalation: external_surface_split` — explorer-confidence split on owned vs 3rd-party.
   User classifies.
 - `escalation: cost_threshold` — capability count > 6 OR file count > 100.
   User confirms cost.
 
-Absent any flag, the orchestrator proceeds with all synthesizer defaults applied (selection, overlap ownership, external-surface classification).
+Absent any flag, the orchestrator proceeds with all defaults applied.
+
+### Single-cluster degeneracy
+
+When call-graph reports one giant community covering most of the codebase, do NOT silently fall back to single-pass derive.
+Switch the partitioning axis:
+
+- File-system structure (directory boundaries).
+- Module/package boundaries (language-aware).
+- Hub-node ego-networks (top-K hubs, each as a synthetic capability with its 1-hop neighborhood).
+
+For polyglot codebases, refuse single-cluster fallback entirely: emit one capability per language root; treat inter-language calls as external surfaces.
+
+Surface this as a `gotcha`.
+
+## Loop semantics
+
+The orchestrator presents the capability menu **only when an escalation condition fires** (see SKILL.md § Phase 3).
+Otherwise it commits the synthesizer's defaults silently.
+
+When prompted, the user may **continue** or **request refinement**.
+Clarify ambiguous refinement requests before dispatching.
+
+Refinement options, by cost:
+
+- **Synthesizer-only re-run (cheap)** — apply new synthesis instructions to existing explorer outputs (e.g., "treat A and B as one capability").
+- **Single-explorer re-run (medium)** — re-run one explorer with adjusted scope (e.g., "ignore `vendor/`").
+- **Full re-explore (expensive)** — re-run all explorers; for substantive scope changes.
+
+Confirm the chosen refinement type before dispatching.
+
+```dot
+digraph phase_2_discovery {
+    start [label="Phase 2 starts", shape=doublecircle];
+    explorers [label="Dispatch parallel explorers\n(call-graph, data-flow, ports,\nschema, tests)", shape=box];
+    findings [label="Explorers emit findings YAML", shape=box];
+    synth [label="Dispatch synthesizer\nwith all explorer paths", shape=box];
+    menu [label="Synthesizer emits capability menu\n+ escalation flags", shape=box];
+
+    flagged [label="Escalation flagged?", shape=diamond];
+    defaults [label="Apply defaults silently\n(confidence>=medium,\nalpha tiebreak)", shape=box];
+    ask [label="Present flagged item;\nask one targeted question", shape=box];
+
+    decide [label="User continues or refines?", shape=diamond];
+    phase3 [label="Trigger Phase 3", shape=doublecircle];
+    cost [label="Choose refinement cost tier", shape=diamond];
+
+    cheap [label="Re-run synthesizer only\n(cheap)", shape=box];
+    medium [label="Re-run one explorer with\nadjusted scope (medium)", shape=box];
+    expensive [label="Re-run all explorers\n(expensive)", shape=box];
+
+    start -> explorers;
+    explorers -> findings;
+    findings -> synth;
+    synth -> menu;
+    menu -> flagged;
+
+    flagged -> defaults [label="no"];
+    flagged -> ask [label="yes"];
+    defaults -> phase3;
+
+    ask -> decide;
+    decide -> phase3 [label="continue"];
+    decide -> cost [label="refine"];
+
+    cost -> cheap [label="treat A & B as one"];
+    cost -> medium [label="ignore vendor/"];
+    cost -> expensive [label="substantive scope change"];
+
+    cheap -> synth;
+    medium -> findings;
+    expensive -> explorers;
+}
+```
 
 ## Pre-flight cost accounting
 
@@ -322,17 +345,4 @@ Total dispatches for a typical run:
 N explorers + 1 synthesizer + 2 × selected_capabilities
 ```
 
-The orchestrator surfaces this in the Pre-flight Consent prompt when the threshold (capability count > 3 OR file count > 50) is exceeded.
-
-## Single-cluster degeneracy
-
-When the call-graph explorer reports one giant community covering most of the codebase, the synthesizer must NOT silently fall back to single-pass derive.
-Instead, switch the partitioning axis:
-
-- File-system structure (directory boundaries)
-- Module/package boundaries (language-aware)
-- Hub-node ego-networks (top-K hubs, each as a synthetic capability with its 1-hop neighborhood)
-
-For polyglot codebases (multiple languages detected), refuse single-cluster fallback entirely: emit one capability per language root, treat inter-language calls as external surfaces.
-
-The synthesizer surfaces this as a `gotcha` so the user knows decomposition was non-trivial.
+The orchestrator surfaces this in Pre-flight Consent when capability count > 3 OR file count > 50.
