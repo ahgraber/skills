@@ -44,6 +44,8 @@ These apply regardless of REST or GraphQL:
    Authenticate before business logic runs.
    As a strong default, keep fine-grained authorization policy in the domain/business layer — but coarse access control (e.g., "only authenticated users") is legitimately enforced in gateways or middleware before the domain layer.
 5. **Evolve without breaking.**
+   Hyrum's Law: with enough users, every observable behavior of your API — including undocumented quirks, error message text, and field ordering — becomes a de facto contract someone depends on.
+   Design with that in mind: be intentional about what you expose, and treat any change as potentially breaking until proven otherwise.
    Additive changes are usually safe, but verify compatibility against clients — adding a GraphQL enum value is schema-safe yet can surprise clients that assume exhaustive handling.
    Removal, renaming, and type changes require versioning (REST) or deprecation workflows (GraphQL).
 6. **Security is structural.**
