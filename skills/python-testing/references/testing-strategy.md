@@ -15,6 +15,7 @@ Tests that prove behavior and contracts, prevent regressions, and support safe r
 - Assert observable behavior (outputs, state transitions, emitted effects), not private implementation details.
 - Do not lock tests to internals (private helpers, incidental call order, exact log strings) unless those details are part of the explicit public contract.
 - Add a regression test for every fixed bug.
+  Write the failing test that reproduces the bug _before_ attempting the fix; a green test on a fix you never saw fail does not prove the bug is gone.
 - Keep one primary behavior per test unless assertions are tightly coupled.
 
 ## Determine Intent and Contracts
@@ -24,6 +25,10 @@ Tests that prove behavior and contracts, prevent regressions, and support safe r
 - Treat tests as executable contract documentation for expected and disallowed usage.
 
 ## Test Portfolio
+
+Shape the suite as a pyramid: many fast unit tests, fewer integration tests, a small set of end-to-end tests.
+As a rough default, target roughly 70-80% unit, 15-25% integration, and under 10% end-to-end.
+Treat the ratios as a sanity check against an inverted pyramid (slow, flaky, expensive), not a quota — let contract risk and reliability needs drive the actual mix.
 
 - Unit tests:
   - Fast, deterministic, and isolated.

@@ -11,6 +11,8 @@
 ## Structure and Naming
 
 - Use Arrange-Act-Assert flow.
+- Prefer DAMP (Descriptive And Meaningful Phrases) over DRY in tests: a test should read like a specification of the behavior it verifies.
+  Inlined, explicit setup beats clever deduplication that forces a reader to chase helpers to understand what the test asserts.
 - Use descriptive names that encode behavior and scenario.
 - Prefer plain test functions over class wrappers unless class grouping adds clear value.
 - Mirror source modules for unit tests; organize integration tests by scenario/contract.
