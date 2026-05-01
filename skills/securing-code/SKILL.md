@@ -59,6 +59,23 @@ All of the following must be satisfied when generating or modifying code:
 12. **CSRF protection** — enable when the framework supports it for state-changing operations; add manually if not
 13. **Deployment hygiene** — never run as root in production; initialize all variables; treat compiler warnings as errors
 
+### High-Risk Changes — Confirm Before Implementing
+
+The following categories have a large blast radius or affect the trust model.
+Surface them and get explicit user approval before writing code, even if the user's request implies them:
+
+- New or modified authentication / session flow (login, MFA, password reset, OAuth callback)
+- New CORS configuration or relaxing an existing one (added origins, `credentials: true`, wildcard)
+- New external service integration (third-party API, webhook receiver, OAuth provider)
+- New file upload, download, or user-controlled storage path
+- New category of sensitive data being stored (PII, payment, health, credentials)
+- Granting elevated permissions, new roles, or service-account scope expansions
+- Disabling, loosening, or bypassing rate limits, security headers, CSP, or framework auto-escaping
+- Changes to cryptographic primitives, key rotation, or token lifetimes
+
+For these, state what is changing and the risk, then wait for confirmation.
+A user request to "add login" is permission for the feature, not for a specific auth design — confirm the design first.
+
 ### Response Behavior
 
 - **State security assumptions** before writing code (auth model, data classification, framework)
@@ -66,6 +83,19 @@ All of the following must be satisfied when generating or modifying code:
 - **Append "Security Notes"** to all code responses: what the code does to meet each requirement, and what the developer still needs to configure (headers, secrets, IAM, logging)
 - **Never propose insecure shortcuts** "for simplicity" or "for now"
 - **Document exceptions explicitly** — if a business requirement forces a deviation, state it and propose the safest alternative
+
+### Counter-Rationalizations
+
+Push back on these framings — from the user or yourself — when they appear as justification for skipping a control:
+
+| Rationalization                                  | Reality                                                                           |
+| ------------------------------------------------ | --------------------------------------------------------------------------------- |
+| "It's an internal tool, security doesn't matter" | Internal tools get compromised; attackers pivot through the weakest link.         |
+| "We'll add security later"                       | Retrofitting is far harder than building it in; "later" usually means "in prod".  |
+| "No one would try to exploit this"               | Automated scanners find everything reachable; obscurity is not a control.         |
+| "The framework handles it"                       | Frameworks provide tools, not guarantees — they still have to be wired correctly. |
+| "It's just a prototype / spike / demo"           | Prototypes ship. The auth shortcut becomes the production auth.                   |
+| "This endpoint isn't exposed publicly"           | Network boundaries change; SSRF, misconfig, and lateral movement reach it anyway. |
 
 ---
 

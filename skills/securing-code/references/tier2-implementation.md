@@ -114,7 +114,8 @@ Use when handling API keys, passwords, tokens, encryption, or classified data.
 
 **Non-negotiable requirements:**
 
-- [ ] No secrets in code, config files, or logs — use a secret manager; add secret scanning to pre-commit + CI
+- [ ] No secrets in code, config files, or logs — use a secret manager (see §2.5 for scanning tooling)
+- [ ] Treat any detected secret as compromised — rotate immediately; scrubbing history is not sufficient
 - [ ] HTTPS everywhere; TLS 1.2 minimum, prefer TLS 1.3
 - [ ] Classify data; encrypt sensitive data at rest and in transit; document sensitive data flows
 - [ ] Approved algorithms only: AES-256-GCM for encryption, SHA-256/SHA-3 for hashing, Argon2id/bcrypt for passwords, Ed25519 or ECDSA P-256 for signatures
@@ -147,7 +148,10 @@ Use when setting up or reviewing build pipelines, repositories, or development e
 - [ ] Maintain an SBOM with transitive dependency tracking
 - [ ] Verify integrity of downloaded packages (checksums, signing, or equivalent)
 - [ ] Add SCA, SAST, and linters; treat compiler warnings as errors
-- [ ] Add secret scanning in pre-commit hooks and CI; rotate immediately if secrets are found
+- [ ] Wire secret scanning into both pre-commit hooks and CI so findings are consistent.
+  Recommended tools: [gitleaks](https://github.com/gitleaks/gitleaks) or [betterleaks](https://github.com/betterleaks/betterleaks), [kingfisher](https://github.com/mongodb/kingfisher), [trufflehog](https://github.com/trufflesecurity/trufflehog), or [detect-secrets](https://github.com/Yelp/detect-secrets).
+  As a last-mile manual catch, `git diff --cached | grep -iE 'password|secret|api[_-]?key|token|bearer'` flags obvious leaks before commit.
+  Rotate immediately on any hit — scrubbing history is not sufficient
 - [ ] Use short-lived credentials for all automation; audit service account access
 - [ ] Implement separation of duties in CI/CD with MFA and signed builds
 
@@ -159,3 +163,31 @@ Use when setting up or reviewing build pipelines, repositories, or development e
 4. Developer "paved road" policy with minimum security baseline for all contributors
 
 **OWASP coverage:** A02, A03, A08
+
+**Triaging dependency-audit findings** (`npm audit`, `pip-audit`, `cargo audit`, `osv-scanner`, etc.):
+
+Not every advisory is a release blocker.
+Use reachability + context to prioritize:
+
+```text
+Advisory reported
+├── Critical / High severity
+│   ├── Reachable in a runtime code path?
+│   │   ├── Yes → fix now: update, patch, or replace the dependency
+│   │   └── No (dev-only, unused export, gated behind a disabled feature) → fix soon, not a blocker
+│   └── No fix available?
+│       └── Evaluate workaround, replacement, or temporary allowlist with a review date
+├── Moderate
+│   ├── Runtime → fix in the next release cycle
+│   └── Dev-only → backlog
+└── Low
+    └── Roll into routine dependency updates
+```
+
+Key questions when assessing reachability:
+
+- Is the vulnerable function actually called from our code or transitive call graph?
+- Runtime dependency or dev/build-only?
+- Is the vuln exploitable in this deployment context (e.g., a server-side gadget in a client-only bundle)?
+
+When deferring, record the reason and a review date in the allowlist file (`.gitleaksignore`, `audit-ci.json`, `osv-scanner` config, etc.) — never silently suppress.
