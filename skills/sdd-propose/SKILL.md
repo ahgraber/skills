@@ -112,6 +112,9 @@ Include:
 - Decisions: each non-obvious choice with rationale and alternatives considered
 - Architecture: ASCII diagrams of component relationships, data flows
 - Risks: what could go wrong and mitigation
+- Verification Waivers (optional): any SHALL requirement that genuinely cannot have automated execution evidence — include the requirement name, the reason automation is infeasible, a manual evidence reference, and a `Recorded` date or commit SHA.
+  `sdd-verify` will otherwise flag any SHALL without runnable evidence as CRITICAL, and uses `Recorded` for provenance checking.
+  See `references/sdd-change-formats.md` § 2 for the format.
 
 Only include sections with content — omit empty sections.
 
@@ -129,6 +132,9 @@ Rules:
 - Order by implementation dependency (what must be done first)
 - Group by component or phase
 - Every task is a concrete action, not an outcome
+- Every SHALL requirement must be paired with at least one task that produces runnable evidence — a named test (unit, integration, or e2e), a schema check, or a captured-output step.
+  If automated evidence is genuinely infeasible, the requirement must appear in `design.md` § Verification Waivers with a manual evidence reference.
+  `sdd-verify` enforces this rule.
 
 ### Phase 7: Validate
 
@@ -139,6 +145,7 @@ Rules:
 - [ ] Mechanism (algorithms, thresholds, strategies, retry policies) appears in `design.md` or the proposal's Approach, not in spec text
 - [ ] `design.md` has at least one Decision with rationale
 - [ ] `tasks.md` has atomic, ordered tasks
+- [ ] Every SHALL requirement maps to at least one evidence-producing task (test, schema check, or captured output) OR appears in `design.md` § Verification Waivers with a manual evidence reference
 - [ ] No delta markers in `.specs/specs/` (baseline specs untouched)
 
 ## Output

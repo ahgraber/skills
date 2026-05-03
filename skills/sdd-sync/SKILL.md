@@ -18,13 +18,15 @@ Applies each delta marker intelligently, preserving existing content not mention
 
 ## When to Use
 
-- After `sdd-verify` passes — implementation is confirmed correct
+- After `sdd-verify` passes with no blocking findings — implementation is confirmed correct
+- After `sdd-verify` reports only blockers that are explicitly overridden per `references/sdd-change-formats.md`
 - Ready to finalize the change and update the source-of-truth specs
 
 ## When Not to Use
 
 - Delta specs don't exist for this change — nothing to sync
 - Implementation isn't verified — run `sdd-verify` first
+- Blocking findings remain from `sdd-verify`
 
 ## Soft Gate
 
@@ -34,6 +36,15 @@ If no delta specs exist in `.specs/changes/<name>/specs/`, warn:
 
 Stop unless the user confirms to proceed.
 
+Before syncing, confirm verification status and any recorded override trail:
+
+1. `sdd-sync` consumes the latest `sdd-verify` outcome; it does not reconstruct verification from `design.md`.
+2. If the latest verify result is not in context, stop and tell the user to run `sdd-verify` first.
+3. If sync is proceeding under override, read `.specs/changes/<name>/design.md` for `## Verification Overrides` and confirm each applicable entry has all required fields (finding, stage, reason, constraints, follow-up task, approved by, recorded).
+   Stop if any required field is missing.
+4. Any blocker from the current verify result that is not covered by a recorded override remains blocking.
+   Stop and tell the user which blockers remain uncovered.
+
 ## Process
 
 ### Phase 1: Identify What to Sync
@@ -41,6 +52,7 @@ Stop unless the user confirms to proceed.
 1. Confirm the active change (ask if multiple active changes exist)
 2. List all delta spec files in `.specs/changes/<name>/specs/`
 3. For each delta spec, identify the corresponding main spec in `.specs/specs/`
+4. If sync is proceeding under override, load the matching override entries and the referenced unchecked tasks from `tasks.md`
 
 ### Phase 2: Apply Each Delta
 
@@ -118,6 +130,9 @@ Synced:
 Schema snapshots updated:
 - openapi.yaml   → 2 endpoints added, 1 model modified
 - Reminder: authored docs/openapi.yaml may be stale (schema sync did not update it)
+
+Synced under overrides:
+- `pip audit` failure for `litellm` → stage: `verify`; reason: upstream fix unavailable in current environment; constraints: no ignore added; follow-up remains open in `tasks.md`
 ```
 
 ## Common Mistakes
@@ -125,7 +140,9 @@ Schema snapshots updated:
 - Replacing the entire main spec instead of merging selectively
 - Leaving delta markers (ADDED/MODIFIED/REMOVED) in the main spec after sync
 - Touching content not mentioned in the delta
-- Syncing before `sdd-verify` passes
+- Reconstructing the verify outcome from `design.md` instead of consuming the latest `sdd-verify` result plus any recorded overrides
+- Syncing before `sdd-verify` clears all blockers, whether by a clean pass or a recorded override
+- Treating a blocker as non-blocking without a recorded `design.md` override and an unchecked remediation task in `tasks.md`
 
 ## References
 

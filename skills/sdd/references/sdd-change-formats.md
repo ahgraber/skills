@@ -84,7 +84,33 @@ Location: `.specs/changes/<name>/design.md`
 ## Risks
 
 - **{Risk}**: {mitigation strategy}
+
+## Verification Waivers
+
+- **Requirement:** {requirement name or ID}
+  **Reason:** {why automated execution evidence is not feasible — e.g., requires production data, third-party sandbox unavailable, manual operator step}
+  **Manual evidence:** {path to captured output, runbook reference, screenshot, or commit where manual verification was recorded}
+  **Recorded:** {ISO date or commit SHA when this waiver was first added — used by sdd-verify's provenance check}
+
+## Verification Overrides
+
+- **Finding:** {exact verify finding or stable identifier}
+  **Stage:** {workflow stage where the override was applied — usually `verify`, sometimes `sync`}
+  **Reason:** {why work must proceed despite the unresolved blocking finding}
+  **Constraints:** {what is still forbidden — e.g., no ignore, no suppression, must wait for upstream release}
+  **Follow-up task:** {exact unchecked task text or task reference in `tasks.md`}
+  **Approved by:** {who explicitly authorized the override — typically `user`}
+  **Recorded:** {ISO date or commit SHA when this override was first added}
 ````
+
+The `## Verification Waivers` section is optional and only present when one or more SHALL requirements cannot be covered by runnable evidence (test, schema check, or captured output).
+`sdd-verify` flags any unwaived SHALL without runnable evidence as CRITICAL, and a waiver entry without a checkable manual evidence reference is itself CRITICAL.
+The `Recorded` field is required for the provenance check; if absent, `sdd-verify` falls back to `git blame`.
+
+The `## Verification Overrides` section is optional.
+User overrides of otherwise blocking findings or gate outcomes are permitted, but they must be recorded in the change artifacts to preserve an audit trail across design, implementation, verify, and sync.
+An override does not remove the finding or change its severity; it only records that work proceeded despite the blocker.
+Each override must identify what was overridden, where in the workflow the intervention happened, why work continued, what remained forbidden, who approved it, and what follow-up work stayed open.
 
 ## 3. Tasks Format
 
@@ -110,3 +136,7 @@ Rules:
 - Tasks describe implementation actions, not outcomes (the outcomes live in `spec.md`)
 - Groups organize by component or phase (e.g., 'Backend', 'Frontend', 'Tests')
 - Use `- [x]` to mark completed tasks
+- If a blocking verify finding or gate outcome is explicitly overridden, keep or add an unchecked remediation task in `tasks.md` that names the fix still required.
+- Every SHALL requirement in the delta specs must be backed by at least one task that produces runnable evidence — a named test (unit, integration, or e2e), a schema-snapshot check, or a captured-output step.
+  Requirements that genuinely cannot be tested automatically belong in `design.md` § Verification Waivers instead.
+  `sdd-verify` enforces this rule and will flag uncovered SHALL requirements as CRITICAL.
