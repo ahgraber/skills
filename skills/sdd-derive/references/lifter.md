@@ -47,6 +47,10 @@ Rules:
   If you cannot articulate the property, emit an Uncertainty — you do not yet have a requirement.
 - If `algorithmic` is tagged AND a chosen algorithm/threshold/data structure appears, apply the strategy check (below).
 - State universal properties universally: "for any {input class}, the system SHALL {outcome}."
+- For each universal SHALL, apply the **partition heuristic** (`sdd-spec-formats.md` § 1.6).
+  When observations describe multiple write-sites, branches, or stages for the same contract-asserted value, do NOT enumerate write-sites in scenarios — that leaks mechanism into the spec.
+  Instead, identify the _semantic_ partitions the spec already names (lifecycle states, identity/equivalence, multi-source composition, derived-pair) and write one scenario per partition.
+  If observations show partition-relevant behavior the spec does not yet name, emit an Uncertainty rather than fabricate scenarios.
 
 ## Tag-driven lift rules
 

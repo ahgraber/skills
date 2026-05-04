@@ -87,6 +87,10 @@ For each affected capability, ask: **what new contract are we adding, changing, 
 State each requirement as a contract statement (guarantee, invariant, prohibition, precondition-consequence, or observable-state relationship — see § 1.1).
 Lean toward universal claims where they apply.
 
+For each universal SHALL claim, apply the **partition heuristic** in `references/sdd-spec-formats.md` § 1.6: ask whether the claim's input space splits along semantic lines the spec already names (lifecycle states, identity/equivalence, multi-source composition, derived-pair invariants).
+If yes, write one scenario per partition; if no, a single scenario is fine.
+Use spec vocabulary only — never partition along code paths or write-sites.
+
 Mechanism thinking is expected here — algorithms, thresholds, strategies, data structures.
 Park those thoughts in the proposal's `## Approach` section as they surface; they formalize in Phase 5 (`design.md`).
 Do not put mechanism into the spec itself.
@@ -135,6 +139,9 @@ Rules:
 - Every SHALL requirement must be paired with at least one task that produces runnable evidence — a named test (unit, integration, or e2e), a schema check, or a captured-output step.
   If automated evidence is genuinely infeasible, the requirement must appear in `design.md` § Verification Waivers with a manual evidence reference.
   `sdd-verify` enforces this rule.
+- For each SHALL, enumerate the **foreseeable write-sites** the design implies — every code path the design names that produces or modifies the contract-asserted value: canonical path plus any alternative paths in `design.md` (deduplication shortcuts, cache fast-paths, retry/fallback branches, idempotency early-returns, merge or composition steps).
+  Each foreseeable write-site needs its own paired evidence-producing test task — one test on the canonical path is not evidence for the shortcut, retry, or merge.
+  Write-sites that emerge later during implementation are handled by `sdd-apply`'s write-site emergence rule and `sdd-verify`'s write-site enumeration; covering the foreseeable ones here keeps verify from flagging them.
 
 ### Phase 7: Validate
 
@@ -142,10 +149,12 @@ Rules:
 - [ ] `proposal.md` has Intent, Scope (in/out), Approach
 - [ ] Delta specs use only ADDED/MODIFIED/REMOVED/RENAMED sections (no baseline format)
 - [ ] Each requirement is a contract statement — a property about observable state that stands on its own without its scenarios (see `references/sdd-spec-formats.md` § 1)
+- [ ] Universal SHALL claims have partition coverage per the heuristic in `references/sdd-spec-formats.md` § 1.6 — when a positive signal fires, scenarios cover each partition
 - [ ] Mechanism (algorithms, thresholds, strategies, retry policies) appears in `design.md` or the proposal's Approach, not in spec text
 - [ ] `design.md` has at least one Decision with rationale
 - [ ] `tasks.md` has atomic, ordered tasks
 - [ ] Every SHALL requirement maps to at least one evidence-producing task (test, schema check, or captured output) OR appears in `design.md` § Verification Waivers with a manual evidence reference
+- [ ] Every foreseeable write-site implied by `design.md` (canonical path plus any alternative paths the design names — shortcuts, retries, merges) is paired with its own evidence-producing test task
 - [ ] No delta markers in `.specs/specs/` (baseline specs untouched)
 
 ## Output
@@ -162,6 +171,9 @@ Summary: change name, capabilities affected, task count.
 - Not reading existing baseline specs before writing deltas
 - Writing baseline format in change specs (missing ADDED/MODIFIED/REMOVED markers)
 - Writing scenarios that carry the contract instead of illustrating it — if deleting the scenarios leaves the requirement untestable, the requirement text is under-specified (see `references/sdd-spec-formats.md` § 1.5)
+- Writing one scenario for a universal claim whose input space partitions along signals from `references/sdd-spec-formats.md` § 1.6 (lifecycle, identity, multi-source composition, derived-pair) — verify will flag this as partition-incomplete coverage
+- Partitioning along code paths or write-sites in scenarios — that is mechanism; partitions must use spec vocabulary only
+- Generating only canonical-path test tasks when `design.md` names alternative paths (shortcuts, retries, merges) — each foreseeable write-site needs its own paired test task, not just the canonical one
 - Creating tasks that are too coarse (one task = "implement auth" instead of atomic steps)
 - Generating all artifacts without pausing for user confirmation between phases
 - Using non-kebab-case change names

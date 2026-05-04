@@ -86,10 +86,56 @@ Consequences:
    If deleting all scenarios leaves nothing testable, the requirement is under-specified — the scenarios were carrying the contract.
 2. **Scenarios should sample the space meaningfully.**
    Happy path alone is weak; include boundaries and cases where the property might plausibly fail.
+3. **Universal claims need partition coverage when the input space splits.**
+   See § 1.6 for the partition heuristic — when a universal SHALL's input space partitions along semantic lines the spec already names, scenarios must sample each partition; otherwise verification can only observe one arm of a multi-arm claim.
 
 Verification in SDD samples these claims via scenarios and implementation tracing — it does not formally prove them.
 Strong universal claims supported by thin, happy-path-only scenarios are a risk flag, not a fault.
 Write the strongest claim you believe holds; select scenarios that would catch a plausible failure if the claim were violated.
+
+### 1.6 Partition heuristic for universal claims
+
+Universal claims ("for any X", "whenever Y", "the system SHALL ... for all ...") apply across a space of cases.
+A single happy-path scenario only samples one corner of that space; verification has no way to observe the other arms.
+This heuristic decides _when_ a universal claim needs multiple scenarios and _what those scenarios should partition along_ — without leaking mechanism into the spec.
+
+**Question to ask of any universal SHALL claim**: _Does the requirement's subject reference named states, identities, or compositions that the rest of the spec already distinguishes?_
+
+If yes → list partitions in scenarios, one scenario per partition the contract must hold for.
+If no → a single scenario is fine.
+
+**Four positive signals.**
+Any one triggers the partition requirement.
+
+1. **Outcome-conditioning lifecycle states.**
+   The requirement's subject (Source, Manifest, Job, Session, etc.) has states defined or referenced elsewhere in the spec, _and_ the requirement's outcome is conditioned on which state holds.
+   Partition: one scenario per outcome-relevant state.
+   _Counter-example:_ "All requests SHALL be logged with user ID and timestamp" — the request has states (GET/POST, authenticated/unauthenticated), but the outcome (logged) does not depend on them; no partition needed.
+2. **Identity / equivalence semantics.**
+   The requirement involves "same as", "already seen", deduplication, normalization, or canonical form.
+   Partition: `(novel input, equivalent-to-existing input)` at minimum.
+3. **Multi-source composition.**
+   The requirement's output is assembled from multiple producers the spec names.
+   Partition: scenarios per producer combination, including disagreement cases (`both agree, A-only, B-only, A and B disagree`).
+4. **Derived-pair invariants.**
+   The requirement asserts `field_a == f(field_b)` or any relationship across two fields the spec names as related.
+   Partition: one scenario per spec-asserted state of the data where the pair must hold, including any post-composition or post-merge state the spec describes.
+
+**Negative signal** (no partition needed).
+Subject has a single shape, no referenced lifecycle the outcome depends on, no identity/equivalence semantics, no multi-source merge, no derived pair.
+
+**Anti-theater rule.**
+If you can't name a partition without inventing one, the claim doesn't need partitions.
+Don't manufacture branches to satisfy a checklist.
+
+**Spec-author vocabulary test.**
+Write the partition list using only vocabulary that already appears in the spec.
+If you reach for implementation terms (write-site, code path, branch, function, module), you've crossed into mechanism — stop, and either rephrase in spec vocabulary or drop the partition.
+
+**Where this heuristic is enforced.**
+
+- `sdd-propose`, `sdd-translate`, `sdd-derive` apply it at spec-authoring time.
+- `sdd-verify` applies it at verification time as the "partition-incomplete coverage" smell — when partitions are evident from the heuristic but scenarios cover only some, that is a WARNING distinct from "universal claim, single scenario."
 
 ## 2. RFC 2119 Keywords
 

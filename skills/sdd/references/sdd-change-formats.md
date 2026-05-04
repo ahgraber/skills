@@ -140,3 +140,29 @@ Rules:
 - Every SHALL requirement in the delta specs must be backed by at least one task that produces runnable evidence — a named test (unit, integration, or e2e), a schema-snapshot check, or a captured-output step.
   Requirements that genuinely cannot be tested automatically belong in `design.md` § Verification Waivers instead.
   `sdd-verify` enforces this rule and will flag uncovered SHALL requirements as CRITICAL.
+- Every **contract-relevant write-site** (see § 3.1) for a SHALL requirement must be paired with an evidence-producing test task that exercises the contract _through that write-site_.
+  When a new write-site emerges during implementation (e.g., a dedup shortcut, retry path, cache fast-path, fallback branch), `sdd-apply` adds the paired test task before the implementation task is marked complete.
+
+### 3.1 Contract-relevant write-sites
+
+A **contract-relevant write-site** is a code location that produces or modifies a value the spec asserts a SHALL contract over.
+
+When the implementation has multiple such locations for the same contract — for example, a canonical write path _and_ a deduplication shortcut, or a primary handler _and_ a retry path — each is a contract-relevant write-site, and each requires its own evidence-producing test task.
+A single test exercising one path leaves the other arms of the contract unverified.
+
+Identifying write-sites is mechanism-level work and lives in tasks (and verify), not in specs.
+Specs partition along _semantic_ states the contract holds in (see `sdd-spec-formats.md` § 1.6).
+Tasks ensure each _implementation path_ producing those states is exercised.
+
+**Heuristic for spotting them:**
+
+- Multiple call sites that mutate the same persisted field.
+- Branches with early `return` that bypass the canonical path (shortcuts, caches, idempotency fast-paths).
+- Retry, fallback, or compensation paths that re-enter the same write logic.
+- Merge or composition steps that combine fields written by other sites.
+
+**What is _not_ a contract-relevant write-site:**
+
+- Internal helpers that don't produce a contract-asserted value on their own.
+- Pure transformations whose output is consumed by exactly one canonical write-site.
+- Logging, metrics, or instrumentation calls that don't affect contract-asserted state.

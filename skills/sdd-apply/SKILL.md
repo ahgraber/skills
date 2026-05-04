@@ -96,9 +96,10 @@ For each unchecked task:
 2. **Check dependencies** — are earlier tasks complete?
    If not, implement them first
 3. **Implement** — write the code
-4. **Test** — verify the implementation works
+4. **Check for newly-emerged write-sites** — see § Write-site emergence below
+5. **Test** — verify the implementation works
    If the test fails, stop and resolve the failure before proceeding to the next step.
-5. **Check off** — update `tasks.md`: `- [ ]` → `- [x]`
+6. **Check off** — update `tasks.md`: `- [ ]` → `- [x]`
 
 Follow design decisions in `design.md` — don't diverge without reason.
 Follow behavioral requirements in delta specs — these define what "correct" means.
@@ -106,6 +107,24 @@ Apply the **Critical Constraints** above to every artifact you produce — code,
 
 If `.specs/.sdd/schema-config.yaml` exists and a task consumes a schema contract that is not yet defined, pause before implementing it.
 Surface the dependency gap and confirm with the user whether to reorder tasks in `tasks.md` first.
+
+### Write-site emergence
+
+A SHALL requirement may end up with multiple code paths that produce or modify the contract-asserted value during implementation — not just the canonical path.
+Common examples: deduplication shortcuts, cache fast-paths, retry/fallback branches, idempotency early-returns, merge or composition steps that write the same fields.
+
+When implementing a task introduces such a path for an existing SHALL:
+
+1. **Pause before checking off** the implementation task.
+2. **Add a paired test task** to `tasks.md` that exercises the contract _through the new path_.
+   The new test task must produce runnable evidence (test, schema check, or captured output) — same standard as the original SHALL coverage rule.
+3. **Implement the test** as part of the same work, or sequence it as the immediately-following task.
+4. **Then** check off the original implementation task.
+
+A test exercising only the canonical path does not stand in for evidence on a shortcut, retry, or composition path.
+This rule is what `sdd-verify`'s write-site enumeration is checking; cover it at apply time and verify has nothing to flag.
+
+When unsure whether a path is contract-relevant, surface it to the user rather than skipping the test task silently.
 
 ### Phase 4: After All Tasks
 
@@ -133,6 +152,8 @@ This skill can be invoked at any point after `tasks.md` exists — not only when
 - Continuing past a failed task without resolving it
 - Diverging from design decisions without documenting why
 - Treating artifacts as frozen when implementation reveals issues (update them)
+- Adding a deduplication shortcut, cache fast-path, retry branch, or composition step for a SHALL-covered value without adding a paired test task that exercises the new write-site (see § Write-site emergence)
+- Checking off the implementation task before the paired test task for a newly-emerged write-site is added and runnable
 - Referencing ephemeral scaffolding — task IDs, group names, design-section IDs (e.g. `D12`) — in code, comments, commit messages, or PR descriptions (see **Critical Constraints**)
 - Drafting a commit message inline without invoking `commit-message` when it is available, or without applying the **Critical Constraints** when it is not
 

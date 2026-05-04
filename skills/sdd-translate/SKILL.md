@@ -108,6 +108,9 @@ Add a source attribution blockquote at the top of each generated spec (see forma
 The translation is from the source doc's grammar into SDD contract statements (see § 1.1 contract shapes).
 Source docs from other tools (Spec Kit, Jira, ADRs, prose) commonly mix WHAT and HOW in the same sentence; translate only the contract, and route mechanism detail to `design.md` or discard it.
 
+When the translated requirement is a universal SHALL, apply the **partition heuristic** in `references/sdd-spec-formats.md` § 1.6 to the source's acceptance criteria.
+Source docs frequently capture only the happy-path acceptance criterion; if the heuristic flags a partition the source did not cover, surface the gap as an Uncertainty rather than fabricating scenarios.
+
 **Translation rules:**
 
 | Source pattern                                                                               | SDD translation                                                                                                                     |
@@ -138,6 +141,7 @@ Source docs from other tools (Spec Kit, Jira, ADRs, prose) commonly mix WHAT and
 - [ ] Every `### Requirement:` uses RFC 2119 keywords (SHALL/MUST/SHOULD/MAY)
 - [ ] Every scenario uses **GIVEN**/**WHEN**/**THEN** with bold labels
 - [ ] Each requirement is a contract statement in one of the shapes from `references/sdd-spec-formats.md` § 1.1 — a property about observable state that stands on its own without its scenarios
+- [ ] Universal SHALL claims have partition coverage per the heuristic in `references/sdd-spec-formats.md` § 1.6 — when a positive signal fires, scenarios cover each partition (or the gap is recorded as an Uncertainty)
 - [ ] Scenarios use `####` heading level (not `###` or `#####`)
 - [ ] Implementation details and named strategies from source were routed to `## Technical Notes` (baseline) or `design.md` (change directory), not left in the requirement text
 

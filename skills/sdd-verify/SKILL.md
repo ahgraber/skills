@@ -202,6 +202,35 @@ If Phase 2 is in failing-suite override mode, passing tests from that run may st
 The output of this phase is a per-requirement evidence table that drives Phase 5 and the final report.
 On the parallel path, the orchestrator assembles this table from subagent findings during synthesis.
 
+### Phase 4.5: Enumerate Write-Sites (orchestrator only)
+
+Cross-cutting search work — runs at the orchestrator regardless of single-agent vs. parallel path.
+Subagents do not enumerate write-sites; they consume the enumeration as a dispatch input.
+
+For each **ADDED or MODIFIED universal SHALL** in scope, produce a list of **contract-relevant write-sites** — code locations that produce or modify the value the SHALL is over.
+See `references/sdd-change-formats.md` § 3.1 for the definition and heuristic.
+
+Procedure:
+
+1. Identify the contract-asserted value(s) named in the requirement (a persisted field, a response shape, an emitted event, etc.).
+2. Search the codebase for every code location that writes or modifies that value — use Grep, the structural graph if available (e.g., `code-review-graph` `query_graph_tool`), or repeated reads.
+3. **Scope rule.**
+   For ADDED requirements, every located write-site is in scope (all are new behavior).
+   For MODIFIED requirements, in scope is the union of (a) write-sites touched by the change diff and (b) pre-existing write-sites the modified contract now applies to — even if the change diff didn't touch them.
+   Untouched legacy code is exactly where this rule earns its keep; do not narrow enumeration to the diff.
+4. Filter out non-contract-relevant locations per the heuristic (internal helpers that don't produce contract-asserted state, pure transformations consumed by exactly one canonical writer, instrumentation-only calls).
+5. Record the enumeration as `requirement → [write-site path:line, …]`.
+
+The enumeration is the orchestrator's responsibility because:
+
+- It is cross-cutting (often spans files outside the change diff for MODIFIED).
+- It needs full tooling (Grep, graph search, repeated reads) that the per-requirement subagent context shouldn't carry.
+- Centralizing avoids subagents re-running the same search and improvising scope.
+
+The enumeration feeds Phase 5 step 4 directly, and on the parallel path it is passed verbatim to subagents in the dispatch prompt under **Implementation write-sites in scope**.
+
+If a SHALL is not universal (narrow shape, no input-space partitions) skip enumeration — single-site requirements don't need this check.
+
 ### Phase 5: Check Contract Satisfaction
 
 Skip requirements flagged as missing in Phase 4.
@@ -215,8 +244,12 @@ For each implemented requirement at TESTED or VERIFIED:
 1. Read the requirement text — this is the **contract claim** (`references/sdd-spec-formats.md` § 1).
 2. Read the delta spec scenarios — concrete **evidence** sampling the claim.
 3. Inspect the cited test or output to verify each scenario holds in the executed evidence (not just in the source code).
-4. Consider whether the implementation honors the broader claim beyond the stated scenarios (e.g., if the requirement says "for any query satisfying C, the system SHALL return no relevant results," check that the implementation doesn't only work on the scenario examples).
-5. Flag deviations as CRITICAL (contradicts requirement or scenario) or WARNING (partially meets it, or honors scenarios but appears to violate the broader claim).
+4. **For universal SHALL claims** (ADDED or MODIFIED), use the write-site enumeration produced in Phase 4.5.
+   For each enumerated write-site, check the test execution log for at least one cited test that exercises the contract _through that site_ — not just through the canonical path.
+   If a write-site has no covering test in the log, flag **CRITICAL: partition-incomplete evidence — write-site `<path:line>` for SHALL `<name>` has no test coverage.**
+   A passing test on one path is not evidence for a deduplication shortcut, retry branch, or composition step that writes the same value.
+5. Consider whether the implementation honors the broader claim beyond the stated scenarios (e.g., if the requirement says "for any query satisfying C, the system SHALL return no relevant results," check that the implementation doesn't only work on the scenario examples).
+6. Flag deviations as CRITICAL (contradicts requirement or scenario, or write-site lacks evidence) or WARNING (partially meets it, or honors scenarios but appears to violate the broader claim).
 
 ### Phase 6: Check Scenario Coverage
 
@@ -233,7 +266,12 @@ Coverage smells to flag as WARNING:
   Fails to exercise different parts of the input space.
 - **Scenarios restate the requirement** — the scenario adds no information beyond the requirement text.
   No independent test value.
-- **Universal claim, single scenario** — the requirement states a property over a class of inputs ("for any X", "whenever Y"), but only one scenario is provided.
+- **Universal claim, single scenario** — the requirement states a property over a class of inputs ("for any X", "whenever Y"), but only one scenario is provided _and_ the partition heuristic does not flag any positive signal.
+  This is a quantitative concern: the input space may be uniform but the sample size is one.
+- **Partition-incomplete coverage** — apply the partition heuristic in `references/sdd-spec-formats.md` § 1.6.
+  When a positive signal fires (lifecycle states, identity/equivalence, multi-source composition, derived-pair invariant) but scenarios cover only some partitions of the input space, flag this distinct from "single scenario."
+  This is a qualitative concern: the input space partitions into named arms and only some are sampled.
+  Example: a SHALL with identity/equivalence semantics whose only scenario covers `(novel input)` and never `(equivalent-to-existing input)` — partition-incomplete, even if multiple scenarios are present.
 
 Flag as SUGGESTION (not WARNING) if the requirement is genuinely narrow and a single scenario is adequate (e.g., "the response Content-Type SHALL be `application/json`").
 
@@ -368,6 +406,12 @@ State instead that verification found issues the user explicitly chose not to le
 - Skipping graceful degradation — running verify is valid even with incomplete artifacts.
 - Not reading baseline specs for full behavioral context.
 - Checking only that scenarios pass, not whether the implementation honors the broader contract claim (`references/sdd-spec-formats.md` § 1.5 — scenarios are evidence, not definition).
+- Skipping Phase 4.5 (write-site enumeration) for ADDED or MODIFIED universal SHALL claims — a passing test on the canonical path is not evidence for a deduplication shortcut, retry branch, or composition step that writes the same contract-asserted value.
+- Narrowing Phase 4.5 enumeration to the change diff for MODIFIED requirements — pre-existing legacy write-sites the modified contract now applies to are exactly the ones least likely to appear in the diff, and they need coverage too.
+- Pushing write-site enumeration into subagents — subagents operate per-requirement; cross-cutting search is orchestrator work and belongs in Phase 4.5.
+  Subagents consume the enumeration as a dispatch input.
+- Treating partition-incomplete coverage as identical to "single scenario."
+  They are distinct: one is a quantitative concern (sample size of one), the other is qualitative (named partitions exist, only some are sampled).
 - Marking a requirement VERIFIED or TESTED without a checkable citation, or accepting a waiver without checkable manual evidence — both fall back to INSPECTED / CRITICAL per `evidence-rules.md`.
 - Skipping the waiver provenance check (`evidence-rules.md` § 4) — waivers added in the same branch as the implementation, especially after a failed verify, need to be surfaced.
 - Recording an override in `design.md` but failing to carry its context into the OVERRIDES section or Summary, which breaks the audit trail for later verify/sync work.
@@ -381,5 +425,6 @@ State instead that verification found issues the user explicitly chose not to le
 - `references/evidence-rules.md` — tiers, sufficiency rule, waivers, provenance check, citation format
 - `references/parallel-subagent-path.md` — availability gate, granularity, dispatch, synthesis
 - `references/verify-subagent.md` — canonical job description for subagents on the parallel path
-- `references/sdd-spec-formats.md` — contract shapes (§ 1.1), scenarios as evidence (§ 1.5)
+- `references/sdd-spec-formats.md` — contract shapes (§ 1.1), scenarios as evidence (§ 1.5), partition heuristic (§ 1.6)
+- `references/sdd-change-formats.md` — task format (§ 3) and contract-relevant write-site definition (§ 3.1)
 - `references/sdd-schema.md` — schema evidence annotations (§ 1) and lifecycle policy (§ 4)

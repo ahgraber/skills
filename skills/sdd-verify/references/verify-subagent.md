@@ -11,7 +11,9 @@ For each requirement in your assigned scope, return:
 
 1. **Evidence tier** with a checkable citation — VERIFIED, TESTED, INSPECTED, or WAIVED (per `evidence-rules.md` §§ 1, 5).
 2. **Contract findings** — does the cited evidence demonstrate the requirement's claim, including beyond the literal scenarios?
-3. **Coverage findings** — do the requirement's scenarios meaningfully sample the contract claim?
+   For ADDED or MODIFIED universal SHALL claims, this includes confirming each write-site in the orchestrator-provided enumeration has at least one cited test (see Contract Satisfaction step 4).
+   You consume the enumeration; you do not produce it.
+3. **Coverage findings** — do the requirement's scenarios meaningfully sample the contract claim, including the partition heuristic (see Scenario Coverage)?
 
 You do NOT:
 
@@ -40,6 +42,9 @@ If any are missing or insufficient, **say so explicitly** in your Notes (prefix 
 - **Overridden blockers** — explicit list of the known failing tests / audit findings / gate outcomes the user chose not to let block sync.
   If `Test suite result` is `failing-suite-override` and this list is missing, that is a `MISSING-INPUT`.
 - **Test artifact listing** — paths to test source files you may need to read (e.g., `tests/`).
+- **Implementation write-sites in scope** — for each ADDED or MODIFIED universal SHALL in scope, the orchestrator provides a per-requirement list of contract-relevant write-sites (`requirement → [path:line, …]`) produced by Phase 4.5.
+  This list is the authoritative scope for write-site coverage checks; do not narrow it, do not extend it from your own search.
+  If a requirement's enumeration is missing when its requirement text is universal, that is a `MISSING-INPUT`.
 - **Schema diff (if any)** — path to `.specs/changes/<name>/schemas/after/` or a generated diff file.
 - **Verification waivers** — relevant entries from `design.md` § Verification Waivers, inlined in the prompt.
 - **Skill root** — absolute path to the directory containing the parent `SKILL.md` and `references/`.
@@ -120,7 +125,16 @@ For each requirement:
    - Each scenario's GIVEN/WHEN/THEN holds in the executed evidence (not just in source code that was never run).
    - The implementation honors the broader claim beyond the stated scenarios.
      Example: a requirement that says "for any query satisfying C, the system SHALL return no relevant results" must not pass merely because the literal scenario inputs return empty — the universal claim must hold.
-4. Flag deviations:
+4. **For universal SHALL claims (ADDED or MODIFIED), use the orchestrator-provided write-site enumeration.**
+   Each such requirement carries a list of contract-relevant write-sites under **Implementation write-sites in scope** in your dispatch input.
+   Do not enumerate write-sites yourself — that is orchestrator work (Phase 4.5).
+   Steps:
+   1. For each write-site listed for this requirement, search the test execution log for at least one cited test that exercises the contract _through that write-site_ (not just through the canonical path).
+   2. If a write-site has no covering test in the log, flag **CRITICAL: partition-incomplete evidence — write-site `<path:line>` for SHALL `<requirement name>` has no test coverage.**
+      Single-test evidence on the canonical path does not stand in for evidence on a shortcut, retry branch, or composition step.
+   3. If a universal SHALL has no enumeration entry but you believe one was expected (the requirement text is universal and ADDED or MODIFIED), record `MISSING-INPUT: write-site enumeration for <requirement>` and treat the requirement as advisory.
+      Do not improvise the enumeration.
+5. Flag other deviations:
    - **CRITICAL** — implementation contradicts the requirement, or contradicts a scenario's THEN.
    - **WARNING** — partially meets the requirement, or honors scenarios but appears to violate the broader claim.
 
@@ -138,7 +152,10 @@ Smells to flag as **WARNING**:
 - **Happy-path only** — every scenario describes a well-formed, success-bound case; missing boundary or adversarial cases.
 - **No precondition variation** — all scenarios share essentially the same GIVEN.
 - **Scenarios restate the requirement** — the scenario adds no information beyond the requirement text.
-- **Universal claim, single scenario** — the requirement states a property over a class of inputs but only one scenario is provided.
+- **Universal claim, single scenario** — the requirement states a property over a class of inputs but only one scenario is provided _and_ no partition signal fires (see next bullet).
+- **Partition-incomplete coverage** — apply the partition heuristic in `sdd-spec-formats.md` § 1.6.
+  When a positive signal fires (lifecycle states, identity/equivalence, multi-source composition, derived-pair invariant) but scenarios cover only some named partitions, flag this distinct from "single scenario."
+  Example: a SHALL with identity/equivalence semantics whose scenarios cover `(novel input)` but never `(equivalent-to-existing input)` — partition-incomplete, even if multiple scenarios exist.
 
 Downgrade to **SUGGESTION** if the requirement is genuinely narrow (e.g., "the response Content-Type SHALL be `application/json`") and a single scenario adequately samples it.
 
@@ -179,8 +196,14 @@ If any item fails, fix it before returning.
 - Citing a test that was deselected or skipped in the test execution log.
   Fall back to INSPECTED.
 - Skipping the broader-claim check — a universal claim can pass on every literal scenario and still be violated by the implementation.
+- Skipping the write-site coverage check on ADDED or MODIFIED universal SHALL claims.
+  A passing test on the canonical path is not evidence for a deduplication shortcut, retry branch, or composition step that writes the same contract-asserted value.
+- Improvising your own write-site enumeration instead of using the orchestrator-provided list, or extending the list with sites you find yourself.
+  Enumeration is orchestrator work (Phase 4.5).
+  Your job is to check coverage of what was provided.
+  Missing enumeration → `MISSING-INPUT:`, not improvisation.
 - Flagging coverage smells as CRITICAL.
-  Thin coverage is WARNING (or SUGGESTION); only contract contradictions are CRITICAL.
+  Thin coverage is WARNING (or SUGGESTION); only contract contradictions and missing write-site evidence are CRITICAL.
 - Speculating about what would happen if a test ran differently.
   Use the captured log; if it doesn't show the test, fall back to INSPECTED.
 - Treating every failing-suite-override run as unusable.
