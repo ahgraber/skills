@@ -50,6 +50,56 @@ Treat the ratios as a sanity check against an inverted pyramid (slow, flaky, exp
 - For reliability-sensitive code, include timeout/cancellation and cleanup behavior.
 - For dependency/lockfile changes, include the PyPI vulnerability audit suite (`scripts/test_pypi_security_audit.py`).
 
+## Multi-Path and Derived-Field Patterns
+
+These two patterns catch a class of bug where a single happy-path test produces a false sense of coverage.
+
+### Multiple write-sites for the same contract
+
+When a contract-asserted value (a persisted field, a response, an emitted event) can be produced by more than one code path — canonical path plus a deduplication shortcut, retry branch, cache fast-path, idempotency early-return — **each path needs its own test**.
+
+A test that exercises the canonical path does not prove the shortcut is correct, even if the shortcut calls the same underlying function.
+The shortcut may skip validation, use a different write order, or fail to propagate updated fields.
+
+Pattern: enumerate write-sites in the implementation; write one test per site that asserts the contract outcome at that site.
+
+```python
+def test_persist_provenance_on_fresh_upload(repo, source):
+    """Validates: source provenance is persisted on initial upload.
+    Implication: fresh-upload path sets canonical fields; regression would silently drop provenance."""
+    result = repo.save(source, dedup=False)
+    assert result.normalized_url == normalize_url(source.url)
+
+
+def test_persist_provenance_via_dedup_shortcut(repo, existing_source):
+    """Validates: source provenance is preserved when dedup shortcut returns an existing record.
+    Implication: dedup path skipping the write would silently lose provenance updates."""
+    updated = replace(existing_source, url="https://example.com/new-path")
+    result = repo.save(updated, dedup=True)
+    assert result.normalized_url == normalize_url(updated.url)
+```
+
+### Derived-pair invariants across composition boundaries
+
+When a spec asserts `field_a == f(field_b)` as an invariant — especially when `field_a` and `field_b` are written by different producers (resolver, fetcher, merge step) — **neither stage-local tests nor field-local tests prove the invariant holds after composition**.
+
+Each producer can be correct in isolation while the composition breaks the relationship.
+A post-composition invariant test asserts the relationship on the assembled output after all producers have run.
+
+```python
+def test_normalized_url_invariant_after_manifest_merge(resolver_output, fetcher_output):
+    """Validates: normalized_url == normalize_url(source_url) after resolver+fetcher merge.
+    Implication: if merge treats the pair as independent fields, a resolver update would produce
+    inconsistent normalized_url without triggering a visible failure."""
+    manifest = merge_manifest(resolver_output, fetcher_output)
+    assert manifest.normalized_url == normalize_url(manifest.source_url), (
+        f"Derived-pair invariant broken: normalized_url={manifest.normalized_url!r} "
+        f"!= normalize_url(source_url={manifest.source_url!r})"
+    )
+```
+
+Identify candidates for this pattern: look for pairs of fields where one is described as derived from the other (in specs, docstrings, or naming), and the fields are written by code that does not enforce the relationship at each write.
+
 ## Determinism and Flake Control
 
 - Keep tests order-independent and free of shared mutable global state.

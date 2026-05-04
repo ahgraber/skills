@@ -53,6 +53,12 @@ When a default conflicts with project constraints, suggest a better-fit alternat
 
 ## Common Mistakes
 
+- **Single write-site coverage** — testing the canonical code path but not alternative paths (dedup shortcut, cache fast-path, retry branch) that write the same contract-asserted value.
+  Each write-site needs its own test.
+  See `references/testing-strategy.md` § Multi-Path and Derived-Field Patterns.
+- **Missing post-composition invariant** — when `field_a == f(field_b)` is a required relationship and each field is written by a different producer (resolver, fetcher, merge step), stage-local tests don't prove the invariant holds after composition.
+  Write a test that asserts the relationship on the assembled output.
+  See `references/testing-strategy.md` § Multi-Path and Derived-Field Patterns.
 - **Mocking too deep** — patching internals instead of module-boundary seams makes tests brittle and coupled to implementation.
 - **Testing the mock** — verifying mock call counts without asserting on observable output proves nothing about behavior.
 - **Missing regression test** — fixing a bug without a test that reproduces it first; the bug will recur.

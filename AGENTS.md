@@ -6,6 +6,15 @@ See `skills/ai-skills` for best practices on designing skills.
 
 Avoid adding extra documentation files inside skills unless explicitly required.
 
+## Source skills vs. installed skills
+
+- This repo is the **upstream source** for the skills it contains.
+  The agent assisting on this repo may have overlapping skills installed (visible in its available-skills list); those installed copies are downstream consumers and may be stale or diverged.
+- All work in this repo — edits, reviews, refactors, tests — must target the **repo variant** under [skills/](skills/).
+  Never operate against the installed version surfaced to the agent.
+- **Corollary (pressure-testing):** if the user asks to pressure-test, exercise, or critique a skill defined in this repo, work against the repo variant by reading [skills/\<name>/SKILL.md](skills/) (and its references) directly.
+  Do **not** invoke the installed copy via the `Skill` tool — that loads a potentially divergent version and gives misleading results.
+
 ## Development vs. user environment
 
 - These practices describe how we develop and test skills in this repo.
