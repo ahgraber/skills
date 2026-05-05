@@ -12,6 +12,12 @@ Use this skill to create, review, or improve SKILL.md-based skills so they trigg
 
 - Inform the user when this skill is being invoked by name: `optimize-skills`.
 
+## Critical Constraints
+
+- Description must state when and why to invoke the skill — no workflow summaries, no "what it does."
+- Don't duplicate reference content in SKILL.md; link to `references/` instead.
+- SKILL.md target: \<500 lines, \<5000 tokens.
+
 ## When to Use
 
 - Creating a new reusable skill from repeated work patterns.
@@ -74,7 +80,8 @@ Skills help future Agent instances find and apply effective approaches.
 
 ### Phase 3: Review and Optimize
 
-1. Run scenario and functional checks against realistic prompts.
+1. Read `references/best-practices.md` and `references/skills-search-optimization.md`.
+   Then run scenario and functional checks against realistic prompts.
 2. Review resource fit:
    - Confirm references/assets/scripts are sufficient and scoped.
    - Offload verbose `SKILL.md` sections into resources where appropriate.
@@ -83,6 +90,19 @@ Skills help future Agent instances find and apply effective approaches.
    - Remove redundancy and improve progressive disclosure.
    - Re-check whether flowchart usage is still justified.
 4. Iterate until trigger behavior and execution quality both pass.
+5. Self-check before finalizing.
+   Verify:
+   - Does the description state when to invoke, not summarize what the skill does?
+     If not, rewrite.
+   - Is reference content duplicated in SKILL.md instead of linked?
+     If yes, move to `references/`.
+   - Is SKILL.md within the 500-line target?
+     If not, trim or offload to `references/`.
+   - Are trigger scenarios converted to patterns in `description`/`## When to Use`, not pasted verbatim?
+     If not, convert.
+   - Has Compliance Hardening been applied?
+     If not, apply before finalizing.
+     Fix any failures before declaring the skill complete.
 
 ## Core Principles
 

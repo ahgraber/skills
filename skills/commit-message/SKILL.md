@@ -19,6 +19,11 @@ Draft a Conventional Commit message from staged changes.
 - If no staged changes exist after one retry, stop and inform the user (standard workflow only).
 - Always include an `AI-assistant: <AGENT>` footer.
 - Output only the final commit message in one markdown code block.
+- Body content rules (apply at draft time, not as an afterthought):
+  - State outcomes the reader can act on, not mechanisms.
+  - Don't name internal symbols (private helpers, parameter lists); name the public surface that changed.
+  - Internal-only refactors collapse to one phrase or are omitted.
+  - Drop bookkeeping (file moves, archive operations, sync steps).
 
 ## Workflow
 
@@ -36,8 +41,18 @@ Draft a Conventional Commit message from staged changes.
    Identify changed files, behavior impact, logical scope, and likely commit type.
 6. Incorporate user arguments/context when provided.
    Preserve explicit issue refs and constraints from user input.
-7. Draft the commit message using `references/conventional-commit-rules.md`.
-8. Return only the final message in a fenced code block, ready for `git commit -F -`.
+7. Read `references/conventional-commit-rules.md`.
+   Then draft the message applying those rules.
+8. Self-check before returning.
+   For each line in the body, verify:
+   - Does it name an internal symbol?
+     If yes, drop or replace with the public-surface description.
+   - Does it describe how, not what changed?
+     If yes, restate as outcome.
+   - Is it bookkeeping (file moves, archive, sync, lockfile)?
+     If yes, drop unless the reader needs to act on it.
+     Revise any failing lines before output.
+9. Return only the final message in a fenced code block, ready for `git commit -F -`.
 
 ## Context Override
 

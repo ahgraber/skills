@@ -73,6 +73,7 @@ Include a body when subject alone is insufficient.
 - **Be concise**, not every change requires attention:
   - Prioritize changes that influence external/user-facing surface and why.
   - Internal-only refactoring with no external surface change can collapse to a phrase or be omitted.
+  - Drop bookkeeping (file moves, archive operations, sync steps) unless the reader needs to act on them.
   - State outcomes, not mechanisms — drop implementation detail the reader doesn't need to act on.
   - Omit diff-level detail (file paths, parameter lists, function names) unless directly relevant.
 - **Never reference ephemeral scaffolding** — task IDs, group numbers, sprint names, todo-list item numbers, or other planning-artifact identifiers that won't persist after the work concludes.
