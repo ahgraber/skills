@@ -30,6 +30,29 @@ Notebook workflows remain async-safe and reproducible without event-loop patchin
 - Await cancellation completion (for example with `asyncio.gather(..., return_exceptions=True)`).
 - Prefer `TaskGroup` when all concurrent tasks are owned by a single scoped operation.
 
+### Fire-and-forget: weak-reference GC (Python 3.12+)
+
+The event loop holds only a **weak reference** to tasks.
+In Python 3.12+ a task created with `asyncio.create_task()` may be garbage-collected before it runs if nothing else holds a strong reference.
+This is a silent failure — no error, the task simply never executes.
+
+Safe pattern: keep a module-level `set` as the strong-reference anchor and remove each task when it completes.
+
+```python
+_background_tasks: set[asyncio.Task] = set()
+
+
+def fire_and_forget(coro) -> asyncio.Task:
+    task = asyncio.create_task(coro)
+    _background_tasks.add(task)
+    task.add_done_callback(_background_tasks.discard)
+    return task
+```
+
+- The `set` prevents GC mid-execution.
+- `discard` in the callback keeps the set from growing unboundedly.
+- Returning the task lets callers optionally cancel or inspect it later.
+
 ## Script + Notebook Compatibility
 
 ```python
