@@ -97,8 +97,11 @@ For each unchecked task:
    If not, implement them first
 3. **Implement** — write the code
 4. **Check for newly-emerged write-sites** — see § Write-site emergence below
-5. **Test** — verify the implementation works
-   If the test fails, stop and resolve the failure before proceeding to the next step.
+5. **Test** — run the project's standard test command at its broadest reasonable scope (e.g. `pytest` with no `--ignore` / `--deselect` / `-m` filters).
+   Inner-loop iteration may use a narrower scope, but the verification you act on — and any pass/fail count you report — must come from a broad-scope run.
+   If you exclude any path, marker, or file, name the exclusion and justify it in the same message.
+   "Not part of this change" is not a valid justification for a class or module rewrite — every test that imports the rewritten symbol is part of the change by definition.
+   If a test fails, stop and resolve the failure before proceeding to the next step.
 6. **Check off** — update `tasks.md`: `- [ ]` → `- [x]`
 
 Follow design decisions in `design.md` — don't diverge without reason.
@@ -128,7 +131,16 @@ When unsure whether a path is contract-relevant, surface it to the user rather t
 
 ### Phase 4: After All Tasks
 
-When all tasks are checked off:
+**Before checking off the final task** (hard gate):
+
+1. Run the full suite as CI would — no programmatic exclusions unless they appear in the project's CI config.
+2. `rg`/`grep` for tests that import any symbol you changed and confirm they ran in step 1.
+   The blast-radius check is what catches tests pinned to rewritten classes or modules that a marker filter would silently skip.
+3. Tests rendered obsolete by the change must be deleted or updated with reasoning recorded in the diff — not silently skipped.
+4. Report results with scope alongside counts (e.g. "407 passed, 1 file excluded because…").
+   Pass/fail counts without an exclusion list are not a verification report.
+
+When the gate passes and all tasks are checked off:
 
 > "All tasks complete. Recommended next steps:
 >
@@ -156,6 +168,8 @@ This skill can be invoked at any point after `tasks.md` exists — not only when
 - Checking off the implementation task before the paired test task for a newly-emerged write-site is added and runnable
 - Referencing ephemeral scaffolding — task IDs, group names, design-section IDs (e.g. `D12`) — in code, comments, commit messages, or PR descriptions (see **Critical Constraints**)
 - Drafting a commit message inline without invoking `commit-message` when it is available, or without applying the **Critical Constraints** when it is not
+- Excluding a test file, path, or marker from a verification run without naming the exclusion and justifying it in the same message — especially fatal when the change rewrites a class or module that the excluded tests pin
+- Reporting "N passed, 0 failed" without also reporting what was excluded and why — scope must travel with the counts
 
 ## References
 
