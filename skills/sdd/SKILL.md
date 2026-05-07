@@ -48,7 +48,7 @@ See `references/find-specs-roots.md` for the **output schema, decision branches,
 Summary of behavior:
 
 - Multiple `.specs/` candidates → ask which to use.
-- Single `.specs/` with a valid pointer → follow it once; surface any malformed/broken/out-of-workspace pointer instead of silently falling back.
+- Single `.specs/` with a pointer → if multiple targets, list and ask which to use; if one target, follow it once; surface any malformed/broken/out-of-workspace pointer instead of silently falling back.
 - No `.specs/` but `specs/` fallback hits → confirm with user (default: parent of `specs/`).
 - Nothing found → ask where to initialize.
 - Always announce the resolved path; if a pointer was followed, announce both marker and target.

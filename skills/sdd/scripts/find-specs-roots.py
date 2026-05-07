@@ -20,6 +20,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+from typing import Literal
 
 EXCLUDE_DIRS = {
     ".git",
@@ -36,22 +37,24 @@ EXCLUDE_DIRS = {
     "venv",
 }
 SPECS_FALLBACK_MAX_DEPTH = 4
-SDD_SHAPE_MARKERS = {"specs", "changes", "schemas"}
+
+
+@dataclass
+class TargetInfo:
+    raw: str
+    comment: str | None
+    resolved: str
+    exists: bool
+    is_dir: bool = False
+    outside_workspace: bool = False
 
 
 @dataclass
 class PointerInfo:
-    present: bool
-    raw_target: str | None = None
-    resolved_target: str | None = None
     malformed: bool = False
-    malformed_reason: str | None = None
-    extra_lines_ignored: bool = False
-    target_exists: bool = False
-    target_is_dir: bool = False
-    target_outside_workspace: bool = False
-    target_shape_ok: bool = False
-    target_shape_reason: str | None = None
+    malformed_reason: Literal["unreadable", "empty"] | None = None
+    malformed_detail: str | None = None
+    targets: list[TargetInfo] = field(default_factory=list)
 
 
 @dataclass
@@ -147,21 +150,41 @@ def walk_for_dirs(
     return sorted(set(results))
 
 
-def parse_pointer_file(path: Path) -> tuple[str | None, bool, str | None]:
-    """Return (raw_target, extra_lines_ignored, malformed_reason)."""
+def parse_pointer_file(
+    path: Path,
+) -> tuple[list[tuple[str, str | None]], Literal["unreadable", "empty"] | None, str | None]:
+    """Return (entries, malformed_reason, malformed_detail).
+
+    entries is a list of (path_str, comment_or_none) pairs. Blank lines and
+    lines whose first non-whitespace character is '#' are skipped. Trailing
+    ' #' and ' //' comments (space-prefixed) are stripped from each remaining
+    line; whichever marker appears earliest wins. The comment text is
+    captured separately.
+    malformed_reason is 'unreadable' when the file cannot be read or is not
+    valid UTF-8, 'empty' when no non-comment lines remain.
+    malformed_detail carries the OS error string for 'unreadable'.
+    """
     try:
         text = path.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError) as exc:
-        return None, False, f"could not read pointer file: {exc}"
-    cleaned: list[str] = []
+        return [], "unreadable", str(exc)
+    entries: list[tuple[str, str | None]] = []
     for line in text.splitlines():
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):
             continue
-        cleaned.append(stripped)
-    if not cleaned:
-        return None, False, "no non-comment line in pointer file"
-    return cleaned[0], len(cleaned) > 1, None
+        comment: str | None = None
+        matches = [(stripped.find(m), m) for m in (" #", " //")]
+        matches = [(i, m) for i, m in matches if i != -1]
+        if matches:
+            idx, marker = min(matches)
+            comment = stripped[idx + len(marker) :].strip() or None
+            stripped = stripped[:idx].strip()
+        if stripped:
+            entries.append((stripped, comment))
+    if not entries:
+        return [], "empty", None
+    return entries, None, None
 
 
 def resolve_pointer_target(raw: str, marker_dir: Path) -> Path:
@@ -173,51 +196,27 @@ def resolve_pointer_target(raw: str, marker_dir: Path) -> Path:
     return (marker_dir / p).resolve()
 
 
-def analyze_target_shape(target: Path) -> tuple[bool, str | None]:
-    """Return (shape_ok, reason_if_not_ok)."""
-    if not target.is_dir():
-        return False, "target is not a directory"
-    try:
-        children = list(target.iterdir())
-    except OSError as exc:
-        return False, f"could not list target: {exc}"
-    if not children:
-        return True, None  # empty == freshly initialized, OK
-    has_marker = any(c.name in SDD_SHAPE_MARKERS and c.is_dir() for c in children)
-    if has_marker:
-        return True, None
-    return False, "target contains no specs/, changes/, or schemas/ subdirectory"
-
-
-def analyze_pointer(marker_dir: Path, anchor: Path) -> PointerInfo:
-    """Inspect `marker_dir/SPECS_ROOT` (if present) and return its parsed/resolved state."""
+def analyze_pointer(marker_dir: Path, anchor: Path) -> PointerInfo | None:
+    """Inspect `marker_dir/SPECS_ROOT` and return its parsed state, or None when the file is absent."""
     pointer_file = marker_dir / "SPECS_ROOT"
     if not pointer_file.is_file():
-        return PointerInfo(present=False)
-    raw, extra, malformed_reason = parse_pointer_file(pointer_file)
-    if malformed_reason is not None or raw is None:
+        return None
+    entries, malformed_reason, malformed_detail = parse_pointer_file(pointer_file)
+    if malformed_reason is not None:
         return PointerInfo(
-            present=True,
             malformed=True,
             malformed_reason=malformed_reason,
-            extra_lines_ignored=extra,
+            malformed_detail=malformed_detail,
         )
-    target = resolve_pointer_target(raw, marker_dir)
-    info = PointerInfo(
-        present=True,
-        raw_target=raw,
-        resolved_target=str(target),
-        extra_lines_ignored=extra,
-        target_exists=target.exists(),
-    )
-    if not info.target_exists:
-        return info
-    info.target_is_dir = target.is_dir()
-    info.target_outside_workspace = not is_inside(target, anchor)
-    shape_ok, reason = analyze_target_shape(target)
-    info.target_shape_ok = shape_ok
-    info.target_shape_reason = reason
-    return info
+    targets: list[TargetInfo] = []
+    for raw, comment in entries:
+        target_path = resolve_pointer_target(raw, marker_dir)
+        t = TargetInfo(raw=raw, comment=comment, resolved=str(target_path), exists=target_path.exists())
+        if t.exists:
+            t.is_dir = target_path.is_dir()
+            t.outside_workspace = not is_inside(target_path, anchor)
+        targets.append(t)
+    return PointerInfo(targets=targets)
 
 
 def analyze_explicit(raw: str, anchor: Path) -> ExplicitPath:
@@ -231,15 +230,6 @@ def analyze_explicit(raw: str, anchor: Path) -> ExplicitPath:
         exists=p.exists(),
         outside_workspace=not is_inside(p, anchor),
     )
-
-
-def to_jsonable(obj):
-    """Recursively convert dataclasses and lists into JSON-serializable primitives."""
-    if isinstance(obj, list):
-        return [to_jsonable(x) for x in obj]
-    if hasattr(obj, "__dataclass_fields__"):
-        return {k: to_jsonable(v) for k, v in asdict(obj).items()}
-    return obj
 
 
 def main() -> int:
@@ -259,7 +249,7 @@ def main() -> int:
     if args.explicit:
         result.explicit = analyze_explicit(args.explicit, anchor)
         # When explicit is given, do not discover or follow pointers.
-        print(json.dumps(to_jsonable(result), indent=2))
+        print(json.dumps(asdict(result), indent=2))
         return 0
 
     dot_specs_dirs = walk_for_dirs(anchor, ".specs", max_depth=None)
@@ -274,7 +264,7 @@ def main() -> int:
         for d in specs_dirs:
             result.specs_fallback_candidates.append(SpecsFallbackCandidate(path=str(d), parent=str(d.parent)))
 
-    print(json.dumps(to_jsonable(result), indent=2))
+    print(json.dumps(asdict(result), indent=2))
     return 0
 
 

@@ -28,17 +28,19 @@ Read these fields off the script's JSON to drive the **Locate Specs Root** dialo
 
 3. `dot_specs_candidates` has one entry (or one was just chosen) → handle its `pointer` field:
 
-   - `pointer.present` is false → use the candidate directory as `SPECS_ROOT`.
-   - `pointer.malformed` is true → surface `pointer.malformed_reason` to the user.
-     Do not silently fall back to the candidate directory.
-   - `pointer.target_exists` is false → surface the broken pointer (`pointer.raw_target` → `pointer.resolved_target`) to the user.
-     Do not silently fall back.
-   - `pointer.target_shape_ok` is false → surface `pointer.target_shape_reason` to the user as a misconfigured pointer.
-     Do not proceed with a target that is clearly not an SDD root.
-   - `pointer.target_outside_workspace` is true → announce the marker, the absolute target, and that the redirect leaves the workspace; ask the user to confirm before proceeding.
-   - `pointer.extra_lines_ignored` is true → announce that extra lines in the pointer were ignored so the user can fix the format.
-     Continue resolution.
-   - Otherwise → use `pointer.resolved_target` as `SPECS_ROOT`.
+   - `pointer` is `null` → no `SPECS_ROOT` file; use the candidate directory as `SPECS_ROOT`.
+   - `pointer.malformed` is true:
+     - `malformed_reason` is `"empty"` → tell the user the file has no valid entries and show the expected format.
+     - `malformed_reason` is `"unreadable"` → tell the user the file could not be read; show `malformed_detail` (the OS error) and ask them to check permissions or encoding.
+       Do not silently fall back in either case.
+   - `pointer.targets` has multiple entries → list them (showing each entry's `raw` path and `comment` if present) and ask which to use.
+     Then apply the single-target rules below to the chosen entry.
+   - `pointer.targets` has one entry → apply the single-target rules:
+     - `target.exists` is false → surface the broken pointer (`target.raw` → `target.resolved`) to the user.
+       Do not silently fall back.
+     - `target.is_dir` is false → surface that the target is a file, not a directory; do not proceed.
+     - `target.outside_workspace` is true → announce the marker, the absolute target, and that the redirect leaves the workspace; ask the user to confirm before proceeding.
+     - Otherwise → use `target.resolved` as `SPECS_ROOT`.
    - The pointer is followed at most once.
      The script does not chase pointers transitively, and neither should the agent.
 
@@ -58,9 +60,15 @@ For users authoring or reviewing the file:
 
 - Plain text, UTF-8.
 - Blank lines and lines starting with `#` are ignored.
-- The first remaining line is the target path.
+- Each remaining line is a target path.
+  A single entry redirects to one spec root; multiple entries let the agent ask which to use (same UX as discovering multiple `.specs/` directories).
+- Trailing `#` and `//` comments (space-prefixed) are stripped from each target line before resolution.
+  Whichever marker appears earliest in the line wins.
+- Behavior change from the prior single-target format: every non-comment line is now a target.
+  Existing pointer files with stray trailing lines (previously silently ignored) will now be treated as multi-entry manifests — clean them up if that is not intended.
 - Absolute paths (`/...`) and `~/...` are accepted; relative paths resolve relative to the directory containing the `SPECS_ROOT` file.
 - The pointer lets a repo keep a discoverable `.specs/` marker at the project root while the real spec tree lives elsewhere (e.g., a sibling docs repo, a monorepo package, or a non-hidden directory).
+  In a monorepo, list one path per project to consolidate the manifest.
 
 ## Top-level fields
 
@@ -95,31 +103,32 @@ The skill must not follow any `SPECS_ROOT` pointer file at the explicit path —
 ```jsonc
 {
   "path": "/abs/path/.specs",
-  "pointer": { ... } | null   // null only when no SPECS_ROOT file existed at all
+  "pointer": { ... } | null   // null when no SPECS_ROOT file exists; populated even if the file is malformed
 }
 ```
 
-Note: `pointer` is non-null whenever a `SPECS_ROOT` file is _present_ — even if it's malformed.
-Use `pointer.present` (always `true` in that case) to distinguish "no pointer file" (the field would be `null`) from "pointer present but unusable" (`pointer.malformed` etc.).
-
 ### PointerInfo
 
-| Field                      | Type           | Notes                                                                                               |
-| -------------------------- | -------------- | --------------------------------------------------------------------------------------------------- |
-| `present`                  | boolean        | Always `true` when this object is populated; `false` only via the surrounding `null`.               |
-| `raw_target`               | string \| null | First non-comment line of the pointer file. `null` if malformed.                                    |
-| `resolved_target`          | string \| null | Absolute resolved path of `raw_target`. `null` if malformed.                                        |
-| `malformed`                | boolean        | True when the pointer file has no non-comment line, or could not be read.                           |
-| `malformed_reason`         | string \| null | Human-readable reason (e.g., `"no non-comment line in pointer file"`).                              |
-| `extra_lines_ignored`      | boolean        | True when the pointer file had more than one non-comment line; the first was used.                  |
-| `target_exists`            | boolean        | Filesystem existence check for `resolved_target`.                                                   |
-| `target_is_dir`            | boolean        | True when the target is a directory.                                                                |
-| `target_outside_workspace` | boolean        | True when the resolved target lies outside the workspace anchor.                                    |
-| `target_shape_ok`          | boolean        | True when the target is empty (freshly initialized) **or** contains `specs/`/`changes/`/`schemas/`. |
-| `target_shape_reason`      | string \| null | Reason when `target_shape_ok` is false.                                                             |
+| Field              | Type                              | Notes                                                                                       |
+| ------------------ | --------------------------------- | ------------------------------------------------------------------------------------------- |
+| `malformed`        | boolean                           | True when the pointer file has no non-comment line, or could not be read.                   |
+| `malformed_reason` | `"unreadable" \| "empty" \| null` | `"unreadable"` when the file could not be read; `"empty"` when no non-comment lines remain. |
+| `malformed_detail` | string \| null                    | OS error string when `malformed_reason` is `"unreadable"`, null otherwise.                  |
+| `targets`          | array[TargetInfo]                 | One entry per non-comment path line. Empty when `malformed` is true.                        |
+
+### TargetInfo
+
+| Field               | Type           | Notes                                                                       |
+| ------------------- | -------------- | --------------------------------------------------------------------------- |
+| `raw`               | string         | The path as written in the pointer file (after comment stripping).          |
+| `comment`           | string \| null | Inline comment from the pointer file line, null if none.                    |
+| `resolved`          | string         | Absolute resolved path.                                                     |
+| `exists`            | boolean        | Filesystem existence check.                                                 |
+| `is_dir`            | boolean        | True when the target is a directory. Only meaningful when `exists` is true. |
+| `outside_workspace` | boolean        | True when the resolved target lies outside the workspace anchor.            |
 
 The script follows pointers **at most once**.
-If the resolved target itself contains a `SPECS_ROOT` file, it is ignored — the script does not chase pointers transitively.
+If any resolved target itself contains a `SPECS_ROOT` file, it is ignored — the script does not chase pointers transitively.
 
 ## SpecsFallbackCandidate
 
@@ -150,7 +159,7 @@ The pointer-file check does not apply to fallback candidates.
 
 → Ask the user where to initialize `.specs/`.
 
-**One `.specs/` with a valid in-workspace pointer**:
+**One `.specs/` with a valid in-workspace pointer (single target)**:
 
 ```json
 {
@@ -161,17 +170,19 @@ The pointer-file check does not apply to fallback candidates.
     {
       "path": "/abs/repo/.specs",
       "pointer": {
-        "present": true,
-        "raw_target": "../docs/.specs",
-        "resolved_target": "/abs/repo/../docs/.specs",
         "malformed": false,
         "malformed_reason": null,
-        "extra_lines_ignored": false,
-        "target_exists": true,
-        "target_is_dir": true,
-        "target_outside_workspace": false,
-        "target_shape_ok": true,
-        "target_shape_reason": null
+        "malformed_detail": null,
+        "targets": [
+          {
+            "raw": "../docs/.specs",
+            "comment": null,
+            "resolved": "/abs/docs/.specs",
+            "exists": true,
+            "is_dir": true,
+            "outside_workspace": false
+          }
+        ]
       }
     }
   ],
@@ -180,7 +191,49 @@ The pointer-file check does not apply to fallback candidates.
 }
 ```
 
-→ Use `resolved_target` as `SPECS_ROOT`; announce both marker and target.
+→ Use `targets[0].resolved` as `SPECS_ROOT`; announce both marker and target.
+
+**One `.specs/` with a multi-entry pointer (monorepo manifest)**:
+
+```json
+{
+  "anchor_path": "/abs/repo",
+  "anchor_source": "git",
+  "explicit": null,
+  "dot_specs_candidates": [
+    {
+      "path": "/abs/repo/.specs",
+      "pointer": {
+        "malformed": false,
+        "malformed_reason": null,
+        "malformed_detail": null,
+        "targets": [
+          {
+            "raw": "../packages/api",
+            "comment": "auth service",
+            "resolved": "/abs/repo/packages/api",
+            "exists": true,
+            "is_dir": true,
+            "outside_workspace": false
+          },
+          {
+            "raw": "../packages/frontend",
+            "comment": "React app",
+            "resolved": "/abs/repo/packages/frontend",
+            "exists": true,
+            "is_dir": true,
+            "outside_workspace": false
+          }
+        ]
+      }
+    }
+  ],
+  "specs_fallback_candidates": [],
+  "fallback_used": false
+}
+```
+
+→ List both targets and ask which to use.
 
 **`specs/` fallback hits both real and false-positive matches**:
 
