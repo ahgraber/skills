@@ -62,7 +62,15 @@ If breaking:
 
 ## Body (Optional)
 
-Include a body when subject alone is insufficient.
+Anchor the body on the future reader who finds this commit through `git log` or `git blame`, not on the conversation that led to the change.
+They need, in order:
+
+1. **What changed** at the behavior or system level (not "modified function X" — the diff handles that).
+2. **Why** — the motivation, even in one phrase.
+3. **0-3 things a future maintainer would otherwise miss** — non-obvious rationale, tuning assumptions, foreseeable wrong "fixes" to guard against.
+
+If #3 is empty and #2 is implied by the subject, ship subject-only.
+Conversation weight is not reader weight — what felt load-bearing in dialogue is rarely what a cold reader needs.
 
 ### Rules
 
@@ -76,6 +84,7 @@ Include a body when subject alone is insufficient.
   - Drop bookkeeping (file moves, archive operations, sync steps) unless the reader needs to act on them.
   - State outcomes, not mechanisms — drop implementation detail the reader doesn't need to act on.
   - Omit diff-level detail (file paths, parameter lists, function names) unless directly relevant.
+  - Don't recap conversation — decisions debated but not load-bearing in the code don't belong in the body.
 - **Never reference ephemeral scaffolding** — task IDs, group numbers, sprint names, todo-list item numbers, or other planning-artifact identifiers that won't persist after the work concludes.
   Describe _what changed and why_; where it came from in the task list is irrelevant to future readers.
 - **Format freely:** bullets may aid scannability for multi-part changes; a short paragraph works when the change is a single cohesive thought.
