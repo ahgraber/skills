@@ -166,3 +166,35 @@ Tasks ensure each _implementation path_ producing those states is exercised.
 - Internal helpers that don't produce a contract-asserted value on their own.
 - Pure transformations whose output is consumed by exactly one canonical write-site.
 - Logging, metrics, or instrumentation calls that don't affect contract-asserted state.
+
+## 4. Implementation Ordering
+
+Implementer-facing lists in change artifacts — affected capabilities in `proposal.md`, decisions in `design.md`, task groups and tasks in `tasks.md` — must be ordered so each item depends only on items earlier in the list.
+The implementer should always be building _on_ a capability already present, never _in anticipation of_ one.
+
+Apply in priority order:
+
+- Contract-defining work (schemas, type/model definitions, interfaces) before consumers.
+- Foundation capabilities before composite ones — primitives before what combines them.
+- Side-effect-free units (pure helpers, validators) before stateful units (persistence, network, scheduling).
+- Tests paired with or immediately after the unit they exercise — never before it exists.
+- Independent items: any internal order is fine, but mark the group as independent so the implementer can reorder or parallelize safely.
+
+Alphabetical and "order of discussion" are not acceptable defaults — they ignore the implementer's experience.
+
+### 4.1 Worked example
+
+A change adding token-based auth:
+
+1. Token model and storage schema _(contract)_
+2. Token issuance — sign + persist _(depends on 1)_
+3. Token validation — verify + lookup _(depends on 1)_
+4. `/login` endpoint _(depends on 2)_
+5. Auth middleware on protected routes _(depends on 3)_
+
+Alphabetical order would force the implementer to scaffold middleware against a missing token contract, then rewrite when it lands.
+
+### 4.2 Cycles
+
+If two items each appear to require the other, the cycle is usually a sign that one needs to split.
+Surface it to the user rather than picking arbitrarily.

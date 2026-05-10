@@ -87,6 +87,10 @@ Proposed capabilities:
 Proceed with this split? (or suggest changes)
 ```
 
+When the output type is a **change directory** (greenfield or aspirational — see Determine Output Type above), present capabilities in build-dependency order rather than alphabetically; the implementer will work through them in the order shown.
+See `references/sdd-change-formats.md` § 4.
+For **baseline** output (code already exists), ordering is a presentation choice — alphabetical is fine.
+
 ### Phase 3: Translate Each Capability
 
 **Output path depends on the output type decision above:**
@@ -96,6 +100,9 @@ Proceed with this split? (or suggest changes)
   - `proposal.md` — intent, scope, approach (see `references/sdd-change-formats.md`)
   - `specs/<capability>/spec.md` — ADDED-only delta specs
   - `tasks.md` — when implementation steps are clear (optional)
+
+Preserve the Phase 2 build-dependency order in `proposal.md` Scope and `tasks.md` when present.
+If implementation steps are unclear and `tasks.md` is omitted, mention any ordering assumptions in the output summary.
 
 See `references/sdd-spec-formats.md` for both baseline and delta spec formats.
 
@@ -154,6 +161,7 @@ Source docs frequently capture only the happy-path acceptance criterion; if the 
 
 - [ ] All specs use ADDED sections only (delta format)
 - [ ] `proposal.md` exists with Intent, Scope, Approach
+- [ ] `proposal.md` Scope and `tasks.md` preserve build-dependency order when the translation produced implementer-facing change artifacts
 - [ ] No `## Purpose` or `## Technical Notes` in delta specs
 
 ### Phase 5: Schema Snapshot (if schemas configured)

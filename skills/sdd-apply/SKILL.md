@@ -74,8 +74,9 @@ When drafting a commit message during apply:
 3. Read `.specs/changes/<name>/design.md` — architectural decisions to follow
 4. Read `.specs/changes/<name>/specs/` — delta specs for behavioral requirements
 5. Read `.specs/specs/` — baseline specs for full context
-6. If `.specs/.sdd/schema-config.yaml` exists, identify tasks that define schema contracts (endpoint definitions, model schemas, DDL changes) and check that they are sequenced before any tasks that consume them in `tasks.md`.
-   Surface any ordering gaps to the user before implementing.
+6. Check task ordering against `references/sdd-change-formats.md` § 4 — each task should depend only on capabilities built by earlier tasks.
+   The schema-config rule below is the named instance: if `.specs/.sdd/schema-config.yaml` exists, identify tasks that define schema contracts (endpoint definitions, model schemas, DDL changes) and confirm they are sequenced before any tasks that consume them.
+   Surface any ordering gaps to the user before implementing (advisory — the user may decide the order is intentional).
 
 ### Phase 2: Identify Starting Point
 

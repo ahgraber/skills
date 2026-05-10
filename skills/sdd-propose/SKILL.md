@@ -80,6 +80,9 @@ If no schema config exists and `.specs/schemas/` is empty or absent, skip silent
 
 Create `.specs/changes/<name>/specs/<capability>/spec.md` for each affected capability.
 
+Order capabilities by build dependency — contract-defining and foundation capabilities before consumers — and use the same order in `proposal.md`'s Scope list, in `design.md`'s Decisions and Architecture, and in `tasks.md`'s task groups.
+See `references/sdd-change-formats.md` § 4 for the principle and worked example.
+
 **Read `references/sdd-spec-formats.md` § 1 before writing any requirement.**
 It defines what a requirement is (contract shapes, authoring primitive, artifact separation) and is the primary guidance for this phase.
 
@@ -133,8 +136,8 @@ See `references/sdd-change-formats.md` for the tasks format.
 Rules:
 
 - Tasks are atomic — each can be done and tested independently
-- Order by implementation dependency (what must be done first)
-- Group by component or phase
+- Order tasks and groups by build dependency per `references/sdd-change-formats.md` § 4 — each task must depend only on capabilities built by earlier tasks; never order alphabetically or by order of discussion
+- Group by component or phase, sequencing foundation groups before consumer groups
 - Every task is a concrete action, not an outcome
 - Every SHALL requirement must be paired with at least one task that produces runnable evidence — a named test (unit, integration, or e2e), a schema check, or a captured-output step.
   If automated evidence is genuinely infeasible, the requirement must appear in `design.md` § Verification Waivers with a manual evidence reference.
@@ -152,7 +155,8 @@ Rules:
 - [ ] Universal SHALL claims have partition coverage per the heuristic in `references/sdd-spec-formats.md` § 1.6 — when a positive signal fires, scenarios cover each partition
 - [ ] Mechanism (algorithms, thresholds, strategies, retry policies) appears in `design.md` or the proposal's Approach, not in spec text
 - [ ] `design.md` has at least one Decision with rationale
-- [ ] `tasks.md` has atomic, ordered tasks
+- [ ] `tasks.md` has atomic tasks, and tasks/groups are ordered by build dependency per `references/sdd-change-formats.md` § 4 — no task depends on a capability not yet built by an earlier task
+- [ ] Affected capabilities appear in the same build-dependency order across `proposal.md` Scope, `design.md`, and `tasks.md` groups
 - [ ] Every SHALL requirement maps to at least one evidence-producing task (test, schema check, or captured output) OR appears in `design.md` § Verification Waivers with a manual evidence reference
 - [ ] Every foreseeable write-site implied by `design.md` (canonical path plus any alternative paths the design names — shortcuts, retries, merges) is paired with its own evidence-producing test task
 - [ ] No delta markers in `.specs/specs/` (baseline specs untouched)
@@ -175,6 +179,7 @@ Summary: change name, capabilities affected, task count.
 - Partitioning along code paths or write-sites in scenarios — that is mechanism; partitions must use spec vocabulary only
 - Generating only canonical-path test tasks when `design.md` names alternative paths (shortcuts, retries, merges) — each foreseeable write-site needs its own paired test task, not just the canonical one
 - Creating tasks that are too coarse (one task = "implement auth" instead of atomic steps)
+- Ordering capabilities or task groups alphabetically or by order of discussion — ordering must follow build dependency per `references/sdd-change-formats.md` § 4 so the implementer never builds in anticipation of a missing capability
 - Generating all artifacts without pausing for user confirmation between phases
 - Using non-kebab-case change names
 
