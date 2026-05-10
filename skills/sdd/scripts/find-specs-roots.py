@@ -1,6 +1,9 @@
 #!/usr/bin/env -S uv run --script
 """Resolve SPECS_ROOT candidates for the sdd skill.
 
+A `SPECS_ROOT` is a directory whose direct children conform to the SDD layout: `specs/`, `changes/`, and `schemas/` (with optional `.sdd/`).
+The conventional location is a hidden `.specs/` at a project root; in a monorepo, each package may have its own `<package>/.specs/`.
+
 Emits a single JSON object describing the workspace anchor, any explicit user
 path, discovered `.specs/` candidates (with pointer-file analysis), and
 `specs/` fallback candidates. The caller (the sdd skill) uses this data to
