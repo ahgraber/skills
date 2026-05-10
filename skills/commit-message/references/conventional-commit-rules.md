@@ -54,23 +54,35 @@ If breaking:
 
 ### Description
 
+The subject is the reader's signal in scan-mode (`git log`, `git blame`, bisect) — write it so a reader scanning history can recognize whether this commit may answer their question without opening it.
+
 - Imperative, present tense (`add`, `fix`, `update`).
 - Start lowercase unless proper noun requires uppercase.
 - Target 50 chars; hard limit 72 chars.
 - No trailing period.
-- Be specific about behavior impact.
+- Name the area and effect concretely — "fix off-by-one in pagination cursor", not "fix bug in pagination".
 
-## Body (Optional)
+## Body
 
-Anchor the body on the future reader who finds this commit through `git log` or `git blame`, not on the conversation that led to the change.
-They need, in order:
+### The cold-reader test
 
-1. **What changed** at the behavior or system level (not "modified function X" — the diff handles that).
-2. **Why** — the motivation, even in one phrase.
-3. **0-3 things a future maintainer would otherwise miss** — non-obvious rationale, tuning assumptions, foreseeable wrong "fixes" to guard against.
+Your reader meets this commit in two phases:
 
-If #3 is empty and #2 is implied by the subject, ship subject-only.
-Conversation weight is not reader weight — what felt load-bearing in dialogue is rarely what a cold reader needs.
+- **Scan mode** — in `git log`, `git blame`, or a bisect, they see the subject and decide whether to open it.
+- **Read mode** — once opened, they read the diff to understand what changed.
+
+The **subject** carries scan mode (see § Subject Line).
+The **body** exists only when read-mode leaves a question unanswered: the diff shows what changed and where, but it does not show:
+
+- **Why this choice** — when the subject names a choice but not the constraint that forced it.
+- **Tuning rationale** — magic numbers, thresholds, or tunables a future reader will want to revisit.
+- **Wrong-fix guards** — foreseeable "fixes" that would re-break the change.
+- **Cross-cutting impact** — callers, consumers, or schema implications the diff doesn't reach.
+- **External references** — issues, advisories, RFCs.
+
+If no gap exists, ship subject-only.
+If a gap exists, write only what fills it.
+Conversation weight is not reader weight: what felt load-bearing in the dialogue is rarely what the diff fails to convey.
 
 ### Rules
 
@@ -78,13 +90,7 @@ Conversation weight is not reader weight — what felt load-bearing in dialogue 
 - Wrap lines at 72 chars.
 - **Organize by logical/topical concern** — one entry per theme, not per file or function.
   Do not use label-style section headers (`Topic: content`, `**Label**:`, etc.).
-- **Be concise**, not every change requires attention:
-  - Prioritize changes that influence external/user-facing surface and why.
-  - Internal-only refactoring with no external surface change can collapse to a phrase or be omitted.
-  - Drop bookkeeping (file moves, archive operations, sync steps) unless the reader needs to act on them.
-  - State outcomes, not mechanisms — drop implementation detail the reader doesn't need to act on.
-  - Omit diff-level detail (file paths, parameter lists, function names) unless directly relevant.
-  - Don't recap conversation — decisions debated but not load-bearing in the code don't belong in the body.
+- **State outcomes, not mechanisms** — drop implementation detail the reader doesn't need to act on.
 - **Never reference ephemeral scaffolding** — task IDs, group numbers, sprint names, todo-list item numbers, or other planning-artifact identifiers that won't persist after the work concludes.
   Describe _what changed and why_; where it came from in the task list is irrelevant to future readers.
 - **Format freely:** bullets may aid scannability for multi-part changes; a short paragraph works when the change is a single cohesive thought.
@@ -179,6 +185,16 @@ feat(cli): add verbose logging flag
 
 AI-assistant: OpenAI Codex
 ```
+
+### Subject-only, non-trivial change
+
+```text
+refactor(sdd-translate): preserve build-order in proposal scope
+
+AI-assistant: Claude Code
+```
+
+No triggers fire — the subject names the behavior change, and the diff carries the rest.
 
 ### Bug fix with context
 

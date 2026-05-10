@@ -19,11 +19,7 @@ Draft a Conventional Commit message from staged changes.
 - If no staged changes exist after one retry, stop and inform the user (standard workflow only).
 - Always include an `AI-assistant: <AGENT>` footer.
 - Output only the final commit message in one markdown code block.
-- Body content rules (apply at draft time, not as an afterthought):
-  - State outcomes the reader can act on, not mechanisms.
-  - Don't name internal symbols (private helpers, parameter lists); name the public surface that changed.
-  - Internal-only refactors collapse to one phrase or are omitted.
-  - Drop bookkeeping (file moves, archive operations, sync steps).
+- Body content: state outcomes the reader can act on, not mechanisms (apply at draft time, not as an afterthought).
 
 ## Workflow
 
@@ -47,30 +43,41 @@ Draft a Conventional Commit message from staged changes.
 06. Incorporate user arguments/context when provided.
     Preserve explicit issue refs and constraints from user input.
 
-07. Frame for the future reader before drafting.
-    Conversation weight is not reader weight — what felt load-bearing in dialogue is rarely what a cold reader needs.
-    Name three things, in order:
+07. Apply the cold-reader test.
 
-    1. **What changed** at the behavior or system level (not "modified function X" — that's diff-level).
-    2. **Why** — the motivation, even when it's a single phrase.
-    3. **0-3 things a future maintainer would otherwise miss** — non-obvious rationale, tuning assumptions, foreseeable wrong "fixes" to guard against.
-       If empty and #2 is implied by the subject, ship subject-only.
+    Your reader meets this commit in two phases: **Scan mode** — they see the subject in `git log`, `git blame`, or a bisect and decide whether to open it.
+    **Read mode** — once opened, they read the diff to understand what changed.
+
+    Write the **subject** so a reader scanning history can recognize whether this commit may answer their question — name the area and effect concretely enough to distinguish from neighbors.
+
+    Write a **body** only when the diff leaves a question unanswered.
+    If no gap exists, ship subject-only — most commits.
+    Conversation weight is not reader weight: what felt load-bearing in the dialogue is rarely what the diff fails to convey.
+
+    The diff shows what changed and where; it does not show:
+
+    - **Why this choice** — when the subject names a choice but not the constraint that forced it.
+    - **Tuning rationale** — magic numbers, thresholds, or tunables a future reader will want to revisit.
+    - **Wrong-fix guards** — foreseeable "fixes" that would re-break the change.
+    - **Cross-cutting impact** — callers, consumers, or schema implications the diff doesn't reach.
+    - **External references** — issues, advisories, RFCs.
 
 08. Read `references/conventional-commit-rules.md`.
     Then draft the message covering only the items named in step 7, applying those rules.
 
-09. Self-check before returning.
-    For each line in the body, verify:
+09. Self-check before returning, in order.
 
-    - Does it name an internal symbol?
-      If yes, drop or replace with the public-surface description.
-    - Does it describe how, not what changed?
-      If yes, restate as outcome.
-    - Is it bookkeeping (file moves, archive, sync, lockfile)?
-      If yes, drop unless the reader needs to act on it.
-    - Is it a recap of a decision made in conversation that didn't shape the code?
-      If yes, drop.
-      Revise any failing lines before output.
+    **Brevity gate:** could the subject alone carry this commit?
+    Drop the body entirely.
+    Does any body line restate the subject?
+    Drop it.
+
+    **Cold-reader test (re-apply from step 7):** does each remaining body line fill a gap the diff leaves open, or is it conversation weight ("this was discussed", "we decided this")?
+    Drop conversation weight.
+
+    **Line-level filters:** names an internal symbol → restate as the public-surface description; describes how, not what → restate as outcome; bookkeeping (file moves, archive, sync, lockfile) → drop unless the reader needs to act.
+
+    Revise or drop any failing lines before output.
 
 10. Return only the final message in a fenced code block, ready for `git commit -F -`.
 
