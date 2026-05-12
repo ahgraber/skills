@@ -72,13 +72,19 @@ Your reader meets this commit in two phases:
 - **Read mode** — once opened, they read the diff to understand what changed.
 
 The **subject** carries scan mode (see § Subject Line).
-The **body** exists only when read-mode leaves a question unanswered: the diff shows what changed and where, but it does not show:
+The **body** exists only when read mode leaves a question unanswered.
+The diff shows what changed and where, but not why or how to act on it.
+A body line is warranted only when it fires one of these **5 triggers**:
 
-- **Why this choice** — when the subject names a choice but not the constraint that forced it.
-- **Tuning rationale** — magic numbers, thresholds, or tunables a future reader will want to revisit.
-- **Wrong-fix guards** — foreseeable "fixes" that would re-break the change.
-- **Cross-cutting impact** — callers, consumers, or schema implications the diff doesn't reach.
-- **External references** — issues, advisories, RFCs.
+1. **Why this choice** — when the subject names a choice but not the constraint that forced it.
+2. **Tuning rationale** — magic numbers, thresholds, or tunables a future reader will want to revisit.
+3. **Wrong-fix guards** — foreseeable "fixes" that would re-break the change.
+4. **Cross-cutting impact** — callers, consumers, or schema implications the diff doesn't reach.
+5. **External references** — issues, advisories, RFCs.
+
+**Trigger-naming rule:** for every body line, name which of the 5 triggers above it fires.
+If you can't name one, don't write the line — it's conversation weight or file inventory, not reader signal.
+"It feels useful to mention" is not a trigger; neither is "this summarizes what the file contains."
 
 If no gap exists, ship subject-only.
 If a gap exists, write only what fills it.
