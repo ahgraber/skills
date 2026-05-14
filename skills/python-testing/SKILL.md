@@ -14,6 +14,9 @@ Keep unit tests fast, deterministic, and patched at module boundaries.
 These are preferred defaults for common cases.
 When a default conflicts with project constraints, suggest a better-fit alternative, call out tradeoffs, and note compensating controls.
 
+For language-agnostic testing principles (AAA structure, naming, test doubles taxonomy, portfolio strategy), see `writing-tests`.
+This skill extends those foundations with Python-specific practices.
+
 ## Invocation Notice
 
 - Inform the user when this skill is being invoked by name: `python-testing`.
@@ -39,10 +42,42 @@ When a default conflicts with project constraints, suggest a better-fit alternat
 - Test observable behavior, not internals.
 - Keep unit tests fast and deterministic.
 - Patch at module boundaries and import locations used by the unit under test.
-- Add regression tests for bugfixes.
+- Add regression tests for bugfixes — write the failing test before the fix.
 - Include timeout/retry/cancellation/cleanup coverage where relevant.
 - For multi-Python: use nox with uv backend; parametrize for dependency matrices.
 - For free-threaded Python: use `pytest-run-parallel`, set `PYTHON_GIL=0`, always set CI timeouts.
+
+## Test Doubles
+
+See `writing-tests` → `references/test-doubles.md` for the full Meszaros taxonomy (Dummy, Fake, Stub, Spy, Mock), the classical vs. mockist distinction, and general guidance.
+Python-specific notes:
+
+**`unittest.mock` naming is misleading.**
+`Mock` and `MagicMock` are named "Mock" but behave as Stubs by default — configured via `return_value` or `side_effect`, they return canned values and do not self-verify.
+They become Mocks (behavior verification) only when you call `.assert_called_with()` / `.assert_called_once_with()`.
+Prefer asserting on observable output instead.
+
+**Use `create_autospec()` or `autospec=True`.**
+A plain `Mock()` accepts any arguments silently.
+`create_autospec(SomeClass)` enforces the real method signatures — a call-site mismatch fails the test immediately rather than hiding a `TypeError` until production.
+
+**Patch at the import location used by the module under test**, not at the original definition site:
+
+```python
+# Wrong: patches the definition; callers in other modules are unaffected
+patch("requests.post", ...)
+
+# Right: patches where your module imported it
+patch("mymodule.client.requests.post", ...)
+```
+
+**Consider `pytest-mock`'s `mocker` fixture** if the project already uses it.
+It integrates with pytest's fixture lifecycle, handles teardown automatically, and avoids decorator stacking on test functions.
+`unittest.mock.patch` is sufficient when `pytest-mock` is not already a dependency — adding it solely for ergonomics is not warranted.
+
+**Fakes over deep mock chains.**
+Prefer in-memory implementations (`FakeRepo`, a `dict`-backed store) over multi-level `Mock()` chains.
+Chains that mirror the production call graph are brittle and a sign that I/O has not been decoupled from logic.
 
 ## Change-Specific Diagnostics
 
@@ -76,3 +111,4 @@ When a default conflicts with project constraints, suggest a better-fit alternat
 - `references/reliability-lifecycle-testing.md`
 - `references/multi-python-testing.md`
 - `references/free-threaded-testing.md`
+- `writing-tests` skill — language-agnostic foundations (AAA, naming, test doubles, portfolio strategy)
