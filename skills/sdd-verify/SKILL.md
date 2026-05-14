@@ -7,7 +7,7 @@ description: |-
 # SDD Verify
 
 Verify that the implementation satisfies the contracts stated in the change's specs.
-Produces a structured report across **five** dimensions (Completeness, Contract, Coverage, Coherence, Conformance) with three severity levels.
+Produces a structured report across **six** dimensions (Completeness, Scope, Contract, Coverage, Coherence, Conformance) with three severity levels.
 
 Specs are contracts — property statements about observable state (see `references/sdd-spec-formats.md` § 1).
 Scenarios are evidence that samples those contracts, not the contracts themselves (§ 1.5).
@@ -46,6 +46,7 @@ Before starting, check `.specs/changes/<name>/tasks.md`:
 | Dimension        | Question                                           | What to check                                                                                        |
 | ---------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | **Completeness** | Is everything done?                                | All tasks checked off, all delta spec requirements implemented                                       |
+| **Scope**        | Is everything implemented in scope?                | Every meaningful code change traces to a delta spec requirement; no unspecified behavior introduced  |
 | **Contract**     | Does the implementation satisfy the spec contract? | Implementation honors each requirement's scenarios and the broader contract claim stated in the text |
 | **Coverage**     | Do scenarios meaningfully sample the contract?     | Scenarios span happy path, boundaries, and plausible failure modes — not trivially-passing cases     |
 | **Coherence**    | Does it follow the design?                         | Implementation follows decisions in `design.md`                                                      |
@@ -90,7 +91,7 @@ Use them to preserve decision continuity, not to erase or reclassify findings.
 Phases 4–6 (Evidence, Contract, Coverage) SHALL be evaluated against the parallel-subagent gate before Phase 3 begins.
 Single-agent execution is permitted only when the gate routes you there — it is not the default.
 
-The gate evaluation is a numbered phase step (see **Phase 2.5**).
+The gate evaluation runs as a required step within Phase 2.
 The full availability gate, granularity proposal, model resolution, dispatch protocol, and synthesis steps live in `references/parallel-subagent-path.md`.
 
 ## Process
@@ -133,13 +134,13 @@ Verification claims rest on observed behavior, so a green suite is the baseline 
    - Record that the remaining phases are diagnostic only, not a clean verification pass.
    - Before recommending `sdd-sync`, record the exception per `references/sdd-change-formats.md` and ensure `tasks.md` contains an unchecked remediation task.
    - Never conclude "all applicable dimensions verified" or otherwise present the run as fully passing.
-   - The parallel-subagent gate (Phase 2.5) handles whether subagent dispatch is allowed under override; do not decide that here.
+   - The parallel-subagent gate step handles whether subagent dispatch is allowed under override; do not decide that here.
 
 4. **If the project has no runnable test suite**, note this as a WARNING and continue — every requirement will land at INSPECTED at best.
 
 5. **Do not modify, skip, or `xfail` tests to make the suite pass** — that is itself a CRITICAL finding.
 
-### Phase 2.5: Evaluate Parallel-Subagent Gate
+#### Evaluate Parallel-Subagent Gate
 
 You SHALL run this gate after Phase 2 and before Phase 3.
 Single-agent execution is allowed only when the gate routes you there.
@@ -202,7 +203,7 @@ If Phase 2 is in failing-suite override mode, passing tests from that run may st
 The output of this phase is a per-requirement evidence table that drives Phase 5 and the final report.
 On the parallel path, the orchestrator assembles this table from subagent findings during synthesis.
 
-### Phase 4.5: Enumerate Write-Sites (orchestrator only)
+#### Enumerate Write-Sites (orchestrator only)
 
 Cross-cutting search work — runs at the orchestrator regardless of single-agent vs. parallel path.
 Subagents do not enumerate write-sites; they consume the enumeration as a dispatch input.
@@ -231,6 +232,43 @@ The enumeration feeds Phase 5 step 4 directly, and on the parallel path it is pa
 
 If a SHALL is not universal (narrow shape, no input-space partitions) skip enumeration — single-site requirements don't need this check.
 
+#### Check Scope (Unspecified Changes)
+
+This is the inverse of Phase 4 (Completeness): for each meaningful code change, check whether a delta spec requirement covers it.
+It runs at the orchestrator regardless of single-agent vs. parallel path — subagents do not run this phase.
+
+1. **Get the code diff** for this change:
+
+   - Run `git diff <base-branch>...HEAD` (or `git diff HEAD~1..HEAD` if a single commit), capturing meaningful changes only.
+   - If no git context is available, enumerate all files touched by the change from `tasks.md` references or the user.
+
+2. **Identify meaningful changes** — changes that alter observable behavior:
+
+   - New functions, methods, classes, endpoints, or public APIs.
+   - Modified control flow, conditionals, or return values.
+   - Removed or renamed public interfaces.
+   - Schema or data model changes not already caught by Phase 3.
+   - Skip: formatting-only edits, comment edits, variable renames with no behavioral effect, and test file changes (test coverage is a separate concern).
+
+3. **Classify each meaningful change** into one of three categories:
+
+   - **In scope** — a delta spec requirement explicitly covers the behavior the change introduces or modifies.
+   - **Related** — no delta spec requirement covers it, but it touches behavior governed by a baseline spec requirement; the change is adjacent to the spec'd work but wasn't pulled into scope.
+   - **Unspecified** — no spec coverage at all, neither delta nor baseline; the change introduces or modifies behavior the spec system has no record of.
+
+4. **Flag related and unspecified changes by severity**:
+
+   - **CRITICAL**: unspecified change introduces or modifies a public API, external contract, or persisted schema.
+   - **WARNING**: related change (silently modifies baseline-governed behavior without a delta requirement) or unspecified change that alters internal logic, control flow, or error handling.
+   - **SUGGESTION**: related or unspecified minor defensive change, refactor, or cleanup that is low-risk.
+
+   In-scope changes require no finding — omit them from the report.
+
+5. Record the scope map — which changes are covered and by which requirement — so Phase 9 can include it in the report.
+   A change that is fully covered need not be mentioned; only unspecified changes appear in the report.
+
+6. If no git diff is available and file enumeration is also impossible, note this as a WARNING and skip the scope check.
+
 ### Phase 5: Check Contract Satisfaction
 
 Skip requirements flagged as missing in Phase 4.
@@ -244,7 +282,7 @@ For each implemented requirement at TESTED or VERIFIED:
 1. Read the requirement text — this is the **contract claim** (`references/sdd-spec-formats.md` § 1).
 2. Read the delta spec scenarios — concrete **evidence** sampling the claim.
 3. Inspect the cited test or output to verify each scenario holds in the executed evidence (not just in the source code).
-4. **For universal SHALL claims** (ADDED or MODIFIED), use the write-site enumeration produced in Phase 4.5.
+4. **For universal SHALL claims** (ADDED or MODIFIED), use the write-site enumeration produced in Phase 4.
    For each enumerated write-site, check the test execution log for at least one cited test that exercises the contract _through that site_ — not just through the canonical path.
    If a write-site has no covering test in the log, flag **CRITICAL: partition-incomplete evidence — write-site `<path:line>` for SHALL `<name>` has no test coverage.**
    A passing test on one path is not evidence for a deduplication shortcut, retry branch, or composition step that writes the same value.
@@ -351,6 +389,10 @@ For each entry in `design.md § Verification Overrides`, carry the audit record 
 
 - {blocking finding or gate outcome} — stage: {stage}; reason: {reason}; constraints: {constraints}; follow-up: {tasks.md task text}; approved by: {approved by}; recorded: {recorded}
 
+## SCOPE
+
+- {Change description} — {file:line} · {related | unspecified} (CRITICAL/WARNING/SUGGESTION)
+
 ## CONFORMANCE
 
 - [x] {What schema confirmed} — {requirement name}
@@ -371,6 +413,7 @@ If no issues found:
 ```text
 All applicable dimensions verified:
 - [x] Completeness
+- [x] Scope
 - [x] Contract
 - [x] Coverage
 - [x] Coherence (if design.md exists)
@@ -394,6 +437,7 @@ State instead that verification found issues the user explicitly chose not to le
 | Delta specs           | Skip contract and coverage checks, note in report                         |
 | `schema-config.yaml`  | Skip Phase 3 snapshot and Phase 7 conformance check, note in report       |
 | `schemas/expected.md` | Skip expected-vs-actual diff within conformance; run drift detection only |
+| No git diff available | Skip scope check (Phase 4 step), flag as WARNING, note in report          |
 
 "Warn before proceeding" means a conversational message to the user.
 "Note in report" means adding a note inside the verification report itself.
@@ -406,9 +450,9 @@ State instead that verification found issues the user explicitly chose not to le
 - Skipping graceful degradation — running verify is valid even with incomplete artifacts.
 - Not reading baseline specs for full behavioral context.
 - Checking only that scenarios pass, not whether the implementation honors the broader contract claim (`references/sdd-spec-formats.md` § 1.5 — scenarios are evidence, not definition).
-- Skipping Phase 4.5 (write-site enumeration) for ADDED or MODIFIED universal SHALL claims — a passing test on the canonical path is not evidence for a deduplication shortcut, retry branch, or composition step that writes the same contract-asserted value.
-- Narrowing Phase 4.5 enumeration to the change diff for MODIFIED requirements — pre-existing legacy write-sites the modified contract now applies to are exactly the ones least likely to appear in the diff, and they need coverage too.
-- Pushing write-site enumeration into subagents — subagents operate per-requirement; cross-cutting search is orchestrator work and belongs in Phase 4.5.
+- Skipping write-site enumeration (the orchestrator step within Phase 4) for ADDED or MODIFIED universal SHALL claims — a passing test on the canonical path is not evidence for a deduplication shortcut, retry branch, or composition step that writes the same contract-asserted value.
+- Narrowing write-site enumeration to the change diff for MODIFIED requirements — pre-existing legacy write-sites the modified contract now applies to are exactly the ones least likely to appear in the diff, and they need coverage too.
+- Pushing write-site enumeration into subagents — subagents operate per-requirement; cross-cutting search is orchestrator work and belongs in Phase 4's enumeration step.
   Subagents consume the enumeration as a dispatch input.
 - Treating partition-incomplete coverage as identical to "single scenario."
   They are distinct: one is a quantitative concern (sample size of one), the other is qualitative (named partitions exist, only some are sampled).
@@ -416,9 +460,12 @@ State instead that verification found issues the user explicitly chose not to le
 - Skipping the waiver provenance check (`evidence-rules.md` § 4) — waivers added in the same branch as the implementation, especially after a failed verify, need to be surfaced.
 - Recording an override in `design.md` but failing to carry its context into the OVERRIDES section or Summary, which breaks the audit trail for later verify/sync work.
 - Treating an override as a severity downgrade, or honoring a chat-only override without recording it in `design.md` and `tasks.md`.
-- Proceeding to Phase 3 without evaluating the parallel-subagent gate (Phase 2.5) — the gate is mandatory; if no gate-outcome announcement appears in the run, you skipped it.
+- Proceeding to Phase 3 without evaluating the parallel-subagent gate (the required step within Phase 2) — the gate is mandatory; if no gate-outcome announcement appears in the run, you skipped it.
   Single-agent execution is a gate result, not a default.
 - On the parallel path: re-running per-requirement phases on the orchestrator, mixing granularities, dispatching above the concurrency cap, or silently defaulting the model — see `references/parallel-subagent-path.md` § 6.
+- Skipping the scope check (the step within Phase 4) — completeness alone is not sufficient; the inverse direction (code → spec) is equally important and catches scope creep and accidental behavioral side-effects.
+- Running the scope check only against the delta specs without also checking baseline specs — a change that silently modifies behavior already covered by a baseline requirement is still unspecified for this change.
+- Classifying test file changes or formatting-only edits as meaningful changes in the scope check step — the scope check targets behavioral changes, not every diff hunk.
 
 ## References
 
