@@ -17,6 +17,14 @@ Adds a small dedup pipeline on top of FastMCP's built-in scanning:
 
 ## Install
 
+**From GitHub (no local clone needed):**
+
+```bash
+uv tool install "git+https://github.com/ahgraber/skills#subdirectory=skills-mcp"
+```
+
+**Local development:**
+
 ```bash
 uv sync
 ```
@@ -60,8 +68,8 @@ Adjust the path to match `which uv`.
       "command": "/Users/you/.local/bin/uv",
       "args": [
         "run",
-        "--directory",
-        "/path/to/skills-mcp",
+        "--with",
+        "git+https://github.com/ahgraber/skills#subdirectory=skills-mcp",
         "skills-mcp"
       ]
     }
@@ -73,13 +81,18 @@ Adjust the path to match `which uv`.
 
 Install once as a user-level tool, then reference the shim.
 
+From GitHub:
+
 ```bash
-uv tool install --editable /path/to/skills-mcp
+uv tool install "git+https://github.com/ahgraber/skills#subdirectory=skills-mcp"
 ls ~/.local/bin/skills-mcp   # confirm
 ```
 
 The shim is the `skills-mcp` entry point declared in `pyproject.toml`, so `args` accepts any flag from `skills-mcp --help` (`--root`, `--include`, `--exclude`, `--no-vendor`, `--no-env`, `--reload`, `--expose`, `--log-level`).
 None are required — the bare command auto-discovers known vendor roots.
+
+Use the full path to the shim (MCP clients strip `PATH`; a bare `"command": "skills-mcp"` won't resolve).
+Run `which skills-mcp` after installing to get the correct path.
 
 ```json
 {
