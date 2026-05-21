@@ -269,6 +269,25 @@ It runs at the orchestrator regardless of single-agent vs. parallel path — sub
 
 6. If no git diff is available and file enumeration is also impossible, note this as a WARNING and skip the scope check.
 
+#### Check MODIFIED Delta Integrity (pre-sync safety)
+
+`sdd-sync` replaces each MODIFIED requirement wholesale, so any baseline scenario or sub-clause the delta block omits is silently deleted at sync.
+This check is the gate that catches that loss before sync; it runs at the orchestrator regardless of single-agent vs. parallel path.
+
+For each MODIFIED requirement in the delta specs:
+
+1. Load the matching baseline requirement from `.specs/specs/<capability>/spec.md` (same capability directory, same requirement name).
+2. Compare the baseline's scenarios and sub-clauses against the MODIFIED delta block.
+3. If the delta omits a baseline scenario or sub-clause **and** the change does not deliberately remove it (no rationale in `design.md`), flag **WARNING: MODIFIED `<name>` delta drops baseline scenario `<scenario>` — `sdd-sync` will delete it from the baseline.**
+   **Restore the full post-change requirement (`references/sdd-spec-formats.md` § 4) or document the removal in `design.md`.**
+
+A delta requirement with no matching baseline requirement is ADDED or RENAMED, not MODIFIED — out of scope for this check.
+
+For a deterministic backstop on the **scenario** part of this check, run `scripts/check_modified_completeness.py <specs-root> --change <name>` — scoped to the change under verification, matching the `sdd-sync` guard so an unrelated active change cannot fail this one.
+Omit `--change` to scan every active change, e.g. as a repo-wide pre-commit/CI gate that runs without an agent.
+It compares scenario names only and exits non-zero when the MODIFIED delta drops a baseline scenario; sub-clause and body-text loss (step 2) still needs a human read.
+Intentional drops are marked with a `<!-- modified-removes: ScenarioName -->` comment in the delta block.
+
 ### Phase 5: Check Contract Satisfaction
 
 Skip requirements flagged as missing in Phase 4.
@@ -465,6 +484,7 @@ State instead that verification found issues the user explicitly chose not to le
 - On the parallel path: re-running per-requirement phases on the orchestrator, mixing granularities, dispatching above the concurrency cap, or silently defaulting the model — see `references/parallel-subagent-path.md` § 6.
 - Skipping the scope check (the step within Phase 4) — completeness alone is not sufficient; the inverse direction (code → spec) is equally important and catches scope creep and accidental behavioral side-effects.
 - Running the scope check only against the delta specs without also checking baseline specs — a change that silently modifies behavior already covered by a baseline requirement is still unspecified for this change.
+- Skipping the MODIFIED delta-integrity check (the orchestrator step within Phase 4) — `sdd-sync` replaces MODIFIED requirements wholesale, so a delta block that drops a baseline scenario causes silent contract deletion at sync; verify is the gate that catches it first.
 - Classifying test file changes or formatting-only edits as meaningful changes in the scope check step — the scope check targets behavioral changes, not every diff hunk.
 
 ## References
@@ -475,3 +495,4 @@ State instead that verification found issues the user explicitly chose not to le
 - `references/sdd-spec-formats.md` — contract shapes (§ 1.1), scenarios as evidence (§ 1.5), partition heuristic (§ 1.6)
 - `references/sdd-change-formats.md` — task format (§ 3) and contract-relevant write-site definition (§ 3.1)
 - `references/sdd-schema.md` — schema evidence annotations (§ 1) and lifecycle policy (§ 4)
+- `scripts/check_modified_completeness.py` — deterministic dropped-scenario check (scenario names only, not body sub-clauses); exits non-zero on dropped baseline scenarios, wireable as a pre-commit/CI gate

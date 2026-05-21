@@ -103,7 +103,8 @@ Delta-format rules:
 - Read the existing baseline spec before writing the delta
 - Only include capabilities that actually change
 - Use only ADDED/MODIFIED/REMOVED/RENAMED sections that apply — omit empty sections
-- MODIFIED: state new and previous behavior inline
+- MODIFIED: copy the full baseline requirement (text + every still-applicable scenario), then edit in place — the block must be the complete post-change requirement, because `sdd-sync` replaces it wholesale (`references/sdd-spec-formats.md` § 4).
+  Note prior behavior in a `> Previously: …` line.
 
 Present specs to user and confirm before continuing.
 

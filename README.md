@@ -72,6 +72,9 @@ Replicated copies in `skills/sdd-*` are implemented as symlinks to reduce drift.
 **Note on spec-kit skills**: `skills/spec-kit/scripts` and `skills/spec-kit/references` are the source of truth for shared Spec Kit files.
 Replicated copies in `skills/spec-kit-*` are implemented as symlinks to reduce drift.
 
+**Note on tests**: Tests for skill scripts live at the repo root under `tests/<skill_name>/`, kept out of the skill directories so they are not installed with the skill.
+Each test is a `uv` script that declares its own dependencies; run it with `uv run tests/<skill_name>/test_<name>.py`.
+
 ## Further Reading
 
 - [Equipping agents for the real world with Agent Skills \\ Anthropic | Claude](https://claude.com/blog/equipping-agents-for-the-real-world-with-agent-skills)

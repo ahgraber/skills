@@ -63,14 +63,26 @@ For each delta spec, read both files:
 
 Apply delta markers:
 
-| Delta marker              | Action                                                     |
-| ------------------------- | ---------------------------------------------------------- |
-| **ADDED** requirements    | Insert as new `### Requirement:` entries in the main spec  |
-| **MODIFIED** requirements | Find the matching requirement by name and replace it       |
-| **REMOVED** requirements  | Find the matching requirement by name and delete it        |
-| **RENAMED** capabilities  | Rename the capability directory and update the spec header |
+| Delta marker              | Action                                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------------------------ |
+| **ADDED** requirements    | Insert as new `### Requirement:` entries in the main spec                                              |
+| **MODIFIED** requirements | Find the matching requirement by name and replace it — apply the **MODIFIED preservation guard** first |
+| **REMOVED** requirements  | Find the matching requirement by name and delete it                                                    |
+| **RENAMED** capabilities  | Rename the capability directory and update the spec header                                             |
 
 **Preservation rule:** Content in the main spec not mentioned in the delta is never touched.
+
+**MODIFIED preservation guard:** The preservation rule operates at requirement granularity — a MODIFIED requirement is replaced as a whole, so scenarios its delta block omits are _not_ preserved.
+Before replacing, compare the baseline requirement's scenarios and sub-clauses against the MODIFIED delta block.
+If the delta omits any baseline scenario that the change did not deliberately remove (no rationale in `design.md`), stop and surface it:
+
+> "MODIFIED `<name>`: baseline scenario(s) `<…>` are absent from the delta block and will be deleted on sync. Restore the full post-change requirement, or confirm the removal is intentional."
+
+Replace only after the omission is confirmed intentional, and strip the delta-only `> Previously: …` provenance line — it does not belong in the baseline.
+
+A mechanical backstop ships with the skill for the **dropped-scenario** half of this guard: run `scripts/check_modified_completeness.py <specs-root> --change <name>` (a `uv` script; deps are declared inline).
+It compares scenario names only and exits non-zero when a MODIFIED delta drops a baseline scenario — sub-clause and body-text preservation is _not_ mechanically checked, so keep verifying that by reading.
+Mark intentional scenario drops with a `<!-- modified-removes: ScenarioName -->` comment inside the delta block.
 
 **Idempotency rule:** Applying the same delta twice produces the same result as applying it once.
 For ADDED: check whether the requirement already exists by name before inserting — skip if already present.
@@ -113,9 +125,9 @@ If no schema config exists and `.specs/schemas/` is empty or absent, skip silent
 ### Phase 5: Validate Output
 
 - [ ] All ADDED requirements appear in the main spec
-- [ ] All MODIFIED requirements reflect the updated behavior (old version removed)
+- [ ] All MODIFIED requirements reflect the updated behavior (old version removed) with no baseline scenario dropped unintentionally
 - [ ] All REMOVED requirements are gone from the main spec
-- [ ] No delta markers (ADDED/MODIFIED/REMOVED/RENAMED) remain in main specs
+- [ ] No delta markers (ADDED/MODIFIED/REMOVED/RENAMED) or `> Previously:` provenance lines remain in main specs
 - [ ] Content not mentioned in deltas is unchanged
 
 ### Phase 6: Report
@@ -140,6 +152,8 @@ Synced under overrides:
 - Replacing the entire main spec instead of merging selectively
 - Leaving delta markers (ADDED/MODIFIED/REMOVED) in the main spec after sync
 - Touching content not mentioned in the delta
+- Replacing a MODIFIED requirement without first checking that its delta block preserves the baseline's still-applicable scenarios — the wholesale replace silently deletes any scenario the delta did not restate
+- Carrying the delta-only `> Previously: …` provenance line into the baseline spec
 - Reconstructing the verify outcome from `design.md` instead of consuming the latest `sdd-verify` result plus any recorded overrides
 - Syncing before `sdd-verify` clears all blockers, whether by a clean pass or a recorded override
 - Treating a blocker as non-blocking without a recorded `design.md` override and an unchecked remediation task in `tasks.md`
@@ -149,3 +163,4 @@ Synced under overrides:
 - `references/sdd-spec-formats.md` — baseline spec format for new capabilities created during sync
 - `references/sdd-change-formats.md` — change directory artifact formats (proposal, design, tasks)
 - `references/sdd-schema.md` — schema lifecycle policy (§ 4) and `.schema-sources.yaml` format (§ 3)
+- `scripts/check_modified_completeness.py` — mechanical dropped-scenario check (scenario names only, not body sub-clauses); exits non-zero on dropped baseline scenarios, wireable as a pre-commit/CI gate

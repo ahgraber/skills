@@ -111,7 +111,7 @@ unfixable = ["B"]
 ".ci/*" = ["D"]
 "docs/*" = ["D"]
 "notebooks/*" = ["B018", "D", "S"]
-"**/tests/*" = ["D", "S101", "S301"]
+"**/tests/**" = ["D", "S101", "S301"]
 
 # --- ruff plugins --------------------
 [lint.flake8-bugbear]

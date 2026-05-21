@@ -52,6 +52,16 @@ Avoid adding extra documentation files inside skills unless explicitly required.
   - `nix develop -c skills/mermaid/scripts/validate_mermaid.py --install-chromium <<'EOF'`
   - `nix develop -c scripts/render-dot.py skills/optimize-skills/references/skill-workflow.dot`
 
+### Tests for skill scripts
+
+- Put tests at the repo root under `tests/<skill_name>/`, not inside `skills/<name>/`.
+  Keeping them out of the skill directory means they are not shipped when the skill is installed.
+- Write each test file as a `uv` script (the same inline-metadata header as the script under test), declaring its own dependencies (`pytest`, plus anything the script imports).
+- Import the script under test by relative path, and self-run via `pytest.main(...)` in a `__main__` block with `--rootdir` and `--confcutdir` pinned to the test's own directory.
+  Otherwise pytest walks the repo root and trips on sandbox-denied files such as `.env`.
+- Run with `uv run tests/<skill_name>/test_<name>.py`.
+- `.ruff.toml` ignores `D`, `S101`, and `S301` under `**/tests/**`, so idiomatic `assert`s and undocumented test functions pass lint.
+
 ## Commit & Review Guidelines
 
 - **Hard gate before committing**: before running `git agent-commit`, present the user with (1) the proposed commit message and (2) a concise diff summary covering which files changed and what each change does.

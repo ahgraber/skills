@@ -198,6 +198,7 @@ Location: `.specs/changes/<name>/specs/<capability>/spec.md`
 
 The delta format is about **provenance**, not authoring — ADDED/MODIFIED/REMOVED markers record how this change relates to the baseline.
 Contract-shape rules from § 1 apply identically: each requirement (whether added, modified, or removed) is a contract statement.
+Provenance markers do not license partial requirements: a MODIFIED block is the whole post-change requirement, not just the changed line — see the MODIFIED rule below.
 
 ```markdown
 # Delta for {Capability}
@@ -218,7 +219,15 @@ The system SHALL/MUST/SHOULD/MAY {new observable behavior}.
 
 ### Requirement: {RequirementName}
 
-The system SHALL/MUST/SHOULD/MAY {new behavior}. (Previously: {old behavior summary})
+> Previously: {one-line summary of the prior behavior}
+
+The system SHALL/MUST/SHOULD/MAY {complete post-change behavior}.
+
+#### Scenario: {ScenarioName}
+
+- **GIVEN** {precondition}
+- **WHEN** {action}
+- **THEN** {expected outcome}
 
 ## REMOVED Requirements
 
@@ -236,7 +245,12 @@ Reason: {why the capability was renamed}.
 Rules:
 
 - Only include sections that apply — omit empty ADDED/MODIFIED/REMOVED/RENAMED sections
-- MODIFIED must state both new and previous behavior inline
+- **A MODIFIED requirement block MUST be the complete post-change requirement** — full requirement text plus every scenario that still applies, exactly as the baseline should read after sync.
+  `sdd-sync` replaces the matched baseline requirement wholesale, so any text or scenario you omit is silently deleted at sync.
+  Author it by copying the current baseline requirement and editing in place — never from scratch.
+- If a change drops a baseline scenario, delete it deliberately and record why in `design.md`; do not drop it by omission.
+- State prior behavior in a `> Previously: …` provenance line above the requirement text.
+  This line is delta-only — `sdd-sync` strips it when writing the baseline.
 - REMOVED entries must include a reason
 - No `## Purpose` or `## Technical Notes` in delta specs
 
