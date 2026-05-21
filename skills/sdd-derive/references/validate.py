@@ -250,6 +250,18 @@ def check_yaml(yaml_path: Path) -> YamlResult:
 # --- Surface coverage diff --------------------------------------------------
 
 
+def _mentioned(name: str, text: str) -> bool:
+    """Whether a surface name occurs in text as a whole token.
+
+    Boundary-aware and case-sensitive. Plain substring matching reports
+    ``ping`` inside ``shipping``; a bare word boundary mishandles names that
+    begin or end with ``/`` (routes). Case is significant for surfaces (HTTP
+    verbs, Go export visibility, event names), so a convention mismatch
+    surfaces as a gap rather than being silently treated as covered.
+    """
+    return re.search(rf"(?:^|(?<=[^\w./-])){re.escape(name)}(?=$|[^\w./-])", text) is not None
+
+
 def check_coverage(yaml_path: Path, spec_path: Path) -> CoverageResult:
     """Diff the surface inventory against the spec, kind-aware.
 
@@ -294,8 +306,8 @@ def check_coverage(yaml_path: Path, spec_path: Path) -> CoverageResult:
         is_internal_knob = kind in INTERNAL_KNOB_KINDS
         is_public = kind in PUBLIC_CONSUMER_KINDS
 
-        in_spec = name in spec_text
-        in_scenario = name in scen_text if scen_blocks else False
+        in_spec = _mentioned(name, spec_text)
+        in_scenario = _mentioned(name, scen_text) if scen_blocks else False
 
         entry = {"kind": kind, "name": name}
 
