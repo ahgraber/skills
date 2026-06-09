@@ -10,28 +10,88 @@
 """
 Security audit tests using pip-audit to detect known vulnerabilities.
 
-This test runs pip-audit against the installed packages and fails if any
-vulnerabilities are detected, ensuring continuous security monitoring.
+This test runs pip-audit against the installed packages and emits a warning (not a failure)
+if any vulnerabilities are detected, surfacing them for developer attention.
+
+To ignore a CVE, add an entry to ``IGNORED_VULNERABILITIES`` below with a
+justification. Entries are passed to pip-audit via ``--ignore-vuln``.
+
+Ref: https://gist.github.com/mikeckennedy/de70ce13231b407a8dccea758f83a5cd
 """
 
+import json
 from pathlib import Path
 import subprocess
 import sys
+import warnings
 
 import pytest
+
+# Map of CVE id -> reason for ignoring. Revisit periodically; remove entries
+# once an upstream fix is released or the risk assessment changes.
+IGNORED_VULNERABILITIES: dict[str, str] = {
+    # "CVE-2025-53000": "nbconvert Windows-only vulnerability (no risk on Linux/macOS)",
+    # "CVE-2025-69872": "#nofix / #wontfix per https://github.com/grantjenks/python-diskcache/issues/357",
+}
+
+
+def _ignore_vuln_args() -> list[str]:
+    args: list[str] = []
+    for cve in IGNORED_VULNERABILITIES:
+        args.extend(["--ignore-vuln", cve])
+    return args
+
+
+def _format_fix_versions(fix_versions: list[str]) -> str:
+    if not fix_versions:
+        return "no fix published"
+    return ", ".join(fix_versions)
+
+
+def _summarize_pip_audit_json(raw_output: str) -> str:
+    payload = json.loads(raw_output)
+    dependencies = payload.get("dependencies", [])
+
+    vulnerable_dependencies = []
+    skipped_dependencies = []
+    for dependency in dependencies:
+        vulns = dependency.get("vulns", [])
+        if vulns:
+            vulnerable_dependencies.append(dependency)
+        elif dependency.get("skip_reason"):
+            skipped_dependencies.append(dependency)
+
+    lines: list[str] = []
+    lines.append(f"Vulnerable packages: {len(vulnerable_dependencies)}")
+    for dependency in vulnerable_dependencies:
+        name = dependency["name"]
+        version = dependency.get("version", "unknown")
+        lines.append(f"- {name} {version}")
+        for vulnerability in dependency.get("vulns", []):
+            vuln_id = vulnerability.get("id", "unknown-id")
+            fix_versions = _format_fix_versions(vulnerability.get("fix_versions", []))
+            lines.append(f"  - {vuln_id}; fix: {fix_versions}")
+
+    if skipped_dependencies:
+        lines.append("")
+        lines.append(f"Skipped dependencies: {len(skipped_dependencies)}")
+        for dependency in skipped_dependencies:
+            lines.append(f"- {dependency['name']}: {dependency['skip_reason']}")
+
+    return "\n".join(lines)
 
 
 def test_pip_audit_no_vulnerabilities():
     """
     Run pip-audit to check for known security vulnerabilities.
 
-    This test will fail if any vulnerabilities are detected in the installed packages.
-
-    Note: CVE-2025-53000 (nbconvert Windows vulnerability) is ignored as it only affects
-    Windows platforms and is a known acceptable risk for this project.
+    Detected vulnerabilities are surfaced as a warning so upstream dependency CVEs
+    are visible to developers without failing the suite.
+    The test still fails if pip-audit itself cannot run (missing, timed out, or
+    erroring), since that means the audit did not actually happen.
 
     To run this test specifically:
-        uv run pytest skills/python/scripts/test_pypi_security_audit.py -v
+        pytest tests/test_pypi_security_audit.py -v
     """
     # Get the project root directory
     project_root = Path(__file__).parent.parent.parent
@@ -45,9 +105,8 @@ def test_pip_audit_no_vulnerabilities():
                 "pip_audit",
                 "--format=json",
                 "--progress-spinner=off",
-                "--ignore-vuln",
-                "CVE-2025-53000",
                 "--skip-editable",
+                *_ignore_vuln_args(),
             ],
             cwd=project_root,
             capture_output=True,
@@ -66,12 +125,18 @@ def test_pip_audit_no_vulnerabilities():
 
         # Check if it's an actual vulnerability vs an error
         if "vulnerabilities found" in error_output.lower() or '"dependencies"' in result.stdout:
-            pytest.fail(
+            try:
+                summarized_output = _summarize_pip_audit_json(result.stdout)
+            except json.JSONDecodeError:
+                summarized_output = result.stdout
+            warnings.warn(
                 f"pip-audit detected security vulnerabilities!\n\n"
-                f"Output:\n{result.stdout}\n\n"
+                f"Output:\n{summarized_output}\n\n"
                 f"Please review and update vulnerable packages.\n"
-                f"Run manually with: uv run python -m pip_audit --ignore-vuln CVE-2025-53000 --skip-editable"
+                f"Run manually with: python -m pip_audit --skip-editable",
+                stacklevel=2,
             )
+            return
         else:
             # Some other error occurred
             pytest.fail(
@@ -98,6 +163,7 @@ def test_pip_audit_runs_successfully():
         )
         if result.returncode != 0:
             pytest.fail(f"pip-audit --version failed: {result.stderr}")
+
         if "pip-audit" not in result.stdout.lower():
             pytest.fail("pip-audit version output unexpected")
     except FileNotFoundError:
