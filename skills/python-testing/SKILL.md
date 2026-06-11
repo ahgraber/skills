@@ -81,7 +81,9 @@ Chains that mirror the production call graph are brittle and a sign that I/O has
 
 ## Change-Specific Diagnostics
 
-- Dependency updates: run `uv run pytest scripts/test_pypi_security_audit.py -v`
+- Dependency updates: run `uv run pytest scripts/test_uv_security_audit.py scripts/test_pypi_security_audit.py -v`.
+  `test_uv_security_audit.py` uses `uv audit` against the lockfile and is preferred; `test_pypi_security_audit.py` is the pip-audit fallback that auto-skips when uv audit can run.
+  Both warn (not fail) on findings, so review the warnings.
 - Async-heavy lifecycle changes: run `pyleak` diagnostics.
 - Multi-Python support changes: run full matrix via `nox`.
 - Free-threaded compatibility: run `PYTHON_GIL=0 uv run --python 3.Xt pytest --parallel-threads=auto --timeout=300` on a free-threaded build (3.13t+).
