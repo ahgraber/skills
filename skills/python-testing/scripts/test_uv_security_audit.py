@@ -27,6 +27,25 @@ import warnings
 import pytest
 
 
+def _find_workspace_root(start: Path) -> Path:
+    """Walk up from ``start`` to the nearest ancestor containing ``uv.lock``.
+
+    The audit targets the uv workspace's single shared lockfile (one ``uv.lock``,
+    one resolved environment for all members), so the test must resolve the
+    workspace root regardless of which member directory it lives in. The search is
+    bounded to the git repository: it never ascends past the directory holding
+    ``.git``, so a stray ``uv.lock`` outside the checkout can't be picked up. Falls
+    back to ``start`` when no lockfile is found within the repo (e.g. a non-workspace
+    checkout), letting the caller's own skip/fallback logic take over.
+    """
+    for directory in (start, *start.parents):
+        if (directory / "uv.lock").exists():
+            return directory
+        if (directory / ".git").exists():
+            break  # reached the repo root; do not search outside the checkout
+    return start
+
+
 def _uv_audit_skip_reason(project_root: Path) -> str | None:
     """Return why uv audit cannot run here, or ``None`` if it can.
 
@@ -99,7 +118,7 @@ def test_uv_audit_no_vulnerabilities():
     To run this test specifically:
         uv run pytest tests/test_uv_security_audit.py -v
     """
-    project_root = Path(__file__).parent.parent
+    project_root = _find_workspace_root(Path(__file__).resolve().parent)
 
     skip_reason = _uv_audit_skip_reason(project_root)
     if skip_reason:
