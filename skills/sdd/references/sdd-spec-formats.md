@@ -209,6 +209,8 @@ Provenance markers do not license partial requirements: a MODIFIED block is the 
 
 The system SHALL/MUST/SHOULD/MAY {new observable behavior}.
 
+Serves: {story-slug}
+
 #### Scenario: {ScenarioName}
 
 - **GIVEN** {precondition}
@@ -222,6 +224,8 @@ The system SHALL/MUST/SHOULD/MAY {new observable behavior}.
 > Previously: {one-line summary of the prior behavior}
 
 The system SHALL/MUST/SHOULD/MAY {complete post-change behavior}.
+
+Serves: {story-slug}
 
 #### Scenario: {ScenarioName}
 
@@ -251,6 +255,10 @@ Rules:
 - If a change drops a baseline scenario, delete it deliberately and record why in `design.md`; do not drop it by omission.
 - State prior behavior in a `> Previously: …` provenance line above the requirement text.
   This line is delta-only — `sdd-sync` strips it when writing the baseline.
+- A requirement may carry a `Serves: {story-slug}[, {story-slug}]` line (directly beneath its SHALL statement) naming the `proposal.md` user stories it advances.
+  This backlink is delta-only — `sdd-sync` strips it when writing the baseline, like `> Previously:`.
+  It is the value backlink that lets `sdd-apply` and `sdd-verify` bound work to user value; see `sdd-change-formats.md` § 1.1.
+  A requirement that serves no story is a signal of possible over-engineering — drop it, or add the story that justifies it.
 - REMOVED entries must include a reason
 - No `## Purpose` or `## Technical Notes` in delta specs
 

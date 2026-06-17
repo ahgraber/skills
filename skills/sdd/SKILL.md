@@ -168,6 +168,7 @@ Child skills replace `.specs/` with `SPECS_ROOT` in all paths.
 
 ```text
 <SPECS_ROOT>/          # e.g. .specs/ or packages/api/.specs/
+├── NORTH-STAR.md                   # Product elevator pitch — durable singleton; change user stories ladder to it
 ├── specs/                          # Main specs (source of truth)
 │   └── <capability>/
 │       └── spec.md
@@ -196,6 +197,11 @@ Child skills replace `.specs/` with `SPECS_ROOT` in all paths.
 An **active change** is any directory directly under `SPECS_ROOT/changes/` (not under `archive/`).
 Archived changes live in `SPECS_ROOT/changes/archive/YYYY-MM-DD-<name>/`.
 Schema snapshots travel with the change directory into the archive — no separate schema archive path is needed.
+
+`NORTH-STAR.md` is the product elevator pitch — a durable, project-global singleton that names the product's reason for being.
+It is the apex of the value chain **north star → user story → requirement**: each change's user stories (in `proposal.md`) ladder up to it, and each delta requirement's `Serves:` backlink points at a story.
+It is seeded once (see `sdd-propose`) and changes rarely.
+Unlike baseline specs, it carries product intent, not contracts — keep it short.
 
 ## References
 

@@ -40,6 +40,12 @@ Ask the user:
 2. **Change name** — kebab-case identifier (e.g., `user-auth-refresh`, `payment-retry`)
 3. **Which capabilities does it touch?**
    — which existing specs are affected?
+4. **What user value does this deliver?**
+   — capture as one or more user stories (_As a {role}, I want {goal}, so that {value}_); see `references/sdd-change-formats.md` § 1.1.
+
+Check `.specs/NORTH-STAR.md`.
+If it is missing, offer to draft a candidate product north star (a 2–4 sentence elevator pitch) from the README and existing specs for the user to ratify — the change's user stories ladder up to it.
+Do not invent or finalize it silently; the north star is a product decision the user owns.
 
 Read `.specs/specs/` to understand existing baseline specs before generating deltas.
 If `.specs/specs/` is empty or does not exist, generate delta specs using only ADDED sections — all behavior is new.
@@ -55,6 +61,7 @@ See `references/sdd-change-formats.md` for the proposal format.
 Write with the user's input:
 
 - Intent: the why — problem being solved
+- User Stories: the cross-cutting product value this change delivers, each laddering to `NORTH-STAR.md` (see `references/sdd-change-formats.md` § 1.1)
 - Scope: concrete in/out lists
 - Approach: high-level direction
 - Open Questions: unresolved decisions (if any)
@@ -105,6 +112,9 @@ Delta-format rules:
 - Use only ADDED/MODIFIED/REMOVED/RENAMED sections that apply — omit empty sections
 - MODIFIED: copy the full baseline requirement (text + every still-applicable scenario), then edit in place — the block must be the complete post-change requirement, because `sdd-sync` replaces it wholesale (`references/sdd-spec-formats.md` § 4).
   Note prior behavior in a `> Previously: …` line.
+- Add a `Serves: {story-slug}` backlink to each requirement, naming the proposal user stories it advances (M:N; `references/sdd-change-formats.md` § 1.1).
+  The backlink is delta-only and stripped at sync.
+  A requirement that serves no story is a signal of over-engineering — drop it, or add the story that justifies it.
 
 Present specs to user and confirm before continuing.
 
@@ -150,11 +160,13 @@ Rules:
 ### Phase 7: Validate
 
 - [ ] Change directory exists: `.specs/changes/<name>/`
-- [ ] `proposal.md` has Intent, Scope (in/out), Approach
+- [ ] `proposal.md` has Intent, User Stories, Scope (in/out), Approach
+- [ ] Each user story uses _As a/I want/so that_ (value clause kept) and ladders to `NORTH-STAR.md`
 - [ ] Delta specs use only ADDED/MODIFIED/REMOVED/RENAMED sections (no baseline format)
 - [ ] Each requirement is a contract statement — a property about observable state that stands on its own without its scenarios (see `references/sdd-spec-formats.md` § 1)
 - [ ] Universal SHALL claims have partition coverage per the heuristic in `references/sdd-spec-formats.md` § 1.6 — when a positive signal fires, scenarios cover each partition
 - [ ] Mechanism (algorithms, thresholds, strategies, retry policies) appears in `design.md` or the proposal's Approach, not in spec text
+- [ ] Each delta requirement carries a `Serves:` backlink to a proposal story, or is deliberately left unserved and surfaced as such
 - [ ] `design.md` has at least one Decision with rationale
 - [ ] `tasks.md` has atomic tasks, and tasks/groups are ordered by build dependency per `references/sdd-change-formats.md` § 4 — no task depends on a capability not yet built by an earlier task
 - [ ] Affected capabilities appear in the same build-dependency order across `proposal.md` Scope, `design.md`, and `tasks.md` groups
@@ -183,6 +195,8 @@ Summary: change name, capabilities affected, task count.
 - Ordering capabilities or task groups alphabetically or by order of discussion — ordering must follow build dependency per `references/sdd-change-formats.md` § 4 so the implementer never builds in anticipation of a missing capability
 - Generating all artifacts without pausing for user confirmation between phases
 - Using non-kebab-case change names
+- Dropping the "so that {value}" clause from a user story — the value clause is the scope ceiling that bounds implementation effort, not decoration
+- Writing a requirement that serves no user story (gold-plating) — every requirement should advance a story or be cut
 
 ## References
 

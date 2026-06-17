@@ -74,7 +74,9 @@ When drafting a commit message during apply:
 3. Read `.specs/changes/<name>/design.md` — architectural decisions to follow
 4. Read `.specs/changes/<name>/specs/` — delta specs for behavioral requirements
 5. Read `.specs/specs/` — baseline specs for full context
-6. Check task ordering against `references/sdd-change-formats.md` § 4 — each task should depend only on capabilities built by earlier tasks.
+6. Read `.specs/changes/<name>/proposal.md` § User Stories and `.specs/NORTH-STAR.md` — the value this work serves.
+   Each requirement's `Serves:` backlink names the stories it advances; these bound scope (see **The story ceiling** below).
+7. Check task ordering against `references/sdd-change-formats.md` § 4 — each task should depend only on capabilities built by earlier tasks.
    The schema-config rule below is the named instance: if `.specs/.sdd/schema-config.yaml` exists, identify tasks that define schema contracts (endpoint definitions, model schemas, DDL changes) and confirm they are sequenced before any tasks that consume them.
    Surface any ordering gaps to the user before implementing (advisory — the user may decide the order is intentional).
 
@@ -96,7 +98,7 @@ For each unchecked task:
 1. **Read the task** — understand what it requires
 2. **Check dependencies** — are earlier tasks complete?
    If not, implement them first
-3. **Implement** — write the code
+3. **Implement** — write the code to the depth the served story requires, no further (see **The story ceiling** below)
 4. **Check for newly-emerged write-sites** — see § Write-site emergence below
 5. **Test** — run the project's standard test command at its broadest reasonable scope (e.g. `pytest` with no `--ignore` / `--deselect` / `-m` filters).
    Inner-loop iteration may use a narrower scope, but the verification you act on — and any pass/fail count you report — must come from a broad-scope run.
@@ -111,6 +113,17 @@ Apply the **Critical Constraints** above to every artifact you produce — code,
 
 If `.specs/.sdd/schema-config.yaml` exists and a task consumes a schema contract that is not yet defined, pause before implementing it.
 Surface the dependency gap and confirm with the user whether to reorder tasks in `tasks.md` first.
+
+### The story ceiling
+
+Each requirement's `Serves:` backlink (and the stories in `proposal.md` § User Stories) names the user value the work exists to deliver.
+That value is the **scope ceiling**: implement to the depth the served story requires, and no further.
+
+When implementing surfaces behavior that no story motivates — extra configuration knobs, speculative generality, defensive paths beyond the contract, broader abstraction than the requirement needs — **stop and surface it** rather than building it silently.
+It is likely over-engineering, the failure mode this ceiling exists to bound.
+The user decides whether the extra work is justified (and, if so, which story it serves); the default is to leave it unbuilt.
+
+A requirement you are implementing that carries no `Serves:` backlink is itself a flag — confirm it advances a real story before building to it.
 
 ### Write-site emergence
 
@@ -160,6 +173,7 @@ This skill can be invoked at any point after `tasks.md` exists — not only when
 ## Common Mistakes
 
 - Implementing without reading design.md (misses architectural decisions)
+- Gold-plating beyond the served story — building behavior no user story motivates instead of surfacing it (see **The story ceiling**)
 - Not checking off tasks as they complete
 - Implementing tasks out of order when dependencies exist
 - Continuing past a failed task without resolving it

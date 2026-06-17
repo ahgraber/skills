@@ -96,10 +96,15 @@ For **baseline** output (code already exists), ordering is a presentation choice
 **Output path depends on the output type decision above:**
 
 - **Baseline** (code exists): produce `.specs/specs/<capability>/spec.md` following SDD baseline format.
+
 - **Change directory** (greenfield/aspirational): create `.specs/changes/<name>/` with:
-  - `proposal.md` — intent, scope, approach (see `references/sdd-change-formats.md`)
-  - `specs/<capability>/spec.md` — ADDED-only delta specs
+
+  - `proposal.md` — intent, **user stories**, scope, approach (see `references/sdd-change-formats.md` § 1.1)
+  - `specs/<capability>/spec.md` — ADDED-only delta specs, each requirement carrying a `Serves:` backlink to a proposal story
   - `tasks.md` — when implementation steps are clear (optional)
+
+Also seed `.specs/NORTH-STAR.md` if absent — draft a candidate product north star from the source specs for the user to ratify; each user story ladders to it.
+When the source uses user-story grammar ("As a … I want … so that …"), the story belongs in `proposal.md` § User Stories (keep the "so that {value}" clause); translate only the WHAT into the requirement and point its `Serves:` line back at the story.
 
 Preserve the Phase 2 build-dependency order in `proposal.md` Scope and `tasks.md` when present.
 If implementation steps are unclear and `tasks.md` is omitted, mention any ordering assumptions in the output summary.
@@ -120,18 +125,18 @@ Source docs frequently capture only the happy-path acceptance criterion; if the 
 
 **Translation rules:**
 
-| Source pattern                                                                               | SDD translation                                                                                                                     |
-| -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| "Users can X"                                                                                | `The system SHALL allow users to X`                                                                                                 |
-| Acceptance criteria bullets                                                                  | `#### Scenario:` entries with GIVEN/WHEN/THEN (as evidence of the requirement — see § 1.5)                                          |
-| "It should Y"                                                                                | `The system SHOULD Y`                                                                                                               |
-| "Required: Z"                                                                                | `The system MUST Z`                                                                                                                 |
-| Implementation detail (class names, libraries)                                               | Move to `## Technical Notes` (baseline) or `design.md` (change directory); omit from the requirement                                |
-| Named algorithm / threshold / strategy (e.g., "use TF-IDF bottom quartile", "retry 3 times") | Translate to the property it produces (e.g., "queries that produce no relevant documents"); route the named strategy to `design.md` |
-| Phase-gated steps (plan.md, tasks.md)                                                        | Omit — not behavior                                                                                                                 |
-| "As a user, I want X so that Y"                                                              | `The system SHALL allow users to X` (discard the "so that" rationale)                                                               |
-| "Shall not / Must not"                                                                       | `The system SHALL NOT / MUST NOT {prohibited behavior}`                                                                             |
-| Numbered requirement IDs (e.g., `REQ-001:`)                                                  | Strip the ID prefix; preserve the requirement text                                                                                  |
+| Source pattern                                                                               | SDD translation                                                                                                                                                                                                                     |
+| -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| "Users can X"                                                                                | `The system SHALL allow users to X`                                                                                                                                                                                                 |
+| Acceptance criteria bullets                                                                  | `#### Scenario:` entries with GIVEN/WHEN/THEN (as evidence of the requirement — see § 1.5)                                                                                                                                          |
+| "It should Y"                                                                                | `The system SHOULD Y`                                                                                                                                                                                                               |
+| "Required: Z"                                                                                | `The system MUST Z`                                                                                                                                                                                                                 |
+| Implementation detail (class names, libraries)                                               | Move to `## Technical Notes` (baseline) or `design.md` (change directory); omit from the requirement                                                                                                                                |
+| Named algorithm / threshold / strategy (e.g., "use TF-IDF bottom quartile", "retry 3 times") | Translate to the property it produces (e.g., "queries that produce no relevant documents"); route the named strategy to `design.md`                                                                                                 |
+| Phase-gated steps (plan.md, tasks.md)                                                        | Omit — not behavior                                                                                                                                                                                                                 |
+| "As a user, I want X so that Y"                                                              | Baseline: `The system SHALL allow users to X` (value layer dropped — baseline is value-free). Change directory: capture the story incl. "so that Y" in `proposal.md` § User Stories and add a `Serves:` backlink on the requirement |
+| "Shall not / Must not"                                                                       | `The system SHALL NOT / MUST NOT {prohibited behavior}`                                                                                                                                                                             |
+| Numbered requirement IDs (e.g., `REQ-001:`)                                                  | Strip the ID prefix; preserve the requirement text                                                                                                                                                                                  |
 
 **Critical rules:**
 
@@ -140,6 +145,8 @@ Source docs frequently capture only the happy-path acceptance criterion; if the 
 - Scenarios use `####` (4 hashtags), requirements use `###` (3 hashtags)
 - **Baseline output:** no delta markers (ADDED/MODIFIED/REMOVED)
 - **Change directory output:** use ADDED sections only (all behavior is new); no `## Purpose` or `## Technical Notes`
+- **Change directory value layer:** author `## User Stories` in `proposal.md` (keep each "so that {value}" clause) and add a `Serves:` backlink to each delta requirement; seed `.specs/NORTH-STAR.md` if absent.
+  Baseline output is value-free — no stories or backlinks.
 
 ### Phase 4: Validate Output
 
@@ -160,7 +167,9 @@ Source docs frequently capture only the happy-path acceptance criterion; if the 
 **Change directory output only:**
 
 - [ ] All specs use ADDED sections only (delta format)
-- [ ] `proposal.md` exists with Intent, Scope, Approach
+- [ ] `proposal.md` exists with Intent, User Stories, Scope, Approach
+- [ ] Each user story keeps its "so that {value}" clause and ladders to `NORTH-STAR.md`
+- [ ] Each delta requirement carries a `Serves:` backlink to a proposal story
 - [ ] `proposal.md` Scope and `tasks.md` preserve build-dependency order when the translation produced implementer-facing change artifacts
 - [ ] No `## Purpose` or `## Technical Notes` in delta specs
 
@@ -202,6 +211,7 @@ Summary: capabilities created, requirement count per capability, translation not
 - Including delta markers (ADDED/MODIFIED) in baseline specs
 - Not reading all source files before generating output
 - Writing baseline specs for a greenfield project — `.specs/specs/` asserts implemented behavior; if nothing is built yet, use a change directory with ADDED-only delta specs
+- Discarding the "so that {value}" clause when producing a change directory — it should become a proposal user story with the requirement's `Serves:` backlink; only baseline output (which is value-free) drops the value layer
 
 ## References
 

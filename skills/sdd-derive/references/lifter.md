@@ -14,6 +14,8 @@ Source access is **bounded**: capability files only, for verification — not ex
   Includes embedded surface inventory (validator consumes it).
 - **Capability metadata** — name, scope, ownership, overlap notes, optional schema paths.
 - **Output type** — `baseline` or `delta`.
+- **User stories** (delta output only) — the change's ratified user stories; add a `Serves:` backlink to each requirement naming the stories it advances.
+  Omitted for baseline output (baseline is value-free).
 - **As-of anchor** — date + short commit SHA for the generation note.
 - **Source files** — read-only, verification scope only (see § Verification discipline).
 - **Output path** — absolute path (orchestrator resolved `$TMPDIR`).
@@ -23,7 +25,7 @@ Source access is **bounded**: capability files only, for verification — not ex
 Write one markdown spec file to the output path.
 
 - `baseline` → `sdd-spec-formats.md` § 3.
-- `delta` → `sdd-spec-formats.md` § 4.
+- `delta` → `sdd-spec-formats.md` § 4; add a `Serves:` backlink to each requirement from the provided user stories.
 - Both: § 1 (requirement shape — contracts, not narration), § 5 (scenario format).
 - Derive-specific additions (generation note, `## Uncertainties`) → `derive-spec-additions.md`.
 
@@ -209,4 +211,5 @@ Do NOT inline spec content.
 - **Treating Uncertainty as failure** — it is honest signaling.
   Two targeted Uncertainties beat five confident-but-wrong contracts.
 - **Skipping the format self-check** — drift is the top bounce reason; 30 seconds prevents re-dispatch.
+- **Adding `Serves:` to baseline output** — baseline is value-free; backlinks are delta-only.
 - **Empty `## Uncertainties` sections** — omit entirely when empty.
