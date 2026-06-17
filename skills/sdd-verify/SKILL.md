@@ -43,14 +43,14 @@ Before starting, check `.specs/changes/<name>/tasks.md`:
 
 ## Verification Dimensions
 
-| Dimension        | Question                                           | What to check                                                                                        |
-| ---------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| **Completeness** | Is everything done?                                | All tasks checked off, all delta spec requirements implemented                                       |
-| **Scope**        | Is everything implemented in scope?                | Every meaningful code change traces to a delta spec requirement; no unspecified behavior introduced  |
-| **Contract**     | Does the implementation satisfy the spec contract? | Implementation honors each requirement's scenarios and the broader contract claim stated in the text |
-| **Coverage**     | Do scenarios meaningfully sample the contract?     | Scenarios span happy path, boundaries, and plausible failure modes — not trivially-passing cases     |
-| **Coherence**    | Does it follow the design?                         | Implementation follows decisions in `design.md`                                                      |
-| **Conformance**  | Do schemas match the specs?                        | Generated schema diff confirms spec requirements are reflected in the schema                         |
+| Dimension        | Question                                           | What to check                                                                                                                                                            |
+| ---------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Completeness** | Is everything done?                                | All tasks checked off, all delta spec requirements implemented                                                                                                           |
+| **Scope**        | Is everything in scope, and no more?               | Every meaningful code change traces to a requirement; every requirement and change traces up to a user story; no unspecified behavior and no value-less over-engineering |
+| **Contract**     | Does the implementation satisfy the spec contract? | Implementation honors each requirement's scenarios and the broader contract claim stated in the text                                                                     |
+| **Coverage**     | Do scenarios meaningfully sample the contract?     | Scenarios span happy path, boundaries, and plausible failure modes — not trivially-passing cases                                                                         |
+| **Coherence**    | Does it follow the design?                         | Implementation follows decisions in `design.md`                                                                                                                          |
+| **Conformance**  | Do schemas match the specs?                        | Generated schema diff confirms spec requirements are reflected in the schema                                                                                             |
 
 ## Severity Levels
 
@@ -269,6 +269,27 @@ It runs at the orchestrator regardless of single-agent vs. parallel path — sub
 
 6. If no git diff is available and file enumeration is also impossible, note this as a WARNING and skip the scope check.
 
+#### Check Value Alignment (story ceiling)
+
+This is the value-side of the scope check.
+SDD's other dimensions confirm _contract_ conformance but never _value_ conformance, so over-engineering that satisfies a contract no user needs passes silently.
+This check is the counterweight.
+It runs at the orchestrator, is change-diff-scoped (never baseline-wide), and its findings are **WARNING** by default — advisory, non-blocking.
+
+Graceful degradation: if `.specs/changes/<name>/proposal.md` has no `## User Stories` section, or `.specs/NORTH-STAR.md` is absent, note this in the report and skip the check — there is no value referent to check against.
+
+1. Read the proposal's user stories and `.specs/NORTH-STAR.md`.
+2. **Orphan requirements.**
+   For each in-scope delta requirement, check for a `Serves:` backlink to a declared story.
+   A requirement that serves no story is suspected over-engineering — flag **WARNING: requirement `<name>` serves no user story (possible gold-plating) — confirm it advances product value or cut it.**
+3. **Orphan implementation.**
+   For each meaningful code change the scope check classified _unspecified_, additionally note when it also traces to no story — the implementation-side of the same smell.
+4. **Story laddering.**
+   Check that each declared story ladders to the product north star.
+   A story with no connection to `NORTH-STAR.md` is drift from product intent — flag **WARNING: story `<slug>` does not ladder to the north star.**
+
+These are WARNING-level findings, not gates: a requirement may legitimately serve product value diffusely (shared infrastructure), so the finding prompts a confirmation rather than blocking.
+
 #### Check MODIFIED Delta Integrity (pre-sync safety)
 
 `sdd-sync` replaces each MODIFIED requirement wholesale, so any baseline scenario or sub-clause the delta block omits is silently deleted at sync.
@@ -449,14 +470,15 @@ State instead that verification found issues the user explicitly chose not to le
 
 ## Graceful Degradation
 
-| Missing artifact      | Behavior                                                                  |
-| --------------------- | ------------------------------------------------------------------------- |
-| `tasks.md`            | Skip completeness check, warn before proceeding                           |
-| `design.md`           | Skip coherence check and waiver lookups, note in report                   |
-| Delta specs           | Skip contract and coverage checks, note in report                         |
-| `schema-config.yaml`  | Skip Phase 3 snapshot and Phase 7 conformance check, note in report       |
-| `schemas/expected.md` | Skip expected-vs-actual diff within conformance; run drift detection only |
-| No git diff available | Skip scope check (Phase 4 step), flag as WARNING, note in report          |
+| Missing artifact                  | Behavior                                                                  |
+| --------------------------------- | ------------------------------------------------------------------------- |
+| `tasks.md`                        | Skip completeness check, warn before proceeding                           |
+| `design.md`                       | Skip coherence check and waiver lookups, note in report                   |
+| Delta specs                       | Skip contract and coverage checks, note in report                         |
+| `schema-config.yaml`              | Skip Phase 3 snapshot and Phase 7 conformance check, note in report       |
+| `schemas/expected.md`             | Skip expected-vs-actual diff within conformance; run drift detection only |
+| No git diff available             | Skip scope check (Phase 4 step), flag as WARNING, note in report          |
+| No user stories / `NORTH-STAR.md` | Skip value-alignment check (Phase 4 step), note in report                 |
 
 "Warn before proceeding" means a conversational message to the user.
 "Note in report" means adding a note inside the verification report itself.
@@ -483,6 +505,8 @@ State instead that verification found issues the user explicitly chose not to le
   Single-agent execution is a gate result, not a default.
 - On the parallel path: re-running per-requirement phases on the orchestrator, mixing granularities, dispatching above the concurrency cap, or silently defaulting the model — see `references/parallel-subagent-path.md` § 6.
 - Skipping the scope check (the step within Phase 4) — completeness alone is not sufficient; the inverse direction (code → spec) is equally important and catches scope creep and accidental behavioral side-effects.
+- Skipping the value-alignment check (the step within Phase 4) — without it, verify confirms contract conformance but never catches value-less over-engineering, the gold-plating this dimension exists to flag.
+- Treating an orphan-requirement finding (serves no story) as CRITICAL — it is a WARNING by default; a requirement may serve product value diffusely, so the finding prompts confirmation, not a block.
 - Running the scope check only against the delta specs without also checking baseline specs — a change that silently modifies behavior already covered by a baseline requirement is still unspecified for this change.
 - Skipping the MODIFIED delta-integrity check (the orchestrator step within Phase 4) — `sdd-sync` replaces MODIFIED requirements wholesale, so a delta block that drops a baseline scenario causes silent contract deletion at sync; verify is the gate that catches it first.
 - Classifying test file changes or formatting-only edits as meaningful changes in the scope check step — the scope check targets behavioral changes, not every diff hunk.

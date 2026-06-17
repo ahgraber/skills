@@ -72,13 +72,16 @@ Apply delta markers:
 
 **Preservation rule:** Content in the main spec not mentioned in the delta is never touched.
 
+**Strip delta-only annotations:** When writing any requirement into a baseline spec — inserting an ADDED requirement, replacing a MODIFIED one, or creating a new capability (Phase 3) — strip its delta-only lines: the `> Previously: …` provenance line and any `Serves:` backlink.
+Baseline specs carry contracts, not change provenance or value backlinks; the value layer (user stories and `Serves:` links) is change-scoped and stays in the change directory.
+
 **MODIFIED preservation guard:** The preservation rule operates at requirement granularity — a MODIFIED requirement is replaced as a whole, so scenarios its delta block omits are _not_ preserved.
 Before replacing, compare the baseline requirement's scenarios and sub-clauses against the MODIFIED delta block.
 If the delta omits any baseline scenario that the change did not deliberately remove (no rationale in `design.md`), stop and surface it:
 
 > "MODIFIED `<name>`: baseline scenario(s) `<…>` are absent from the delta block and will be deleted on sync. Restore the full post-change requirement, or confirm the removal is intentional."
 
-Replace only after the omission is confirmed intentional, and strip the delta-only `> Previously: …` provenance line — it does not belong in the baseline.
+Replace only after the omission is confirmed intentional, and strip the delta-only `> Previously: …` and `Serves:` lines — they do not belong in the baseline (see **Strip delta-only annotations**).
 
 A mechanical backstop ships with the skill for the **dropped-scenario** half of this guard: run `scripts/check_modified_completeness.py <specs-root> --change <name>` (a `uv` script; deps are declared inline).
 It compares scenario names only and exits non-zero when a MODIFIED delta drops a baseline scenario — sub-clause and body-text preservation is _not_ mechanically checked, so keep verifying that by reading.
@@ -127,7 +130,7 @@ If no schema config exists and `.specs/schemas/` is empty or absent, skip silent
 - [ ] All ADDED requirements appear in the main spec
 - [ ] All MODIFIED requirements reflect the updated behavior (old version removed) with no baseline scenario dropped unintentionally
 - [ ] All REMOVED requirements are gone from the main spec
-- [ ] No delta markers (ADDED/MODIFIED/REMOVED/RENAMED) or `> Previously:` provenance lines remain in main specs
+- [ ] No delta markers (ADDED/MODIFIED/REMOVED/RENAMED), `> Previously:` provenance lines, or `Serves:` backlinks remain in main specs
 - [ ] Content not mentioned in deltas is unchanged
 
 ### Phase 6: Report
@@ -154,6 +157,7 @@ Synced under overrides:
 - Touching content not mentioned in the delta
 - Replacing a MODIFIED requirement without first checking that its delta block preserves the baseline's still-applicable scenarios — the wholesale replace silently deletes any scenario the delta did not restate
 - Carrying the delta-only `> Previously: …` provenance line into the baseline spec
+- Carrying a delta-only `Serves:` backlink into the baseline spec — like `> Previously:`, it is change-scoped and must be stripped at sync
 - Reconstructing the verify outcome from `design.md` instead of consuming the latest `sdd-verify` result plus any recorded overrides
 - Syncing before `sdd-verify` clears all blockers, whether by a clean pass or a recorded override
 - Treating a blocker as non-blocking without a recorded `design.md` override and an unchecked remediation task in `tasks.md`

@@ -202,6 +202,12 @@ Refinement options:
 - Re-run a specific explorer with adjusted scope — medium; for "ignore vendor/"
 - Re-run all explorers — expensive; only for substantive scope changes
 
+**Change-directory output — value layer.**
+If the output type is a change directory, draft candidate user stories from the change intent (Phase 1) and the capability menu — cross-cutting product value — and seed `.specs/NORTH-STAR.md` if absent.
+Present both for user ratification here, before dispatching lifters: Phase 4 lifters add each requirement's `Serves:` backlink from this ratified story set.
+Deriving cross-cutting stories from code is approximate — present them for ratification rather than asserting them.
+Baseline output skips this entirely (baseline is value-free).
+
 ### Phase 4: Per-Capability Derive
 
 For each selected capability, dispatch sequentially:
@@ -212,6 +218,7 @@ For each selected capability, dispatch sequentially:
 2. **Lifter** — reads observations + surface inventory + capability metadata.
    Has bounded source access for **verification only**.
    Emits lifted contracts and spec content (delta or baseline format), plus optional `## Uncertainties` section.
+   For change-directory (delta) output, also receives the ratified user stories and adds a `Serves:` backlink to each requirement; baseline output gets none.
    See `references/lifter.md`.
 
 Capabilities run in parallel across each other; observer/lifter is sequential within a capability.
@@ -288,13 +295,15 @@ See `references/derive-spec-additions.md` for the `## Uncertainties` section for
 
 **Change directory (new/modified behavior):**
 
-- `.specs/changes/<name>/proposal.md`
-- `.specs/changes/<name>/specs/<capability>/spec.md` (delta format)
+- `.specs/changes/<name>/proposal.md` — includes `## User Stories` (see `references/sdd-change-formats.md` § 1.1)
+- `.specs/changes/<name>/specs/<capability>/spec.md` (delta format) — requirements carry `Serves:` backlinks to the proposal stories
 - `.specs/changes/<name>/tasks.md` (when applicable)
+
+For change-directory output, seed `.specs/NORTH-STAR.md` if absent (draft a candidate from discovery + intent for the user to ratify) and author user stories from the change intent and capability menu, each laddering to the north star.
 
 **Baseline specs (retroactive):**
 
-- `.specs/specs/<capability>/spec.md` per capability
+- `.specs/specs/<capability>/spec.md` per capability — value-free (no user stories or `Serves:` backlinks; the value layer is change-scoped)
 
 `sdd-derive` produces a **partial** change directory — no `design.md`.
 Use `sdd-propose` for a full artifact set.
@@ -310,6 +319,7 @@ Report after generation: capabilities covered, requirement count, uncertainties 
 - **Lifter exploring instead of verifying** — source access is reactive, not proactive.
   See `references/lifter.md` § Verification Discipline.
 - **Wrong format for the output type** — delta in `.specs/specs/`, or baseline in a change dir.
+- **Baseline carrying a value layer** — baseline output is value-free; user stories and `Serves:` backlinks belong only to change-directory output (the value layer is change-scoped).
 - **Baseline specs in greenfield** — `.specs/specs/` asserts implemented behavior; if nothing is built, use a change directory with ADDED-only delta specs.
 - **Mid-run truncation** — if a capability is too large to observe in one pass, split before dispatch (Phase 3).
   Never silently truncate.

@@ -18,6 +18,12 @@ Location: `.specs/changes/<name>/proposal.md`
 
 {2-4 sentences describing why this change is needed and what problem it solves.}
 
+## User Stories
+
+### Story: {story-slug}
+
+As a {role}, I want {goal}, so that {value}.
+
 ## Scope
 
 **In scope:**
@@ -40,11 +46,38 @@ Location: `.specs/changes/<name>/proposal.md`
 Rules:
 
 - Intent is the "why" — not the "what" or "how"
+- User Stories name the cross-cutting product value this change delivers — see § 1.1
 - Scope prevents scope creep — be explicit about boundaries
 - Open Questions is optional — omit if there are none
 - **Approach** is the draft sandbox for mechanism thinking during spec authoring.
   Early algorithm, heuristic, or strategy ideas that surface while writing the contract belong here until they are formalized into `design.md`.
   This keeps mechanism out of `spec.md` without losing the thinking.
+
+### 1.1 User stories and the value ceiling
+
+A **user story** is a cross-cutting slice of product value — the user-facing reason a change exists, in the form _As a {role}, I want {goal}, so that {value}_.
+Keep the "so that {value}" clause: it is the point of the story, not decoration.
+A story typically spans several capabilities, so it is **not** a contract — give it no scenarios.
+Its serving requirements carry the contract; the story carries the value.
+
+**Ladder to the north star.**
+Every story should ladder up to the product north star at `<SPECS_ROOT>/NORTH-STAR.md` (the product elevator pitch — a durable, project-global singleton).
+A change whose stories don't connect to the north star is drifting from product intent; surface that rather than proceeding.
+
+**`Serves:` backlinks (M:N).**
+Each delta-spec requirement that advances a story carries a `Serves: {story-slug}` line (see `sdd-spec-formats.md` § 4).
+The relationship is many-to-many: one story is served by many requirements; one requirement (e.g., a shared auth check) may serve many stories.
+
+**The value ceiling.**
+The story bounds effort.
+`sdd-apply` implements only to the depth a served story requires; `sdd-verify` flags a requirement, scenario, or implementation that serves no story as a WARNING — suspected over-engineering, _out of scope by construction_.
+This is the counterweight to SDD's thoroughness machinery (partition coverage, write-site enumeration): granularity is justified only to the extent a user story needs it.
+
+**Lifecycle — change-scoped, not durable.**
+User stories live here in `proposal.md`, and `Serves:` backlinks live only in delta specs.
+Both are disposable: `sdd-sync` strips `Serves:` lines when merging deltas into baseline (like the `> Previously:` line), and the proposal is archived with the change.
+Baseline specs stay value-free.
+The value layer lives where the work happens — the active change — without committing to a durable story tier.
 
 ## 2. Design Format
 
