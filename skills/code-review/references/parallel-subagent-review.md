@@ -44,22 +44,29 @@ Gather what they need first, or dispatch is wasted.
 
 1. **Finish Step 1 Triage.**
    You need the prioritized file list, risk hotspots, and (if graph is on) the blast-radius snapshot to brief each subagent.
+
 2. **Clarify intent with the user.**
    Ask, if not already clear:
+
    - What is this change trying to accomplish?
      Any non-obvious constraints?
    - Is there a spec, ticket, PRD, or design doc the implementation should match?
      If yes, where?
    - Any areas the user already knows are rough and wants (or does not want) scrutinized?
+
 3. **Package a shared context block.**
-   Build once, reuse across all four dispatches:
-   - Scope refs (base branch, merge-base SHA, or staged).
-   - The full diff (or pointer to it).
-   - File list with priorities from triage.
-   - Relevant surrounding code paths the reviewer will likely need to read.
-   - Spec/intent summary from the user, verbatim where possible.
+   The review packet from Step 0 (`scripts/build-review-packet.py`) is this block — build it once and hand every subagent its `packet_path` rather than inlining the diff into each prompt.
+   The packet already carries:
+
+   - Scope refs (base branch, merge-base SHA, or staged) and the full diff.
+   - The changed-file list.
+   - The source of truth (intent plus any `--include`d spec/plan), when provided.
+
+   Add per-dispatch only what the packet lacks: file priorities from triage and the surrounding code paths a reviewer will likely need to read.
+
 4. **Resolve the model (if the dispatch schema exposes one).**
    When the dispatch schema has a model parameter, the choice is the user's, not the harness default.
+
    - If the user specified a model earlier in the conversation, reuse it across every dispatch in this review.
 
    - Otherwise, ask once before dispatching, then record the answer and apply it uniformly to Agents 1–4.
@@ -101,6 +108,7 @@ Required behaviors missing?
 Scope creep?
 Deviations from the spec's acceptance criteria?
 If no spec was provided, report that the subagent was dispatched without one and focus only on stated PR intent.
+When the packet reports `has_source_of_truth: false`, this is that case — proceed on stated intent and do not infer a spec from the diff; if a spec exists, the better fix is to rebuild the packet with `--intent`/`--include` rather than skip this lens.
 
 ### Agent 4 — Security Review
 
@@ -166,6 +174,8 @@ Add:
 ## Agent Prompt Templates
 
 Each subagent prompt should be self-contained: it will not see this conversation.
+
+In every template below, point the `## Diff` (and `## Context` / `## Intent and Spec`) placeholders at the packet rather than inline its contents: `Start from the review packet at <packet_path> — it has the diff, changed files, and source of truth, but it is a starting point, not the whole picture. You have Read/Grep/git; pull callers, surrounding code, and any file the diff does not show whenever a finding depends on it.` Inline a snippet only when a finding needs a specific excerpt called out.
 
 ### Template — Agent 1: Architectural Critique
 
