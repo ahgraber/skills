@@ -9,6 +9,7 @@
 - Main SKILL.md stays under 500 lines.
 - References are one level deep and linked from SKILL.md.
 - Scripts are used for deterministic, repeatable work and tested once.
+- Scripts assume only `uv`; harness primitives (subagent/model/thinking hints) are substitutable, not hardcoded.
 - Skill has trigger tests (should/should-not) and functional tests.
 - Package only after validation passes.
 
@@ -19,7 +20,7 @@
 - Metadata should stay lean (around 100 tokens combined for `name` + `description`).
 - Keep SKILL.md targeted (\<5000 tokens recommended) and push details to on-demand files.
 - Composability: assume multiple skills can load together.
-- Portability: avoid environment-specific assumptions unless required.
+- Portability: avoid OS- and harness-specific assumptions unless required (see `## Portability`).
 - Right level of freedom: prose for judgment, scripts for fragile steps.
 
 ## Description (Triggering) Guidance
@@ -46,6 +47,17 @@ description: Use when drafting commit messages — reads staged diff, applies co
 description: Use whenever a Conventional Commit message is being drafted
 ```
 
+### The same trap at runtime
+
+The failure generalizes beyond descriptions: a skill that hands a subagent a pre-built or trimmed context — a diff packet, a summary, a stripped prompt — instead of the source it should reason from invites the same confident-wrong shortcut, with the agent inventing whatever is missing.
+For skills that dispatch subagents or pre-bake context:
+
+- **Carry the source of truth.**
+  The artifact must include what the work is judged or acted against (spec, plan, intent), not only the thing acted on (the diff).
+  A reviewer given only a diff redefines the spec as whatever the diff implies and passes it.
+- **Frame the artifact as a floor, not a ceiling.**
+  Name the gaps it cannot cover (off-diff callers, truncation, history) as things the agent must go fill — otherwise the agent treats the artifact as the whole world.
+
 ## SKILL.md Body Guidance
 
 - Use imperative/infinitive form.
@@ -53,6 +65,21 @@ description: Use whenever a Conventional Commit message is being drafted
 - For decision-heavy logic, use a small dot flowchart and link to references.
 - For long references (>100 lines), include a table of contents.
 - Avoid narrative case studies; focus on reusable patterns.
+
+## Portability
+
+Skills run on machines and harnesses you do not control.
+Cover two axes, or scope the skill explicitly.
+
+**OS / runtime.**
+For end users, assume only `uv` (per the repo README) — not nix, `mmdc`, `dot`, GNU coreutils, or a specific shell.
+In scripts: prefer the stdlib or `uv` inline deps over shelling out; feature-detect rather than assume (`open` vs `xdg-open` vs `rundll32`, BSD vs GNU flags, path separators, line endings); skip-with-a-note instead of crashing when an optional tool is absent.
+If a skill is genuinely OS-specific, say so in the description trigger.
+
+**Harness.**
+Do not hardcode one harness's primitives — tool names (`Agent`, `Skill`), a `model` parameter, or thinking hints (`Think hard.`).
+Use the harness-note pattern: name one primitive as the running example, tell the agent to substitute its harness's equivalent, and gate use on a capability check ("if a subagent-dispatch tool is available…").
+Exemplar: `skills/sdd-verify/references/parallel-subagent-path.md`.
 
 ## Optional Directories
 
@@ -83,6 +110,21 @@ Keep inline when:
 - Use for deterministic or repetitive work agents can execute.
 - Keep scripts self-contained or clearly declare dependencies.
 - Return actionable errors and handle expected edge cases.
+
+Skill scripts are agent-native CLIs — an agent invokes them and parses their output.
+Hold every skill script to this contract:
+
+- **stdout is the data channel; stderr is for humans.**
+  Machine-readable output (JSON, paths, counts) goes to stdout only; diagnostics, warnings, and progress go to stderr.
+  Never mix them.
+- **Exit codes are the success signal.**
+  Return 0 on success and non-zero on any known failure; never exit 0 after printing an error.
+  Agents check the code before trusting stdout.
+- **Errors name the valid set.**
+  When rejecting input against a fixed set, include the options (`error: mode must be one of: fast slow (got: turbo)`) so the agent self-corrects in one retry.
+- **No interactive prompts.**
+  Required inputs are flags or env vars; the script must complete headless.
+- **Consistent flag names** across a skill's scripts (`--input`, not `-i` in one and `--file` in another).
 
 ## Workflow Modeling (GraphViz)
 
