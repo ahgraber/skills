@@ -1,4 +1,8 @@
 #!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11,<3.13"
+# dependencies = []
+# ///
 """Resolve SPECS_ROOT candidates for the sdd skill.
 
 A `SPECS_ROOT` is a directory whose direct children conform to the SDD layout: `specs/`, `changes/`, and `schemas/` (with optional `.sdd/`).
