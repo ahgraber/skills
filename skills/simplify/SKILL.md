@@ -14,7 +14,9 @@ Determine what changed and what tooling is available before any analysis.
 
 ### Scope detection
 
-Run `git diff` (or `git diff HEAD` if there are staged changes) to see what changed.
+Run `scripts/build-review-packet.py` (shipped in this skill's `scripts/`) to resolve scope and pre-bake one packet — diff plus changed-file list — that the three review agents read by path instead of each re-running git.
+It auto-detects staged vs. branch vs. worktree and prints `packet_path` in its JSON.
+Fall back to `git diff` (or `git diff HEAD`) for a manual scope.
 If there are no git changes, review the most recently modified files that the user mentioned or that you edited earlier in this conversation.
 
 ### Graph-enhanced tooling gate
@@ -45,7 +47,7 @@ Pass all available context — diff, and graph triage data if available — to e
 ## Phase 2: Launch Three Review Agents in Parallel
 
 Use the Agent tool to launch all three agents concurrently in a single message.
-Pass each agent the diff (and graph context from Phase 1 if available).
+Give each agent the packet path from Phase 0 as its starting point (plus graph context from Phase 1 if available): the packet has the diff and changed files, but it is a floor, not a ceiling — agents still read surrounding code, callers, and existing utilities the diff does not show (Agent 1's reuse search is inherently off-diff).
 When graph data includes risk scores, instruct agents to review highest-risk items first.
 
 ### Agent 1: Code Reuse Review

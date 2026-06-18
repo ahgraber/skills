@@ -70,6 +70,24 @@ Determine review scope and available tooling before doing any analysis.
 
 Identify whether this is a pre-commit or pre-merge review, then set the `base` ref accordingly.
 
+**Build the review packet first.**
+Run `scripts/build-review-packet.py` (shipped in this skill's `scripts/`) to resolve scope deterministically and write one packet — diff, changed-file list, and source-of-truth — that every later step and every subagent reads by path instead of re-deriving the base ref and re-running git:
+
+```sh
+# Auto-detects staged vs. branch vs. worktree. Pass the spec so the packet
+# carries what the change is judged against (see source-of-truth note below).
+scripts/build-review-packet.py --intent "<what this change is for>" --include <spec-or-plan-if-any>
+```
+
+It prints JSON with `packet_path` and `has_source_of_truth`.
+Use `packet_path` as the deterministic scope baseline for the rest of the review and for every subagent dispatch — it fixes _what changed_ so no one re-derives it, but it is a floor, not a ceiling: keep reading surrounding code, callers, history, and tests beyond the diff as the review demands.
+The raw git commands below are what the script automates; reach for them directly only when scoping a review the script's scope detection does not cover.
+
+**Source of truth.**
+If `has_source_of_truth` is false, the packet is a bare diff.
+A reviewer grading spec compliance from a bare diff will silently invent a spec and grade against it.
+When a spec exists, supply `--intent`/`--include` so the packet carries it; when it does not, judge only stated intent and say so — never infer a spec from the diff and grade against it.
+
 _Pre-commit (staged changes):_
 
 ```sh
