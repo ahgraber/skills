@@ -7,6 +7,7 @@ This file records external sources referenced while building or maintaining thes
 - Anthropics skill-creator template: <https://github.com/anthropics/skills/blob/ef74077/skills/skill-creator/SKILL.md> (accessed 2026-01-31)
 - OpenAI skill-creator template: <https://github.com/openai/skills/blob/e8acbcb/skills/.system/skill-creator/SKILL.md> (accessed 2026-01-31)
 - obra/superpowers writing skill: <https://github.com/obra/superpowers/blob/66a2dbd/skills/writing-skills/SKILL.md> (accessed 2026-01-31)
+- obra/superpowers (agentic skills methodology): <https://github.com/obra/superpowers> — source for the compression-correctness and portability guidance (accessed 2026-06-18)
 
 ## Articles and blog posts
 
@@ -14,4 +15,4 @@ This file records external sources referenced while building or maintaining thes
 - fsck.com: "Using GraphViz for CLAUDE.md" (published 2025-09-29): <https://blog.fsck.com/2025/09/29/using-graphviz-for-claudemd/> (accessed 2026-01-31)
 - fsck.com: "Claude Code skills not triggering?
   It might not see them." (published 2025-12-17): <https://blog.fsck.com/2025/12/17/claude-code-skills-not-triggering/> (accessed 2026-01-31)
-- fsck.com: "Superpowers 4" (published 2025-12-18): <https://blog.fsck.com/2025/12/18/superpowers-4/> (accessed 2026-01-31)
+- trevinsays.com: "10 Principles for Agent-Native CLIs": <https://trevinsays.com/p/10-principles-for-agent-native-clis> (accessed 2026-06-18)
