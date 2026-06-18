@@ -90,6 +90,17 @@ const MIME_TYPES = {
   '.jpeg': 'image/jpeg', '.gif': 'image/gif', '.svg': 'image/svg+xml'
 };
 
+// Passive hardening: keep the locally-served mockups from leaking via referrer
+// or being framed elsewhere. `frame-ancestors 'none'` only restricts who can
+// embed us; it does not affect our own inline helper script.
+const SECURITY_HEADERS = {
+  'Referrer-Policy': 'no-referrer',
+  'Cache-Control': 'no-store',
+  'X-Frame-Options': 'DENY',
+  'X-Content-Type-Options': 'nosniff',
+  'Content-Security-Policy': "frame-ancestors 'none'"
+};
+
 // ========== Templates and Constants ==========
 
 const WAITING_PAGE = `<!DOCTYPE html>
@@ -118,7 +129,7 @@ function wrapInFrame(content) {
 
 function getNewestScreen() {
   const files = fs.readdirSync(CONTENT_DIR)
-    .filter(f => f.endsWith('.html'))
+    .filter(f => !f.startsWith('.') && f.endsWith('.html'))
     .map(f => {
       const fp = path.join(CONTENT_DIR, f);
       return { path: fp, mtime: fs.statSync(fp).mtime.getTime() };
@@ -143,20 +154,32 @@ function handleRequest(req, res) {
       html += helperInjection;
     }
 
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', ...SECURITY_HEADERS });
     res.end(html);
   } else if (req.method === 'GET' && req.url.startsWith('/files/')) {
     const fileName = req.url.slice(7);
     const filePath = path.join(CONTENT_DIR, path.basename(fileName));
-    if (!fs.existsSync(filePath)) {
+    // basename() blocks `../` traversal; realpath containment additionally
+    // blocks a symlink inside CONTENT_DIR that points outside it. Only serve
+    // regular files that resolve within the content root.
+    let realPath, contentRoot;
+    try {
+      realPath = fs.realpathSync(filePath);
+      contentRoot = fs.realpathSync(CONTENT_DIR);
+    } catch (e) {
       res.writeHead(404);
       res.end('Not found');
       return;
     }
-    const ext = path.extname(filePath).toLowerCase();
+    if (!realPath.startsWith(contentRoot + path.sep) || !fs.statSync(realPath).isFile()) {
+      res.writeHead(404);
+      res.end('Not found');
+      return;
+    }
+    const ext = path.extname(realPath).toLowerCase();
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
-    res.writeHead(200, { 'Content-Type': contentType });
-    res.end(fs.readFileSync(filePath));
+    res.writeHead(200, { 'Content-Type': contentType, ...SECURITY_HEADERS });
+    res.end(fs.readFileSync(realPath));
   } else {
     res.writeHead(404);
     res.end('Not found');
@@ -243,7 +266,9 @@ function handleMessage(text) {
   }
   touchActivity();
   console.log(JSON.stringify({ source: 'user-event', ...event }));
-  if (event.choice) {
+  // Guard against null/primitive payloads: a bare `null` or non-object JSON
+  // message would throw on `.choice` and crash the server.
+  if (event && event.choice) {
     const eventsFile = path.join(STATE_DIR, 'events');
     fs.appendFileSync(eventsFile, JSON.stringify(event) + '\n');
   }
@@ -279,14 +304,14 @@ function startServer() {
   // macOS fs.watch reports 'rename' for both new files and overwrites,
   // so we can't rely on eventType alone.
   const knownFiles = new Set(
-    fs.readdirSync(CONTENT_DIR).filter(f => f.endsWith('.html'))
+    fs.readdirSync(CONTENT_DIR).filter(f => !f.startsWith('.') && f.endsWith('.html'))
   );
 
   const server = http.createServer(handleRequest);
   server.on('upgrade', handleUpgrade);
 
   const watcher = fs.watch(CONTENT_DIR, (eventType, filename) => {
-    if (!filename || !filename.endsWith('.html')) return;
+    if (!filename || filename.startsWith('.') || !filename.endsWith('.html')) return;
 
     if (debounceTimers.has(filename)) clearTimeout(debounceTimers.get(filename));
     debounceTimers.set(filename, setTimeout(() => {
@@ -320,6 +345,13 @@ function startServer() {
     );
     watcher.close();
     clearInterval(lifecycleCheck);
+    // Close upgraded WebSocket sockets explicitly: server.close() waits for all
+    // open connections to end, so leaving clients connected hangs shutdown and
+    // orphans the process.
+    for (const socket of clients) {
+      try { socket.destroy(); } catch (e) { /* already gone */ }
+    }
+    clients.clear();
     server.close(() => process.exit(0));
   }
 

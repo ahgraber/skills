@@ -18,6 +18,17 @@ PID_FILE="${STATE_DIR}/server.pid"
 if [[ -f "${PID_FILE}" ]]; then
   pid=$(cat "${PID_FILE}")
 
+  # Guard against PID reuse: if the PID is alive but is not our server.cjs
+  # process, refuse to signal it. A stale PID file after a reboot could
+  # otherwise name an unrelated process.
+  if kill -0 "${pid}" 2>/dev/null; then
+    cmd=$(ps -p "${pid}" -o command= 2>/dev/null || true)
+    if [[ "${cmd}" != *server.cjs* ]]; then
+      echo "{\"status\": \"failed\", \"error\": \"PID ${pid} is not the brainstorm server (PID reuse?); refusing to kill\"}"
+      exit 1
+    fi
+  fi
+
   # Try to stop gracefully, fallback to force if still alive
   kill "${pid}" 2>/dev/null || true
 
