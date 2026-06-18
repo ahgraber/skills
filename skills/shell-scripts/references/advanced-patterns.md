@@ -75,6 +75,17 @@ Use this instead of building one string and evaluating it.
 - If GNU behavior is required and those commands are missing, suggest installing GNU tools (for example `gnu-sed` and `coreutils`) before proceeding.
 - See `references/command-resolution-and-os-portability.md`.
 
+## Agent-Consumed Scripts
+
+When a script's primary consumer is an agent rather than a human:
+
+- Write machine-readable output (JSON, paths, `key=value`) to stdout only; send all diagnostics, progress, and warnings to stderr (`>&2`).
+- Exit 0 only on success; return non-zero on any known error.
+  Never `exit 0` after printing an error.
+- Avoid ANSI color in stdout — agents parse it, they do not render it.
+- On invalid input against a fixed set, emit the valid set so the agent self-corrects: `printf 'error: must be one of: a b c (got: %s)\n' "${val}" >&2`.
+- Guard destructive operations behind an explicit non-default flag (`--force`, `--delete`); do not make the destructive path the default, since agents retry without human review.
+
 ## Avoid Common Footguns
 
 - Do not parse `ls` output.
