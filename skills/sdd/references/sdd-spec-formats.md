@@ -252,7 +252,11 @@ Rules:
 - **A MODIFIED requirement block MUST be the complete post-change requirement** — full requirement text plus every scenario that still applies, exactly as the baseline should read after sync.
   `sdd-sync` replaces the matched baseline requirement wholesale, so any text or scenario you omit is silently deleted at sync.
   Author it by copying the current baseline requirement and editing in place — never from scratch.
-- If a change drops a baseline scenario, delete it deliberately and record why in `design.md`; do not drop it by omission.
+- If a change drops a baseline scenario, delete it deliberately: omit it from the MODIFIED block, mark the removal with a `<!-- modified-removes: {ScenarioName} -->` comment inside that requirement block, and record why in `design.md`.
+  Do not drop a scenario by silent omission — `sdd-sync` and `sdd-verify` run a deterministic backstop (`check_modified_completeness.py`) that FAILS on a baseline scenario absent from its MODIFIED block without this marker.
+  - The marker names the baseline scenario (matched case- and whitespace-insensitively); list several in one marker with comma/semicolon separators (`<!-- modified-removes: A, B -->`), or write one marker each.
+  - Because the payload is comma/semicolon-separated, a scenario name must not contain `,` or `;` (see § 5).
+    A legacy baseline name that does cannot be expressed by the marker — drop it via a Verification Override (`sdd-change-formats.md` § Verification Overrides) instead.
 - State prior behavior in a `> Previously: …` provenance line above the requirement text.
   This line is delta-only — `sdd-sync` strips it when writing the baseline.
 - A requirement may carry a `Serves: {story-slug}[, {story-slug}]` line (directly beneath its SHALL statement) naming the `proposal.md` user stories it advances.
@@ -278,6 +282,8 @@ Rules:
 
 - Each scenario MUST have all three labels: GIVEN, WHEN, THEN
 - Labels are bold with no colon: `**GIVEN**`, `**WHEN**`, `**THEN**`
+- Name the scenario as a short label for the case it samples (`Locked account refused`), not as a full sentence — push the expected nuance into the THEN clause, not the heading.
+  Avoid commas and semicolons in the name: the `modified-removes` drop marker (§ 4) treats them as separators and cannot reference a name that contains them.
 - Scenarios sample the contract stated in the requirement — they are evidence, not the contract itself (see § 1.5)
 - Aim for scenarios that span happy path, boundary conditions, and plausible failure modes — not just the happy case
 
