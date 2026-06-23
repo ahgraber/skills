@@ -123,6 +123,7 @@ Verification claims rest on observed behavior, so a green suite is the baseline 
    For machine-readable output use `pytest --junit-xml=<path>` and point subagents at the XML.
    If the runner cannot produce per-test-ID output, treat all requirements as INSPECTED and note this as a WARNING.
    Capture the output to `.specs/changes/<name>/.verify/test-output.log`.
+   `.verify/` is transient run scratch — the first time you create it, write a `.gitignore` containing a single `*` into the directory so the whole thing stays out of git and out of the archive (see the router's **Directory Convention**).
 
 3. **If any tests fail or error**, flag each failure as CRITICAL in the report and **stop the verify run by default** — do not proceed to later phases.
    A failing suite invalidates Contract, Coverage, and Coherence conclusions, and there is no reliable way to localize "affected area" without a test→requirement map.
@@ -385,6 +386,13 @@ A decision either is or is not reflected in code; if the decision needs runtime 
 
 ### Phase 9: Produce Report
 
+The report is a derived snapshot, not a committed artifact.
+Present it in chat.
+If you persist it, write it to `.specs/changes/<name>/.verify/report.md` — the transient, self-gitignored zone created in Phase 2 — never the change root, where it would be committed and travel into the archive as if it were a source of truth.
+A committed report goes stale the moment code or specs move.
+Its durable consequences do not live in the report: waivers and overrides are recorded in `design.md`, and remediation tasks in `tasks.md` (both committed).
+The report only echoes them.
+
 Before writing the Summary, classify blocking status:
 
 - Any finding or gate outcome the skill says "must fix before proceeding," "stop," or "blocked" is **blocking** by default.
@@ -500,6 +508,7 @@ State instead that verification found issues the user explicitly chose not to le
 - Marking a requirement VERIFIED or TESTED without a checkable citation, or accepting a waiver without checkable manual evidence — both fall back to INSPECTED / CRITICAL per `evidence-rules.md`.
 - Skipping the waiver provenance check (`evidence-rules.md` § 4) — waivers added in the same branch as the implementation, especially after a failed verify, need to be surfaced.
 - Recording an override in `design.md` but failing to carry its context into the OVERRIDES section or Summary, which breaks the audit trail for later verify/sync work.
+- Persisting the verification report into the committed change directory (or anywhere but `.verify/`) — it is a derived snapshot that goes stale the moment code or specs move; write it only to the transient, self-gitignored `.verify/`, and rely on `design.md`/`tasks.md` for the durable record.
 - Treating an override as a severity downgrade, or honoring a chat-only override without recording it in `design.md` and `tasks.md`.
 - Proceeding to Phase 3 without evaluating the parallel-subagent gate (the required step within Phase 2) — the gate is mandatory; if no gate-outcome announcement appears in the run, you skipped it.
   Single-agent execution is a gate result, not a default.

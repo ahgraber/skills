@@ -180,6 +180,7 @@ Child skills replace `.specs/` with `SPECS_ROOT` in all paths.
 │   │   ├── proposal.md
 │   │   ├── design.md
 │   │   ├── tasks.md
+│   │   ├── .verify/                # Transient verify scratch (self-gitignored) — test log + report; never committed or archived
 │   │   ├── schemas/                # Schema snapshots scoped to this change
 │   │   │   ├── before/             # Snapshot taken at propose/derive time
 │   │   │   ├── after/              # Snapshot taken at verify time
@@ -197,6 +198,11 @@ Child skills replace `.specs/` with `SPECS_ROOT` in all paths.
 An **active change** is any directory directly under `SPECS_ROOT/changes/` (not under `archive/`).
 Archived changes live in `SPECS_ROOT/changes/archive/YYYY-MM-DD-<name>/`.
 Schema snapshots travel with the change directory into the archive — no separate schema archive path is needed.
+
+Everything in a change directory is durable and committed — proposal, design, tasks, delta specs, and schema snapshots all travel into the archive as the change's record.
+The one exception is `.verify/`: run-scoped scratch (the captured test output and any persisted verification report) that `sdd-verify` regenerates on each run.
+It is self-gitignored — `sdd-verify` writes a `.gitignore` containing `*` into the directory — so it never enters a commit or the archive.
+A verification report is a derived snapshot, not a source of truth: its durable consequences (waivers, overrides, remediation tasks) are written back into `design.md` and `tasks.md`, which are committed.
 
 `NORTH-STAR.md` is the product elevator pitch — a durable, project-global singleton that names the product's reason for being.
 It is the apex of the value chain **north star → user story → requirement**: each change's user stories (in `proposal.md`) ladder up to it, and each delta requirement's `Serves:` backlink points at a story.

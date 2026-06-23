@@ -65,6 +65,8 @@ mv .specs/changes/<name>/ .specs/changes/archive/YYYY-MM-DD-<name>/
 
 Confirm the move succeeded by checking the archive path exists.
 
+The change's `.verify/` scratch (if present) is self-gitignored, so it never enters the archived commit even though `mv` carries it along — leave it or delete it; it is not part of the archived record.
+
 ### Phase 4: Report
 
 ```text
