@@ -1,0 +1,22 @@
+{
+  "completeness": "complete",
+  "deferred": [],
+  "documentType": "security-scan.coverage",
+  "excludePaths": [],
+  "explicitExclusions": [],
+  "includePaths": [
+    "src/"
+  ],
+  "inventoryStrategy": "repository",
+  "mode": "repository",
+  "scanId": "scan_example_001",
+  "schemaVersion": "1.0",
+  "surfaces": [
+    {
+      "disposition": "reported",
+      "id": "surface_archive_extraction",
+      "label": "Archive extraction",
+      "receiptRefs": []
+    }
+  ]
+}

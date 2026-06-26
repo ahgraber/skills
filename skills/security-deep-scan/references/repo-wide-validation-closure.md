@@ -1,0 +1,1 @@
+../../security-scan/references/repo-wide-validation-closure.md

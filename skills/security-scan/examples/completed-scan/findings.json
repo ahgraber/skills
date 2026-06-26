@@ -1,0 +1,51 @@
+{
+  "documentType": "security-scan.findings",
+  "findings": [
+    {
+      "attackPath": null,
+      "confidence": {
+        "level": "high",
+        "rationale": "Direct source trace reaches the filesystem write without a containment check."
+      },
+      "extensions": {},
+      "findingId": "csf_ef955c44fe9e6578679b6a95",
+      "fingerprints": {
+        "algorithm": "security-scan/v1",
+        "primary": "security-scan/v1:sha256:0fb822717bf2dca22ee6d85e2e35129a65b7b81cf5fdb656da2a209f4e95e71a"
+      },
+      "identity": {
+        "anchor": "archive-entry-write-without-containment"
+      },
+      "locations": [
+        {
+          "endLine": 44,
+          "path": "src/extract.py",
+          "role": "sink",
+          "startLine": 41
+        }
+      ],
+      "occurrenceId": "occ_1e377486f7efce3cb8ec013d",
+      "provenance": {
+        "source": "local_plugin"
+      },
+      "remediation": "Normalize destinations and reject entries that escape the extraction root.",
+      "ruleId": "path-traversal.archive-extraction",
+      "severity": {
+        "level": "high",
+        "score": 8.1,
+        "scoringSystem": "CVSS:3.1"
+      },
+      "summary": "An attacker-controlled path reaches a filesystem write without containment validation.",
+      "taxonomy": {
+        "category": "path-traversal",
+        "cwe": [
+          "CWE-22"
+        ]
+      },
+      "title": "Unsafe archive extraction can escape the output directory",
+      "validation": null
+    }
+  ],
+  "scanId": "scan_example_001",
+  "schemaVersion": "1.0"
+}

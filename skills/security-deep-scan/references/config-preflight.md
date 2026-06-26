@@ -1,0 +1,1 @@
+../../security-scan/references/config-preflight.md

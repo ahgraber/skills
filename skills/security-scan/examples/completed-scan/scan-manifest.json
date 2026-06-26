@@ -1,0 +1,43 @@
+{
+  "documentType": "security-scan.scan-manifest",
+  "scan": {
+    "artifacts": [
+      {
+        "mediaType": "application/json",
+        "path": "findings.json",
+        "sha256": "2c28af02493e7453098737767ea0576f3972fa37e9c4fd97420a62412223e98f"
+      },
+      {
+        "mediaType": "application/json",
+        "path": "coverage.json",
+        "sha256": "3402441ae3ca55b49c0e98180cc9f6c4ad22f43a5ffb96b8a22521d6c25c1d35"
+      }
+    ],
+    "completedAt": "2026-05-31T18:09:00Z",
+    "coverageRef": "coverage.json",
+    "findingsRef": "findings.json",
+    "id": "scan_example_001",
+    "producer": {
+      "name": "security-scan-plugin",
+      "version": "0.1.0"
+    },
+    "scope": {
+      "excludePaths": [],
+      "includePaths": [
+        "src/"
+      ]
+    },
+    "sealedAt": "2026-05-31T18:09:00Z",
+    "startedAt": "2026-05-31T18:00:00Z",
+    "status": "completed",
+    "target": {
+      "displayName": "example/repo",
+      "kind": "git_worktree",
+      "remote": "https://github.com/example/repo",
+      "revision": "deadbeef",
+      "snapshotDigest": "security-scan-snapshot/v1:sha256:ed88f96a4c1a06603a41b3f261f59c3de2555c367ef6ad3bb8b9e483495d34eb",
+      "targetId": "target_sha256_example"
+    }
+  },
+  "schemaVersion": "1.0"
+}

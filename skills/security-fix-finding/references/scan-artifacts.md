@@ -1,0 +1,1 @@
+../../security-scan/references/scan-artifacts.md

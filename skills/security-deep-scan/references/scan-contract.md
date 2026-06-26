@@ -1,0 +1,1 @@
+../../security-scan/references/scan-contract.md

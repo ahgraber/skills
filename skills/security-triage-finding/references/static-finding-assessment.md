@@ -1,0 +1,1 @@
+../../security-scan/references/static-finding-assessment.md

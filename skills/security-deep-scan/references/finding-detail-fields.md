@@ -1,0 +1,1 @@
+../../security-scan/references/finding-detail-fields.md

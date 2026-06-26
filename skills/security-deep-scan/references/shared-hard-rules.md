@@ -1,0 +1,1 @@
+../../security-scan/references/shared-hard-rules.md

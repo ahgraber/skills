@@ -1,0 +1,1 @@
+../../security-scan/references/validation-guidance.md
