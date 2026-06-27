@@ -68,6 +68,8 @@ Move fluidly across these, prioritizing by impact:
 - **Structure:** Does the order of sections serve the argument?
   Is there a logical through-line, or does it meander?
   Does the opening earn attention and the ending land?
+  Does every heading state its section's claim rather than just name the topic, and does every sentence add information the reader does not already have?
+  (For the heading-states-the-claim and don't-state-the-obvious rules, see `good-prose` → Composition and Style, and `references/humanize-guardrails.md` patterns 25-27.)
 - **Argument:** Are claims supported?
   Where are the logical leaps, unstated assumptions, strawmen, or unaddressed counterarguments?
   Does the conclusion follow?

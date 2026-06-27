@@ -154,6 +154,29 @@ Aligned to the categories in Wikipedia:Signs of AI writing; see `skills/good-pro
 - Watch for: "The future looks bright" without specifics.
 - Fix: End with concrete next steps or facts.
 
+## Structure and Discourse Patterns
+
+These operate above the sentence: each example below is grammatical and lean and still fails the reader.
+A sentence-level pass will not catch them, so check structure and headings before polishing clauses.
+
+### 25) Bookmark headings
+
+- Watch for: a heading that names its topic instead of stating the section's claim, or that promises "why/what/how" without carrying the answer.
+- Fix: Make the heading assert the section's main point or answer the question it raises; keep it short.
+- Example: `## What the catalog measures` → `## Three roles, one contract each`; `### The search and vector provider, and why it is the constrained role` → `### Search: the index must commit inside the metadata transaction`.
+
+### 26) Obvious-instruction sentences
+
+- Watch for: sentences that tell the reader to do what reading the document already implies, or that restate what the previous sentence established.
+- Fix: Delete them; open with the substantive claim instead.
+- Example: after "The three roles are the metadata store, the blob store, and the search provider," cut "Read each candidate against all three" — the reader is already reading to judge against those characteristics.
+
+### 27) Empty "not one thing" openers
+
+- Watch for: a nondescriptive subject paired with a setup device — "A backend is not one thing," "X is more than just Y."
+- Fix: Lead with the concrete claim; give the opening sentence an informative subject.
+- Example: "A backend is not one thing." → "A backend plays up to three roles, each with its own contract."
+
 ## Wikipedia-Specific Tells (Use if writing or editing Wikipedia-like text)
 
 These reflect the Wikipedia "Signs of AI writing" list.
