@@ -65,6 +65,13 @@ Avoid adding extra documentation files inside skills unless explicitly required.
 - Run with `uv run tests/<skill_name>/test_<name>.py`.
 - `.ruff.toml` ignores `D`, `S101`, and `S301` under `**/tests/**`, so idiomatic `assert`s and undocumented test functions pass lint.
 
+## Changelog
+
+- Before committing a change that would read as **Added**, **Changed**, **Deprecated**, **Removed**, or **Breaking** in `CHANGELOG.md` (new skill, new user-facing capability, renamed/removed skill, behavior change a skill user would notice) — not pure **Fixed** typo/doc/test/dev-tooling commits — invoke the `changelog` skill to draft the `[Unreleased]` entry before creating the commit.
+  Pure fixes are worth a changelog entry too when they change observable behavior; skip only for CI/test-only, formatting, or repo-scaffold commits.
+- Let the `changelog` skill place entries in the correct category and phrasing; do not hand-write `CHANGELOG.md` entries inline.
+- Cutting a release (renaming `[Unreleased]` to a versioned block, choosing the version bump) is a separate, explicit step from routine commits — do it only when the user asks to cut a release, and confirm the proposed version number with the user first (see `references/changelog-format.md` in the `changelog` skill for bump rules).
+
 ## Commit & Review Guidelines
 
 - **Hard gate before committing**: before running `git agent-commit`, present the user with (1) the proposed commit message and (2) a concise diff summary covering which files changed and what each change does.
