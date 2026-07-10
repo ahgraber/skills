@@ -60,6 +60,7 @@ raison = "raison"
 ba = "ba"
 autonymous = "autonymous"
 formant = "formant"   # acoustics term (resonant frequency peaks in vowel sounds)
+Nam = "Nam"           # author surname (Nam et al. 2024, explain-diff ATTRIBUTION)
 prelease = "prelease" # Strudel API parameter: pitch envelope release (.prelease())
 ue = "ue"             # German/IPA vowel designator used in Strudel's vowel filter
 
