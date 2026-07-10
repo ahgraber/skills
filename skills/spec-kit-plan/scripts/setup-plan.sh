@@ -1,1 +1,0 @@
-../../spec-kit/scripts/setup-plan.sh

@@ -1,1 +1,0 @@
-../../spec-kit/scripts/check-prerequisites.sh
