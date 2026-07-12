@@ -35,6 +35,7 @@ Three non-negotiables:
    Verbal consolidation is not gated — when the user signals readiness, do it.
    Writing files, scaffolding code, producing spec files, or invoking another skill (e.g., `sdd-propose`, `handoff`) requires an explicit user request in the turn.
    **Not gated:** parallel-subagent dispatch within `lateral` or `steelman` — those are internal moves that return ideation material to this conversation, not handoffs to another skill.
+   These moves are purpose-built for ideation and take precedence over any general subagent skill (e.g. `subagent-patterns`) during a brainstorm; their fire-conditions govern, not a general opt-in gate.
 
 2. **Narrate, don't gate.**
    Take the next move.

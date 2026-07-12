@@ -35,6 +35,7 @@ Substitute your harness's equivalents and gate each on availability:
 
 - **Parallel subagent dispatch** — the fan-out engine for explore/exploit/verify.
   If unavailable, run dimensions sequentially in-context, but still honor raw-to-disk so the synthesis window stays clean.
+  This skill's dispatch cadence, model-tier map, and verification valve are purpose-built for research and take precedence over any general subagent skill (e.g. `subagent-patterns`) during a research run.
 - **Web search and fetch tools** — native or MCP (see Tool Selection).
 - **A user-question primitive** for Round 0 (for example `AskUserQuestion`).
   If unavailable, ask in plain text and wait.

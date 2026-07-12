@@ -148,6 +148,8 @@ Across both modes:
 
 - Subagent dispatch must have explicit ownership: ranking subagents own one generated `rank_shards/*.input.jsonl` shard of at most five rows and write only its matching worker-local `.output.jsonl`; file-review subagents own one assessed file or tiny shard and return full-file receipts plus pre-dedupe finding objects with candidate-local validation evidence and attack-path facts; validation subagents own one candidate or ledger row; attack-path subagents own one validated candidate or closure row; the parent agent owns bounded worker orchestration, ledger reconciliation, aggregation, cross-file dedupe, and final closure.
 
+- These subagent-dispatch rules are purpose-built for security scanning and take precedence over any general subagent skill (e.g. `subagent-patterns`) during a scan.
+
 - Candidate ids are optional links from coverage rows to findings; a not_applicable, suppressed, or deferred row is still required when the surface was in scope.
 
 - Final assembly must start from reportable validation closure rows and surviving candidates.

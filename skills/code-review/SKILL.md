@@ -137,6 +137,7 @@ The reference doc specifies required and optional tool calls per phase, with dec
 If the `Agent` tool is available and the change is non-trivial, plan to use the parallel-subagent path in Step 2.
 See `references/parallel-subagent-review.md` for the thresholds, dispatch pattern, and prompt templates.
 Otherwise continue with the single-agent path.
+These dispatch rules are purpose-built for code review and take precedence over any general subagent skill (e.g. `subagent-patterns`) when the work is a code review.
 
 ### Step 1 — Triage & Context
 

@@ -69,6 +69,8 @@ If discovery finds no relevant implementation, generate a change directory with 
 
 ### Subagent Protocol
 
+This protocol is purpose-built for spec derivation and takes precedence over any general subagent skill (e.g. `subagent-patterns`) during a derive run.
+
 **Persist before returning.**
 Every subagent MUST write its output to disk unconditionally.
 

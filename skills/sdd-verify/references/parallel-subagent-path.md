@@ -8,6 +8,8 @@ description: Dispatch playbook for running sdd-verify Phases 4–6 across isolat
 Phases 4–6 of `sdd-verify` (Evidence, Contract, Coverage) are per-requirement and amenable to context isolation across subagents.
 Phases 2 (Test Suite), 3 (Schema Snapshot), 7 (Conformance), and 8 (Coherence) stay orchestrator-only — they are whole-change checks, not per-requirement.
 
+These dispatch rules — the availability gate, granularity, the 8-subagent cap, model resolution, and severity/gating — are purpose-built for SDD verification and take precedence over any general subagent skill (e.g. `subagent-patterns`) when verifying an SDD change.
+
 > **Harness note.** This document uses `Agent` as the running example name for the subagent dispatch tool, and `model` as the example name for a per-dispatch model parameter.
 > The skill assumes a Claude-Code-style harness in which subagents inherit Read access from the parent and accept a `model` override.
 > If your harness exposes a different dispatch primitive, substitute equivalents — but verify the inheritance and override behavior before relying on this section.

@@ -164,6 +164,7 @@ Checklist — do all four:
 
 If the gate sends you to single-agent, proceed to Phase 3 yourself.
 If the gate sends you to parallel, wait for user confirmation, then resolve model and dispatch per `references/parallel-subagent-path.md` §§ 3–4.
+These dispatch and gating rules are purpose-built for SDD verification and take precedence over any general subagent skill (e.g. `subagent-patterns`) when verifying an SDD change.
 
 **Failing-suite override and the gate.**
 The gate table in `references/parallel-subagent-path.md` § 1 already partitions failing-suite states (rows 2 and 3): parallel dispatch is allowed under override only when the dispatch inputs explicitly carry the override state and the known overridden blockers; otherwise the gate routes to single-agent.

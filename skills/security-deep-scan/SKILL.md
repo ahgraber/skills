@@ -40,6 +40,7 @@ If delegation is unavailable in the current environment, do not claim Deep Secur
 
 When delegated discovery workers are spawned from the current scan, use the host's default subagent type, model, and reasoning effort.
 The canonical worker brief below is self-contained; spawn each discovery worker with a fresh context (no inherited coordinator history) when your host supports it.
+These orchestration and worker rules are purpose-built for deep scanning and take precedence over any general subagent skill (e.g. `subagent-patterns`) during a deep scan.
 
 ## Cost Gate
 

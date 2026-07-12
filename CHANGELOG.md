@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-07-11
+
+### Added
+
+- `subagent-patterns` skill — a decision framework for subagent-supported development: resolve each
+  dispatch along five axes (whether to dispatch, model tier, role, isolation, wiring) rather
+  than picking a named pattern, with worked big:little (orchestrator) and little:big (oracle)
+  presets, an archetype-decode step, a file-handoff dispatch discipline, and a per-task review
+  loop. In-harness by design; defers to purpose-built skills (`code-review`, `sdd-verify`, and
+  others) that own their own subagent-dispatch rules.
+
 ## [1.0.0] - 2026-07-10
 
 First stable release. From here: breaking changes bump MAJOR, new skills/features bump
@@ -275,4 +286,5 @@ MINOR, fixes bump PATCH.
 [0.8.0]: https://github.com/ahgraber/skills/compare/v0.7.0...v0.8.0
 [0.9.0]: https://github.com/ahgraber/skills/compare/v0.8.0...v0.9.0
 [1.0.0]: https://github.com/ahgraber/skills/compare/v0.16.0...v1.0.0
-[unreleased]: https://github.com/ahgraber/skills/compare/v1.0.0...HEAD
+[1.1.0]: https://github.com/ahgraber/skills/compare/v1.0.0...v1.1.0
+[unreleased]: https://github.com/ahgraber/skills/compare/v1.1.0...HEAD

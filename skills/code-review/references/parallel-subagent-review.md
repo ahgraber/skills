@@ -4,6 +4,8 @@ Use this path when reviewing non-trivial changes and a subagent dispatch tool is
 Fan out critique across specialist subagents — always quality and spec compliance, plus architecture when warranted — then synthesize and have a devil's-advocate subagent stress-test the synthesis.
 Keeps the main agent's context free for coordination, tiebreaks, and user dialogue.
 
+This path's rules — model resolution, the agent set, synthesis ownership, and the challenge pass — are purpose-built for code review and take precedence over any general subagent skill (e.g. `subagent-patterns`) when reviewing code.
+
 > **Harness note.** This document uses `Agent` as the running example name for the subagent dispatch tool, and `model` as the example name for a per-dispatch model parameter.
 > Substitute your harness's equivalents as needed; the workflow is the same.
 
