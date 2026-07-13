@@ -49,6 +49,13 @@ exclude-newer = "3 days"
 [tool.uv.sources]
 skills_mcp = { path = "src/skills_mcp", editable = true }
 
+[tool.uv-ship]
+release-branch = "main"                                    # releases are cut from main
+tag-prefix = "skills-mcp-v"                                # own namespace; distinct from skills-v*
+commit-message = "bump(skills-mcp): {old_ver} → {new_ver}" # conventional, passes the commit hook
+changelog-path = "skills-mcp/CHANGELOG.md"                 # repo-root-relative — MUST name this dir
+allow-dirty = false                                        # releases require a clean tree
+
 [tool.pytest.ini_options]
 addopts = """
   -ra

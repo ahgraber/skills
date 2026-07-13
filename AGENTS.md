@@ -65,12 +65,30 @@ Avoid adding extra documentation files inside skills unless explicitly required.
 - Run with `uv run tests/<skill_name>/test_<name>.py`.
 - `.ruff.toml` ignores `D`, `S101`, and `S301` under `**/tests/**`, so idiomatic `assert`s and undocumented test functions pass lint.
 
+## Versioning & releases
+
+This repo ships **two independently versioned components**; never fold one's release into the other's.
+
+| Component             | What it is                                       | Version source                                  | Changelog                                          | Tag prefix     | Cut with                                                           |
+| --------------------- | ------------------------------------------------ | ----------------------------------------------- | -------------------------------------------------- | -------------- | ------------------------------------------------------------------ |
+| **skills collection** | everything under [skills/](skills/)              | none (a doc collection — no code version)       | root [CHANGELOG.md](CHANGELOG.md)                  | `skills-v`     | manual annotated tag                                               |
+| **skills-mcp**        | the Python package in [skills-mcp/](skills-mcp/) | `skills-mcp/pyproject.toml` `[project].version` | [skills-mcp/CHANGELOG.md](skills-mcp/CHANGELOG.md) | `skills-mcp-v` | `uv-ship` (see [skills-mcp/RELEASING.md](skills-mcp/RELEASING.md)) |
+
+- Tags are namespaced so the two series never collide and `git describe` stays unambiguous: match on `skills-v*` or `skills-mcp-v*`, never bare `skills-*`.
+- The repo root has no `pyproject.toml`, so the skills collection is not a package — it is versioned purely by its changelog and a hand-cut `skills-v<X.Y.Z>` tag.
+  Only `skills-mcp` uses `uv-ship` / `uv version`.
+- skills-mcp uses a **static** `[project].version` bumped by `uv version` (via uv-ship); do not switch it to dynamic/VCS versioning.
+
 ## Changelog
 
-- Before committing a change that would read as **Added**, **Changed**, **Deprecated**, **Removed**, or **Breaking** in `CHANGELOG.md` (new skill, new user-facing capability, renamed/removed skill, behavior change a skill user would notice) — not pure **Fixed** typo/doc/test/dev-tooling commits — invoke the `changelog` skill to draft the `[Unreleased]` entry before creating the commit.
+- A change to `skills-mcp` lands in [skills-mcp/CHANGELOG.md](skills-mcp/CHANGELOG.md); any other user-visible change lands in the root [CHANGELOG.md](CHANGELOG.md).
+  Keep each component's entries in its own file.
+- Before committing a change that would read as **Added**, **Changed**, **Deprecated**, **Removed**, or **Breaking** in the relevant `CHANGELOG.md` (new skill, new user-facing capability, renamed/removed skill, behavior change a skill user would notice) — not pure **Fixed** typo/doc/test/dev-tooling commits — invoke the `changelog` skill to draft the `[Unreleased]` entry before creating the commit.
   Pure fixes are worth a changelog entry too when they change observable behavior; skip only for CI/test-only, formatting, or repo-scaffold commits.
 - Let the `changelog` skill place entries in the correct category and phrasing; do not hand-write `CHANGELOG.md` entries inline.
-- Cutting a release (renaming `[Unreleased]` to a versioned block, choosing the version bump) is a separate, explicit step from routine commits — do it only when the user asks to cut a release, and confirm the proposed version number with the user first (see `references/changelog-format.md` in the `changelog` skill for bump rules).
+- Cutting a release is a separate, explicit step from routine commits — do it only when the user asks, and confirm the version number first (see `references/changelog-format.md` in the `changelog` skill for bump rules).
+  For the **skills collection**, this means promoting `[Unreleased]` in the root `CHANGELOG.md` to a versioned block and hand-cutting the `skills-v<X.Y.Z>` tag.
+  For **skills-mcp**, `uv-ship` handles the promotion, version bump, and `skills-mcp-v<X.Y.Z>` tag in one step — follow [skills-mcp/RELEASING.md](skills-mcp/RELEASING.md).
 
 ## Commit & Review Guidelines
 

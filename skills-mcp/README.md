@@ -1,9 +1,6 @@
 # skills-mcp
 
-A stdio MCP server that aggregates [agent skills](https://agentskills.io/home)
-from well-known vendor locations (`~/.claude/skills`, `~/.agents/skills`,
-`~/.cursor/skills`, etc.) and exposes each as MCP resources via FastMCP's
-`SkillsDirectoryProvider`.
+A stdio MCP server that aggregates [agent skills](https://agentskills.io/home) from well-known vendor locations (`~/.claude/skills`, `~/.agents/skills`, `~/.cursor/skills`, etc.) and exposes each as MCP resources via FastMCP's `SkillsDirectoryProvider`.
 
 Adds a small dedup pipeline on top of FastMCP's built-in scanning:
 
