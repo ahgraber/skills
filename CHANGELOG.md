@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `subagent-patterns` — a dispatch delegates labor, not accountability: briefs must carry the
+  positive standard (a worked exemplar and rubric for quality-bar work like writing, design, or
+  naming), not just constraints, or the worker satisfices to the smallest change that clears the
+  bans; tacit-standard work (taste, voice, register, craft) stays inline.
+
 ## [1.1.0] - 2026-07-11
 
 ### Added

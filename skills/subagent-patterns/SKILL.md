@@ -57,6 +57,10 @@ Two of these get rushed most often:
   A subagent earns its place only by buying you one thing: isolation from token-heavy output, parallelism, a cheaper or stronger model, or an independent view.
   Without one of those, do the work inline.
   A root agent with tokens to spare reviews its own output fine, and a pile of narrow specialists costs more reliability than it adds.
+  One thing a dispatch never buys: judgment you yourself cannot specify.
+  A dispatch delegates labor, not accountability, and it can only carry what the brief can state.
+  When the quality bar is tacit — taste, voice, register, craft — the brief carries constraints but not the standard, so the worker satisfices to the letter of the brief and returns the minimum that technically passes.
+  Do that work inline, or dispatch it only with a worked exemplar of the target and the rubric you will judge by.
 - **Decision 3 is about what is withheld, not just why you fork.**
   Keep-context: withhold nothing, but make the worker return a digest instead of its raw output.
   Unbiased: withhold your own conclusion and the other workers' findings, so the judgment is genuinely independent.
@@ -134,6 +138,8 @@ These hold whatever you dispatched.
 2. **Give each worker a self-contained brief.**
    It inherits none of your context, so a good brief carries: one line of placement (where this fits in the effort); the requirements as a file it reads first, with exact values (numbers, signatures, test cases) verbatim; the interfaces and decisions from earlier work it can't know; your resolution of any ambiguity you spotted; and the report-file path.
    Never paste session history or "state after Tasks 1–3."
+   Carry the standard, not just the constraints: state what "done" looks like and how you will judge it.
+   Where there are no exact values — writing, design, naming, anything with a quality bar — a list of things to avoid is not a spec; add a worked exemplar of the target and the rubric, or the worker will make the smallest change that technically clears the bans.
 3. **Match the return contract to the role** (see Roles and Their Rules).
    The detail lives in the file, not the reply.
 4. **Name the model explicitly.**
@@ -167,6 +173,7 @@ A subagent can't reach the user, so it raises blocks and decisions to you; you d
 - Feeding an "unbiased" verifier your own conclusion, or giving an adversary the prior findings so it anchors on them instead of attacking the work fresh; either leaks what you meant to withhold.
 - Omitting the model, so a mechanical task inherits the session's most expensive one.
 - Handing a verifier the deliverable with no source of truth, so it invents the standard and grades against it.
+- Briefing a worker with constraints and prohibitions but no positive standard, so it satisfices — the smallest change that technically clears the bans — and returns shallow work you then accept without re-reading against what "good" should have been.
 - Pre-judging the verifier ("don't flag X", "at most Minor"), the bias a fresh context exists to remove.
 - Fanning out writers on the same files, or parallelizing tightly dependent steps.
 - Re-dispatching a task the ledger already marks finished, especially after compaction.
