@@ -1,7 +1,7 @@
 ---
 name: proof
 description: |-
-  Use when the user asks for proofreading or light copy editing while preserving original wording, tone, and order. Triggers: 'proofread', 'fix typos', 'grammar only', 'copy edit only', 'SPAG pass'. Not for rewrites, tone shifts, structural edits, or style upgrades; use good-prose for those requests.
+  Use when the user asks for proofreading or light copy editing while preserving original wording, tone, and order. Triggers: 'proofread', 'fix typos', 'grammar only', 'copy edit only', 'SPAG pass'. Not for rewrites, tone shifts, structural edits, or style upgrades; use antislop-writing for those requests.
 ---
 
 # Proof
@@ -21,7 +21,7 @@ Proofread and lightly copy edit text while preserving wording, order, tone, and 
 - Edits to a file (rather than to text pasted into the user's message) must land in the file via available file-editing tools.
   Never reply with the corrected file contents inline as a substitute for editing the file.
 
-## Routing: `proof` vs `good-prose`
+## Routing: `proof` vs `antislop-writing`
 
 Use `proof` when the request is about correctness without stylistic change.
 
@@ -30,7 +30,7 @@ Use `proof` when the request is about correctness without stylistic change.
 - "copy edit lightly"
 - "do not rewrite"
 
-Use `good-prose` when the request asks for writing-quality changes or substantial edits.
+Use `antislop-writing` when the request asks for writing-quality changes or substantial edits.
 
 - Rewrite, tighten, polish, or improve flow/clarity.
 - Adjust tone for audience (more formal, friendlier, firmer).
@@ -41,7 +41,7 @@ If intent is ambiguous:
 
 1. Start with a proof-only pass.
 2. Flag issues that need substantive rewriting.
-3. Ask whether to proceed with a `good-prose` rewrite.
+3. Ask whether to proceed with a `antislop-writing` rewrite.
 
 ## Target Selection
 

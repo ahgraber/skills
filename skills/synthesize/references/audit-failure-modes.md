@@ -37,7 +37,7 @@ If removing the quote removes the point, you haven't synthesized — you've forw
 
 **Symptom:** superlatives and importance-claims ("striking," "the strongest convergence," "remarkably," "this cannot be overstated") standing in for argument.
 **Repair:** replace the adjective with the reason.
-If something is the strongest point, show why it outweighs the others; don't assert that it does. (Overlaps with `good-prose` AI guardrails; here the concern is argument substituted by emphasis, not sentence polish.)
+If something is the strongest point, show why it outweighs the others; don't assert that it does. (Overlaps with `antislop-writing`'s AI-tells catalog; here the concern is argument substituted by emphasis, not sentence polish.)
 
 ## Source taken at face value
 

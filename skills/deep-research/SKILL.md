@@ -163,7 +163,7 @@ Hand off or compose at these flow points:
   R0 only narrows a researchable question; it does not shape a fuzzy premise.
 - **mcp-research** — _mid-research_, when a sub-question is a library, API, SDK, or version lookup.
   Its docs-first tool selection applies within that thread.
-- **good-prose** — at Synthesize, to tighten the report.
+- **antislop-writing** — at Synthesize, to tighten the report.
   The report is prose a human reads, so its heading-claim and lead-with-the-point rules apply (they do not apply to this skill file).
 - **editorial-review** — _after_ the report, only if it advances a thesis or recommendation worth pressure-testing.
   A pure findings catalog does not need it.

@@ -97,7 +97,7 @@ Pull these through as well — they are usually the difference between a tour an
    Make relevance evident in the writing; never prepend a meta-label.
    No `**Why this exists:**`, `**What you'll learn:**`, or `**Story:**` prefixes — the first sentence already carries the point.
    Give each section a heading that states its claim ("## Edits version — they don't overwrite"), not a bare noun ("## Editing"), so the headings read as the story and the notebook is navigable.
-   See `good-prose`.
+   See `antislop-writing`.
 5. **Prove the effect with real data.**
    Every claim the markdown makes must be visible in the cell's output — show the evidence, not a summary:
    - Dump the whole object the call returned when its shape is instructive (e.g. `print(result.model_dump_json(indent=2))` for a pydantic model), not one cherry-picked field — but skip dumps so large they bury the point.

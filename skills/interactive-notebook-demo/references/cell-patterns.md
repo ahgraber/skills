@@ -2,7 +2,7 @@
 
 Copy-paste skeletons.
 The examples use a hypothetical async `store` client with pydantic-style models; swap in your own library's names and read the real method signatures before writing calls — use kwargs.
-The prose in these cells follows `good-prose`: relevance lives in the first sentence, headings state a claim, and there are no `**Why this:**`-style meta-labels.
+The prose in these cells follows `antislop-writing`: relevance lives in the first sentence, headings state a claim, and there are no `**Why this:**`-style meta-labels.
 
 ## Header cell
 

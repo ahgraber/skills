@@ -21,10 +21,10 @@ npx skills add ahgraber/skills --list
 npx skills add ahgraber/skills -g
 
 # Install specific skills to user scope (global)
-npx skills add ahgraber/skills --skill good-prose --skill mcp-research -g
+npx skills add ahgraber/skills --skill antislop-writing --skill mcp-research -g
 
 # Install to specific agents
-npx skills add ahgraber/skills --skill good-prose -a claude-code -a codex -g
+npx skills add ahgraber/skills --skill antislop-writing -a claude-code -a codex -g
 
 # Install to current project (instead of global)
 npx skills add ahgraber/skills --skill code-review

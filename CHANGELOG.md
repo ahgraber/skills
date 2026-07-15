@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-07-14
+
+### Breaking Changes
+
+- Removed the `good-prose` skill — superseded by `antislop-writing`, which subsumes its scope.
+  Update any direct invocations (`/good-prose` → `/antislop-writing`); references in `proof`,
+  `deep-research`, `receiving-feedback`, `interactive-notebook-demo`, `editorial-review`, and
+  `synthesize` now point to `antislop-writing`.
+
+### Added
+
+- `antislop-writing` skill — write, rewrite, or line-edit prose so it reads as a professional
+  wrote it, not a model. Adds per-register modules (technical, editorial, correspondence), a
+  signed-exemplars anchor, a leveled AI-tells catalog (each tell tagged strip or rewrite), a
+  fact-inventory compose workflow, and a `prose_audit.py` mechanical tripwire scanner. Replaces
+  `good-prose`.
+
 ### Changed
 
 - `subagent-patterns` — a dispatch delegates labor, not accountability: briefs must carry the
@@ -294,4 +311,5 @@ MINOR, fixes bump PATCH.
 [0.9.0]: https://github.com/ahgraber/skills/compare/v0.8.0...v0.9.0
 [1.0.0]: https://github.com/ahgraber/skills/compare/v0.16.0...v1.0.0
 [1.1.0]: https://github.com/ahgraber/skills/compare/v1.0.0...v1.1.0
-[unreleased]: https://github.com/ahgraber/skills/compare/v1.1.0...HEAD
+[2.0.0]: https://github.com/ahgraber/skills/compare/skills-v1.1.0...skills-v2.0.0
+[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.0.0...HEAD

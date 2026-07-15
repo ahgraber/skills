@@ -123,7 +123,7 @@ When the user signals to proceed, revise in this order:
    - **Structure** — organization, flow, missing or extraneous sections
    - **Precision** — vague language, ambiguous requirements, weak specificity
    - **Polish** — tone, style, formatting, consistency
-3. For non-code artifacts, invoke `good-prose` as a final pass (soft gate)
+3. For non-code artifacts, invoke `antislop-writing` as a final pass (soft gate)
 4. **Verify coherence** — no regressions, earlier fixes should still hold, and the artifact should be internally consistent
 
 For code-specific revision ordering, see `references/code-review-reception.md`.

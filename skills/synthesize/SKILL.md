@@ -26,7 +26,7 @@ See `references/finding-the-spine.md`.
 - **Comparisons or catalogs where enumeration _is_ the deliverable** (vendor capability matrix, feature comparison).
   The list is correct; do not force prose.
   This is the escape hatch — name it and step aside.
-- **Line-editing or polishing prose** — use `good-prose`, electively, after the gist exists.
+- **Line-editing or polishing prose** — use `antislop-writing`, electively, after the gist exists.
 
 ## Core Discipline
 
@@ -102,7 +102,7 @@ The list below is an index, not the procedure — the cues that catch each mode 
 ## Composition With Other Skills
 
 Standalone — no built-in gather or polish steps, and no automatic handoffs.
-The user or agent may **electively** run `mcp-research` (gather sources) before, or `good-prose` (polish prose) after.
+The user or agent may **electively** run `mcp-research` (gather sources) before, or `antislop-writing` (polish prose) after.
 
 ## References
 
