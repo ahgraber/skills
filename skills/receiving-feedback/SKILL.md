@@ -1,7 +1,7 @@
 ---
 name: receiving-feedback
 description: >-
-  You MUST use this when receiving feedback on any text-based work artifact — code, specs, design docs, PRDs, proposals, plans, or prose — before implementing suggestions, especially if feedback seems unclear or technically questionable.
+  You MUST use this when receiving feedback, review, or commentary on any text-based work artifact — code, specs, design docs, PRDs, proposals, plans, or prose — before implementing suggestions, especially if feedback seems unclear or technically questionable.
 ---
 
 # Receiving Feedback
@@ -107,6 +107,8 @@ The reviewer may lack full context.
 2. Conflicts with existing decisions or constraints?
 3. What motivated the current approach?
 4. Does the reviewer understand the full context?
+5. Has an independent reviewer raised this before?
+   Convergence escalates scrutiny — re-probe; do not answer a repeat finding by citing the precedent.
 
 If the feedback seems wrong, push back with specific reasoning.
 
@@ -132,6 +134,9 @@ For code-specific revision ordering, see `references/code-review-reception.md`.
 
 **Push back (hard gate):** When feedback is verifiably wrong against ground truth.
 
+**Evidence symmetry (hard gate):** a declination carries the same empirical burden as an acceptance.
+If the finding can be probed, probe it before pushing back — reasoned argument alone does not discharge this gate when a test, command, or measurement is available.
+
 **Push back (soft gate):** When feedback:
 
 - Conflicts with prior decisions or constraints established in conversation
@@ -142,7 +147,7 @@ For code-specific revision ordering, see `references/code-review-reception.md`.
 **How to push back:**
 
 - Specific reasoning, not defensiveness
-- Reference the ground truth or prior decision
+- Reference the ground truth; a prior decision is context to re-examine, never ground truth for a dispute about that decision
 - Ask targeted questions
 
 ## Risk Escalation
@@ -180,17 +185,19 @@ No long apologies, no defending why you pushed back.
 
 ## Common Mistakes
 
-| Mistake                                 | Fix                                              |
-| --------------------------------------- | ------------------------------------------------ |
-| Performative agreement                  | State the requirement or just act                |
-| Revising before verifying               | Check against ground truth first                 |
-| Assuming ground truth exists            | Surface when it doesn't — ask the user           |
-| Batch revisions without checking        | One at a time, verify each                       |
-| Assuming reviewer is right              | Especially for external feedback — verify        |
-| Avoiding pushback                       | Correctness over comfort                         |
-| Partial revision of related items       | Clarify all unclear items first                  |
-| Acting on risky feedback silently       | Surface externalities, let user decide           |
-| Jumping to revision before user signals | Present assessment, calibrate pace from response |
+| Mistake                                                | Fix                                                           |
+| ------------------------------------------------------ | ------------------------------------------------------------- |
+| Performative agreement                                 | State the requirement or just act                             |
+| Revising before verifying                              | Check against ground truth first                              |
+| Assuming ground truth exists                           | Surface when it doesn't — ask the user                        |
+| Batch revisions without checking                       | One at a time, verify each                                    |
+| Assuming reviewer is right                             | Especially for external feedback — verify                     |
+| Avoiding pushback                                      | Correctness over comfort                                      |
+| Partial revision of related items                      | Clarify all unclear items first                               |
+| Acting on risky feedback silently                      | Surface externalities, let user decide                        |
+| Jumping to revision before user signals                | Present assessment, calibrate pace from response              |
+| Rejecting a finding because its proposed fix is flawed | Judge the defect and the fix separately                       |
+| Citing your own prior ruling as ground truth           | Prior decisions are context; re-read the source contract cold |
 
 ## References
 

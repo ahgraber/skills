@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-07-18
+
+### Changed
+
+- `receiving-feedback` — tighten pushback discipline: an evidence-symmetry hard gate makes a
+  declination carry the same empirical burden as an acceptance (probe a testable finding before
+  pushing back); a repeat finding from an independent reviewer escalates scrutiny instead of
+  being answered by precedent; prior decisions are context to re-examine, never ground truth in
+  a dispute about that decision; and a flawed proposed fix no longer discredits the defect it
+  addresses. Description now also triggers on "review" and "commentary".
+
 ## [2.0.0] - 2026-07-14
 
 ### Breaking Changes
@@ -312,4 +323,5 @@ MINOR, fixes bump PATCH.
 [1.0.0]: https://github.com/ahgraber/skills/compare/v0.16.0...v1.0.0
 [1.1.0]: https://github.com/ahgraber/skills/compare/v1.0.0...v1.1.0
 [2.0.0]: https://github.com/ahgraber/skills/compare/skills-v1.1.0...skills-v2.0.0
-[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.0.0...HEAD
+[2.0.1]: https://github.com/ahgraber/skills/compare/skills-v2.0.0...skills-v2.0.1
+[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.0.1...HEAD
