@@ -5,6 +5,7 @@ This repo holds [Agent Skills](https://agentskills.io/home), folders of instruct
 See `skills/ai-skills` for best practices on designing skills.
 
 Avoid adding extra documentation files inside skills unless explicitly required.
+Do not manually add linebreaks, trust linters and formatters for this.
 
 ## Source skills vs. installed skills
 

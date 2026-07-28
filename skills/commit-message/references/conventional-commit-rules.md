@@ -64,31 +64,10 @@ The subject is the reader's signal in scan-mode (`git log`, `git blame`, bisect)
 
 ## Body
 
-### The cold-reader test
+Whether a body is warranted, and which lines survive, is decided by **Body Discipline** in `SKILL.md` — the cold-reader test, the 6 triggers, the budget, durable-artifact routing, and the filters.
+That section is the single home for those rules; this file covers formatting and shows worked examples.
 
-Your reader meets this commit in two phases:
-
-- **Scan mode** — in `git log`, `git blame`, or a bisect, they see the subject and decide whether to open it.
-- **Read mode** — once opened, they read the diff to understand what changed.
-
-The **subject** carries scan mode (see § Subject Line).
-The **body** exists only when read mode leaves a question unanswered.
-The diff shows what changed and where, but not why or how to act on it.
-A body line is warranted only when it fires one of these **5 triggers**:
-
-1. **Why this choice** — when the subject names a choice but not the constraint that forced it.
-2. **Tuning rationale** — magic numbers, thresholds, or tunables a future reader will want to revisit.
-3. **Wrong-fix guards** — foreseeable "fixes" that would re-break the change.
-4. **Cross-cutting impact** — callers, consumers, or schema implications the diff doesn't reach.
-5. **External references** — issues, advisories, RFCs.
-
-**Trigger-naming rule:** for every body line, name which of the 5 triggers above it fires.
-If you can't name one, don't write the line — it's conversation weight or file inventory, not reader signal.
-"It feels useful to mention" is not a trigger; neither is "this summarizes what the file contains."
-
-If no gap exists, ship subject-only.
-If a gap exists, write only what fills it.
-Conversation weight is not reader weight: what felt load-bearing in the dialogue is rarely what the diff fails to convey.
+By the time you are here, you should already know which lines you are writing and which trigger each one fires.
 
 ### Rules
 
@@ -97,6 +76,8 @@ Conversation weight is not reader weight: what felt load-bearing in the dialogue
 - **Organize by logical/topical concern** — one entry per theme, not per file or function.
   Do not use label-style section headers (`Topic: content`, `**Label**:`, etc.).
 - **State outcomes, not mechanisms** — drop implementation detail the reader doesn't need to act on.
+- **Don't duplicate durable artifacts** — where a spec, design doc, or ADR already carries a contract or its rationale, leave it there (see Body Discipline § Durable-artifact routing).
+  A docs-only commit almost never needs a body: the diff _is_ the prose.
 - **Never reference ephemeral scaffolding** — task IDs, group numbers, sprint names, todo-list item numbers, or other planning-artifact identifiers that won't persist after the work concludes.
   Describe _what changed and why_; where it came from in the task list is irrelevant to future readers.
 - **Format freely:** bullets may aid scannability for multi-part changes; a short paragraph works when the change is a single cohesive thought.
@@ -129,6 +110,7 @@ Use the active agent identity for `<AGENT>` (for example, `OpenAI Codex`).
 ## Output Contract
 
 - Return only the commit message in one markdown code block.
+  On the Commit Train path, one code block per commit, in commit order, and nothing else but the grouping that precedes them.
 - No explanation, labels, or commentary before/after.
 - Output must be directly usable with `git commit -F -`.
 

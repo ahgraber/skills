@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- Python scripts use snake_case filenames, matching PEP 8 module naming. Shipped script paths change: `build-review-packet.py` → `build_review_packet.py` (`code-review`, `simplify`), `render-dot.py` → `render_dot.py` (`optimize-skills`), `find-specs-roots.py` → `find_specs_roots.py` (`sdd`). References inside each skill are updated; update any external hook, command, or wrapper that invokes these by path.
+
+## [2.0.2] - 2026-07-28
+
+### Changed
+
+- `commit-message` — rebalance body discipline against two failure modes instead of one. An
+  orientation trigger licenses naming what a new capability does and operates on, which large
+  feature commits previously had no way to say; durable-artifact routing keeps contracts and
+  rationale in the specs, design docs, or ADRs that already carry them, and defers only to an
+  artifact that exists at draft time. Adds a paragraph budget counted per capability rather than
+  per named surface, a repo-calibration step, a rule that a docstring or error message carried in
+  the diff closes the gap so no body line survives on top of it, explicit precedence of routing
+  over a fired trigger, and a Commit Train path for work landing as several commits.
+
+### Fixed
+
+- `commit-message` — retrieve staged changes with `git diff --cached` or the harness's own SCM
+  tooling. The step previously named `get_changed_files`/`repositoryPath`, a different harness's
+  primitive that never existed here, so every run silently fell through to the fallback. The step
+  now also directs paging through a diff that exceeds one tool call's output limit, which a long
+  diff would otherwise truncate into a message that reads complete.
+
 ## [2.0.1] - 2026-07-18
 
 ### Changed
@@ -324,4 +349,5 @@ MINOR, fixes bump PATCH.
 [1.1.0]: https://github.com/ahgraber/skills/compare/v1.0.0...v1.1.0
 [2.0.0]: https://github.com/ahgraber/skills/compare/skills-v1.1.0...skills-v2.0.0
 [2.0.1]: https://github.com/ahgraber/skills/compare/skills-v2.0.0...skills-v2.0.1
-[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.0.1...HEAD
+[2.0.2]: https://github.com/ahgraber/skills/compare/skills-v2.0.1...skills-v2.0.2
+[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.0.2...HEAD
