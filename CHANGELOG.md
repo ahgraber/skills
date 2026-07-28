@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Python scripts use snake_case filenames, matching PEP 8 module naming. Shipped script paths change: `build-review-packet.py` → `build_review_packet.py` (`code-review`, `simplify`), `render-dot.py` → `render_dot.py` (`optimize-skills`), `find-specs-roots.py` → `find_specs_roots.py` (`sdd`). References inside each skill are updated; update any external hook, command, or wrapper that invokes these by path.
 
+## [2.0.3] - 2026-07-28
+
+### Changed
+
+- `explain-diff` — save the artifact inside the repo by default instead of requiring it live
+  outside version control. Asks where to persist the file, defaulting to `.explain/` at the repo
+  root (or `docs/.explain/` when the project already organizes generated docs under `docs/`), and
+  offers to keep the destination untracked via the repo's root `.gitignore` or a `*` `.gitignore`
+  dropped inside the directory.
+
 ## [2.0.2] - 2026-07-28
 
 ### Changed
@@ -350,4 +360,5 @@ MINOR, fixes bump PATCH.
 [2.0.0]: https://github.com/ahgraber/skills/compare/skills-v1.1.0...skills-v2.0.0
 [2.0.1]: https://github.com/ahgraber/skills/compare/skills-v2.0.0...skills-v2.0.1
 [2.0.2]: https://github.com/ahgraber/skills/compare/skills-v2.0.1...skills-v2.0.2
-[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.0.2...HEAD
+[2.0.3]: https://github.com/ahgraber/skills/compare/skills-v2.0.2...skills-v2.0.3
+[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.0.3...HEAD

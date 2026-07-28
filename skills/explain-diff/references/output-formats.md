@@ -11,8 +11,10 @@ Choose Markdown when the user asks or the context calls for it.
 
 ## Shared conventions (both formats)
 
-- **Dated filename, outside the repo.**
-  Name the file starting with today's date, `YYYY-MM-DD-explanation-<slug>.<ext>`, and save it _outside the code repository_ so it stays out of version control and sorts by date.
+- **Dated filename, in a gitignored directory.**
+  Name the file starting with today's date, `YYYY-MM-DD-explanation-<slug>.<ext>`, for time-sorting.
+  Ask the user where to save it; default to `.explain/` at the repo root (or `docs/.explain/` if the project already organizes generated docs under `docs/`).
+  Keep the directory out of version control — add it to the repo's root `.gitignore`, or drop a `*` `.gitignore` inside the directory itself — so artifacts stay untracked without cluttering the root ignore file with individual filenames.
 - **Four sections in order:** Background → Intuition → Code → Quiz.
 - **Kleppmann-style prose:** engaging, classic style, smooth transitions between sections.
 - **Diagram families:** pick a small number of reusable diagram types and reuse them.

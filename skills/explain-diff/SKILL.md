@@ -50,7 +50,10 @@ Adapted from Geoffrey Litt's `explain-diff` prompts (see `ATTRIBUTION.md`).
 5. **Build the quiz** following `references/quiz-design.md`.
    This is where the artifact becomes interactive and where quality most often slips — do not skip the item-writing rules.
 6. **Save and deliver.**
-   Write the artifact to a location **outside the code repository** (so it stays out of version control), with a filename starting with today's date in `YYYY-MM-DD-` format for time-sorting, e.g. `YYYY-MM-DD-explanation-<slug>.html`.
+   Ask the user where to persist the artifact.
+   Default suggestion: `.explain/` at the repo root, or `docs/.explain/` if the project already organizes generated docs under `docs/`.
+   Save the file inside that directory with a filename starting with today's date in `YYYY-MM-DD-` format for time-sorting, e.g. `YYYY-MM-DD-explanation-<slug>.html`.
+   Offer to keep the whole directory out of version control: either add its path to the repo's root `.gitignore`, or create an in-directory `.gitignore` containing `*` so every present and future artifact under it stays untracked.
    Return the path.
    For HTML, before saving, verify every code block's CSS uses `white-space: pre` or `pre-wrap` (see Format Rules).
 
@@ -93,7 +96,7 @@ The items most easily missed:
 
 ## Output
 
-A single dated artifact (HTML file by default, or Markdown file) saved outside the repo, containing Background → Intuition → Code → interactive Quiz, written with Kleppmann-style clarity.
+A single dated artifact (HTML file by default, or Markdown file) saved in the user-chosen (or default `.explain/`) directory, containing Background → Intuition → Code → interactive Quiz, written with Kleppmann-style clarity.
 Return its path.
 
 ## Related Skills
