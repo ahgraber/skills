@@ -130,7 +130,7 @@ Notes:
 
 Each example shows only the fields that distinguish that branch; omitted fields take their default/empty values.
 
-**No specs anywhere** (fresh repo) — `dot_specs_candidates: []`, `specs_fallback_candidates: []`, `fallback_used: true`.
+**No specs anywhere** (fresh repo) — `dot_specs_candidates: []`, `specs_fallback_candidates: []`, `fallback_used: true`.\
 → Ask the user where to initialize `.specs/`.
 
 **One `.specs/` with a valid in-workspace pointer (single target)**:
@@ -158,7 +158,7 @@ Each example shows only the fields that distinguish that branch; omitted fields 
 
 → Use `targets[0].resolved` as `SPECS_ROOT`; announce both marker and target.
 
-**Multi-entry pointer (monorepo manifest)** — `pointer.targets` contains both `../packages/api/.specs` (resolved `/abs/repo/packages/api/.specs`) and `../packages/frontend/.specs` (resolved `/abs/repo/packages/frontend/.specs`).
+**Multi-entry pointer (monorepo manifest)** — `pointer.targets` contains both `../packages/api/.specs` (resolved `/abs/repo/packages/api/.specs`) and `../packages/frontend/.specs` (resolved `/abs/repo/packages/frontend/.specs`).\
 → List both targets and ask which to use.
 
 **`specs/` fallback hits real and false-positive matches**:

@@ -5,7 +5,7 @@ Lead with a recommendation.
 
 ## Lead against the lean
 
-If the user has expressed a preference for option X, present the case for **not-X first**, then X.
+If the user has expressed a preference for option X, present the case for **not-X first**, then X.\
 Forces honest comparison instead of post-hoc justification of where they were already going.
 
 This is the cheapest agent-sycophancy mitigation: by structuring the answer against the user's lean, you can't accidentally fold to it.

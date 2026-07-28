@@ -1,6 +1,7 @@
 ---
 name: security-triage-finding
-description: Use when the user supplies existing security findings or vulnerability reports — SARIF results, CVE/GHSA or advisory text, scanner tickets, bug bounty reports, or finding artifacts — and wants static repo-impact triage. Do not use for discovery, duplicate-bug triage, validation, or fixes.
+description: |-
+  Use when the user supplies existing security findings or vulnerability reports — SARIF results, CVE/GHSA or advisory text, scanner tickets, bug bounty reports, or finding artifacts — and wants static repo-impact triage. Do not use for discovery, duplicate-bug triage, validation, or fixes.
 metadata:
   short-description: Triage supplied security findings from scanners, advisories, and reports
 ---
@@ -46,11 +47,9 @@ The triage result contract is defined in `references/triage-result-contract.md`.
 
 ## Static Assessment Guidance
 
-Use the shared static finding assessment reference in `references/static-finding-assessment.md` for the reusable evidence work: source/control/sink tracing, smallest useful evidence search,
-reachability, boundary inputs, counterevidence, proof gaps, and static confidence.
+Use the shared static finding assessment reference in `references/static-finding-assessment.md` for the reusable evidence work: source/control/sink tracing, smallest useful evidence search, reachability, boundary inputs, counterevidence, proof gaps, and static confidence.
 
-This skill still owns external finding intake, the backlog triage verdicts,
-the first-pass no-runtime constraint, and the output contract.
+This skill still owns external finding intake, the backlog triage verdicts, the first-pass no-runtime constraint, and the output contract.
 
 ## Missing Input
 
@@ -151,8 +150,7 @@ A reachable dataflow is not enough. `confirmed` requires both:
 1. the vulnerable condition is statically reachable under stated preconditions
 2. the source crosses a security boundary that the project appears to support
 
-If the code is reachable only through trusted configuration, local developer interfaces, examples, tests, fixtures, or demo applications, do not mark `confirmed` unless static evidence shows that surface is shipped, deployed,
-documented for untrusted users, or bypasses a documented hardening/auth boundary.
+If the code is reachable only through trusted configuration, local developer interfaces, examples, tests, fixtures, or demo applications, do not mark `confirmed` unless static evidence shows that surface is shipped, deployed, documented for untrusted users, or bypasses a documented hardening/auth boundary.
 
 When the boundary classification is policy-dependent or unclear, prefer `needs_review` and put the ambiguity in proof gaps.
 

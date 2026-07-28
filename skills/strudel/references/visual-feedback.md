@@ -51,8 +51,7 @@ note("c3 e3 g3")._pianoroll()
 `punchcard()` works like `pianoroll()` but highlights events according to their position in the mini-notation string.
 This makes it easy to see how `[]`, `<>`, `*`, `/`, and `@` affect structure.
 
-Suggest when: the user is learning the DSL, confused about how a pattern subdivides, or debugging
-a timing issue caused by nesting.
+Suggest when: the user is learning the DSL, confused about how a pattern subdivides, or debugging a timing issue caused by nesting.
 
 ```js
 s("bd [sd sd] hh cp").punchcard()
@@ -158,8 +157,7 @@ n("0 2 4 7").scale("C:major").color("<red blue green orange>")
 
 **Use at most one visualizer per pattern** — chaining multiple is not supported and produces undefined behavior, so pick the one that best matches what you're teaching.
 
-When you want to show two different aspects simultaneously, use separate `$:` tracks or
-`stack()` streams, each with its own visualizer:
+When you want to show two different aspects simultaneously, use separate `$:` tracks or `stack()` streams, each with its own visualizer:
 
 ```js
 // Two patterns, each with a different visualizer — not two on one pattern

@@ -1,6 +1,6 @@
 ---
 name: receiving-feedback
-description: >-
+description: |-
   You MUST use this when receiving feedback, review, or commentary on any text-based work artifact — code, specs, design docs, PRDs, proposals, plans, or prose — before implementing suggestions, especially if feedback seems unclear or technically questionable.
 ---
 

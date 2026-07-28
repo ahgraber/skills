@@ -74,5 +74,5 @@ The goal is the net user-visible result, not a commit-by-commit transcript.
 | Reference | One link per entry, prefer PR > commit hash > issue                                        |
 | Length    | One line preferred; two lines max for complex breaking changes                             |
 
-**Good:** `Fix null pointer when config file is absent on first run`
+**Good:** `Fix null pointer when config file is absent on first run`\
 **Bad:** `fixed some stuff with config loading` / `Config file null pointer exception fix`

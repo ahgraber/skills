@@ -1,6 +1,7 @@
 ---
 name: api-design
-description: Use when designing, reviewing, or planning REST or GraphQL APIs — endpoint structure, schema design, versioning, error handling, pagination, URI naming, or choosing between REST and GraphQL. Also triggers for OpenAPI spec creation and API contract review.
+description: |-
+  Use when designing, reviewing, or planning REST or GraphQL APIs — endpoint structure, schema design, versioning, error handling, pagination, URI naming, or choosing between REST and GraphQL. Also triggers for OpenAPI spec creation and API contract review.
 ---
 
 # API Design

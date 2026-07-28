@@ -9,6 +9,23 @@
 default:
     @just --list
 
+# --- markdown render safety ------------------------------------------------
+# The formatters rewrite markdown source; these recipes check that the rendered
+# output is unchanged. Requires pandoc, plus a hook runner for the -hooks recipe;
+# `just check-markdown-render-doctor` reports what is missing.
+
+# Check the working tree against HEAD, e.g. `just check-markdown-render skills/commit-message`
+check-markdown-render *args:
+    ./scripts/check_markdown_render.py {{ args }}
+
+# Run the repo's hooks on a throwaway copy and check what they would do (run after editing .rumdl.toml/.mdformat.toml/.pre-commit-config.yaml). Narrow with `--hook mdformat --hook rumdl-fmt`.
+check-markdown-render-hooks *args:
+    ./scripts/check_markdown_render.py --run-hooks {{ args }}
+
+# Report which of the script's dependencies (pandoc, hook runner) are present
+check-markdown-render-doctor:
+    ./scripts/check_markdown_render.py --doctor
+
 # --- skills-mcp (uv-ship) --------------------------------------------------
 # uv-ship needs `--config pyproject.toml` here: run from the repo root it would infer
 # config from the pyproject-less git root, defaulting the tag prefix / commit message.

@@ -8,9 +8,7 @@ It is versioned and tagged **independently** of the agent-skills collection:
 | **skills-mcp** (this package)    | `pyproject.toml` `[project].version` | `skills-mcp/CHANGELOG.md` | `skills-mcp-v` | `uv-ship`  |
 | skills collection (rest of repo) | none (doc collection)                | `../CHANGELOG.md`         | `skills-v`     | manual tag |
 
-Releases are cut with [uv-ship](https://floraths.github.io/uv-ship/), a CLI that bumps
-the version (via `uv version`), refreshes this changelog, then commits, tags, and pushes
-in one step.
+Releases are cut with [uv-ship](https://floraths.github.io/uv-ship/), a CLI that bumps the version (via `uv version`), refreshes this changelog, then commits, tags, and pushes in one step.
 
 ## Prerequisites
 
@@ -34,8 +32,7 @@ Bump rules (SemVer): breaking API/CLI/behavior change → MAJOR, new capability 
 
 ## Cutting a release
 
-Run **from this directory** (`skills-mcp/`) so `uv version` targets this package, and
-**always pass `--config pyproject.toml`** (see the gotcha below):
+Run **from this directory** (`skills-mcp/`) so `uv version` targets this package, and **always pass `--config pyproject.toml`** (see the gotcha below):
 
 ```sh
 cd skills-mcp
@@ -62,8 +59,7 @@ uv-ship --config pyproject.toml next minor
 > Verify with the dry-run: the changelog header should read `skills-mcp-v…` and
 > `config source` should be `"pyproject.toml"`.
 
-A clean working tree and the configured `release-branch` (`main`) are preflight-checked;
-use `--dirty` only deliberately.
+A clean working tree and the configured `release-branch` (`main`) are preflight-checked; use `--dirty` only deliberately.
 
 ## Configuration
 

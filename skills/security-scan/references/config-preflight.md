@@ -1,8 +1,6 @@
 # Capability Preflight
 
-Top-level scan skills should run this read-only helper before substantive scan
-work to confirm the current agent runtime can actually perform the requested
-scan, and to surface honest warnings when it cannot.
+Top-level scan skills should run this read-only helper before substantive scan work to confirm the current agent runtime can actually perform the requested scan, and to surface honest warnings when it cannot.
 
 This preflight is **agent-naive**.
 It evaluates only facts the calling agent supplies about its own runtime — whether it can delegate to subagents, run them concurrently, nest delegation, and track goals.
@@ -18,8 +16,7 @@ The command is written on one line so it works in PowerShell, Command Prompt, an
 <python_command> <plugin_dir>/scripts/config_preflight.py --profile <capability-profile> --runtime-check delegation_available=<true|false> --runtime-check nested_delegation_available=<true|false> --runtime-check goal_tools_available=<true|false> --worker-slots <N>
 ```
 
-Instead of `--profile`, you may pass `--skill <skill-id>` (for example
-`--skill security-scan`) to resolve the profile from the registry routes.
+Instead of `--profile`, you may pass `--skill <skill-id>` (for example `--skill security-scan`) to resolve the profile from the registry routes.
 
 Determine each value from your own tool surface:
 

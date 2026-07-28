@@ -1,6 +1,7 @@
 ---
 name: security-fix-finding
-description: Use when the user explicitly asks to fix and verify a validated or plausible security finding. Do not use as the primary trigger for full PR, commit, branch, patch, or repository scans.
+description: |-
+  Use when the user explicitly asks to fix and verify a validated or plausible security finding. Do not use as the primary trigger for full PR, commit, branch, patch, or repository scans.
 metadata:
   short-description: Fix and verify security findings
 ---

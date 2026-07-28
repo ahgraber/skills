@@ -45,9 +45,7 @@ n("0 1 2 3").scale("F:major:pentatonic")
 
 **Pentatonic:** `major:pentatonic`, `minor:pentatonic`
 
-**Other useful scales:**
-`melodic minor`, `harmonic minor`, `whole tone`, `diminished`, `chromatic`,
-`blues`, `bebop`, `hungarian minor`, `double harmonic`
+**Other useful scales:** `melodic minor`, `harmonic minor`, `whole tone`, `diminished`, `chromatic`, `blues`, `bebop`, `hungarian minor`, `double harmonic`
 
 ### Scale degree behaviors
 
@@ -86,7 +84,7 @@ n("0 2 4").scale("C:major").scaleTranspose(1)   // shift 1 step up within scale
 n("0 2 4").scale("C:major").scaleTranspose(-2)  // shift 2 steps down within scale
 ```
 
-Interval abbreviations: `P`=perfect, `M`=major, `m`=minor, `A`=augmented, `d`=diminished
+Interval abbreviations: `P`=perfect, `M`=major, `m`=minor, `A`=augmented, `d`=diminished\
 Numbers: 1=unison, 2=second, 3=third, 4=fourth, 5=fifth, 6=sixth, 7=seventh, 8=octave
 
 ---

@@ -1,6 +1,7 @@
 ---
 name: security-scan
-description: Use when the user asks for a security scan or review of a repository, a scoped path (package, folder, or submodule), or a Git-backed change set (pull request, commit, branch diff, or working-tree patch). Point it at the target; it runs the full threat-model, discovery, validation, and attack-path pipeline and writes a report. Do not use to triage externally supplied findings or to fix a single finding.
+description: |-
+  Use when the user asks for a security scan or review of a repository, a scoped path (package, folder, or submodule), or a Git-backed change set (pull request, commit, branch diff, or working-tree patch). Point it at the target; it runs the full threat-model, discovery, validation, and attack-path pipeline and writes a report. Do not use to triage externally supplied findings or to fix a single finding.
 metadata:
   short-description: Security scan (repository, scoped path, or diff)
 ---

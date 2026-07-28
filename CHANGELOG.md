@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-07-28
+
+### Fixed
+
+- `debugging` — the skill loads again. Its frontmatter description was an unquoted YAML scalar containing `Triggers: "why is this failing"`, and the bare `: ` inside it made the whole frontmatter block unparsable, so any consumer that reads the frontmatter skipped the skill entirely.
+
 ## [2.1.0] - 2026-07-28
 
 ### Breaking Changes
@@ -364,4 +370,5 @@ MINOR, fixes bump PATCH.
 [2.0.2]: https://github.com/ahgraber/skills/compare/skills-v2.0.1...skills-v2.0.2
 [2.0.3]: https://github.com/ahgraber/skills/compare/skills-v2.0.2...skills-v2.0.3
 [2.1.0]: https://github.com/ahgraber/skills/compare/skills-v2.0.3...skills-v2.1.0
-[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.1.0...HEAD
+[2.1.1]: https://github.com/ahgraber/skills/compare/skills-v2.1.0...skills-v2.1.1
+[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.1.1...HEAD

@@ -151,7 +151,7 @@ Drum sounds are accessed by short name.
 
 ## Drum Machine Banks
 
-`.bank(name)` prepends the bank name with an underscore to the sample name:
+`.bank(name)` prepends the bank name with an underscore to the sample name:\
 `s("bd").bank("RolandTR909")` → plays `_RolandTR909_bd`.
 
 | Bank name        | Machine             |

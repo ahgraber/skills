@@ -197,13 +197,13 @@ Fix: delete; open with the substantive claim instead.
 
 ### Empty "not one thing" openers — [rewrite]
 
-A nondescript subject plus a setup device: "A backend is not one thing," "X is more than just Y."
+A nondescript subject plus a setup device: "A backend is not one thing," "X is more than just Y."\
 Fix: lead with the concrete claim and an informative subject — "A backend plays up to three roles, each with its own contract."
 
 ### Fractal summaries — [rewrite]
 
 "Tell them what you'll say; say it; tell them what you said" applied at every level — every subsection, section, and the document each get a summary.
-Avoid: "In this section we'll explore...
+Avoid: "In this section we'll explore...\
 [3000 words] ...as we've seen in this section."
 Fix: cut the throat-clearing and the recap; let the content stand.
 

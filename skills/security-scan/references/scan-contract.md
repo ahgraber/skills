@@ -33,8 +33,11 @@ Every sealed manifest includes exactly one artifact record for each canonical JS
 
 ## Target Snapshots
 
-Choose the target kind based on the reviewed content, not the scan invocation:
-`git_worktree` for a checked-out Git workspace, `directory_snapshot` for a non-Git directory, `git_diff` for a Git-backed change set, and `git_revision` for an exact immutable Git tree.
+Choose the target kind based on the reviewed content, not the scan invocation:\
+`git_worktree` for a checked-out Git workspace,\
+`directory_snapshot` for a non-Git directory,\
+`git_diff` for a Git-backed change set, and\
+`git_revision` for an exact immutable Git tree.
 
 | Kind                 | Required snapshot fields                                                   |
 | -------------------- | -------------------------------------------------------------------------- |

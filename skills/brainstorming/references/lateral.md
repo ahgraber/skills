@@ -84,7 +84,7 @@ Examples (illustrative, not a fixed mapping):
 
 ## Verbalized sampling — required in subagent prompts
 
-Each subagent generates angles **with internal probabilities**, not just a top-k list.
+Each subagent generates angles **with internal probabilities**, not just a top-k list.\
 1.6–2.1× diversity uplift, training-free, ~20 tokens overhead ([VS, arxiv:2510.01171](https://arxiv.org/abs/2510.01171)).
 
 Prompt template fragment:

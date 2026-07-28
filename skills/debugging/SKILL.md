@@ -1,6 +1,7 @@
 ---
 name: debugging
-description: Use when a bug, test failure, build break, regression, flaky test, or unexpected behavior appears — before proposing or attempting fixes. Triggers: "why is this failing", "this test broke", "something's wrong", "help me debug", "it works on my machine", mysterious stack traces, intermittent failures. Not for: writing new features, reviewing working code, or routine refactors.
+description: |-
+  Use when a bug, test failure, build break, regression, flaky test, or unexpected behavior appears — before proposing or attempting fixes. Triggers: "why is this failing", "this test broke", "something's wrong", "help me debug", "it works on my machine", mysterious stack traces, intermittent failures. Not for: writing new features, reviewing working code, or routine refactors.
 ---
 
 # Debugging

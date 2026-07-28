@@ -1,11 +1,7 @@
 ---
 name: writing-tests
-description: >-
-  Use when writing or reviewing tests in any language, or diagnosing a suite
-  that is slow, brittle, or hard to read. Triggers: "write tests", "how should
-  I test this", "what kind of test", "test is flaky/fragile", "should I mock
-  this", "test is hard to read". For Python-specific guidance see
-  `python-testing`.
+description: |-
+  Use when writing or reviewing tests in any language, or diagnosing a suite that is slow, brittle, or hard to read. Triggers: "write tests", "how should I test this", "what kind of test", "test is flaky/fragile", "should I mock this", "test is hard to read". For Python-specific guidance see `python-testing`.
 ---
 
 # Writing Tests
