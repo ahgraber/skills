@@ -183,4 +183,4 @@ A subagent can't reach the user, so it raises blocks and decisions to you; you d
 ## References
 
 - `references/review-loop.md` — the general verify/gate/fix loop for any deliverable: scoping the check to the delta against its source of truth, treating reports as unverified, no pre-judging, severity gating, the fix loop, and human arbitration (code review defers to `code-review`).
-- `code-review` skill (`references/parallel-subagent-review.md`) — the parallel-reviewer dispatch templates and `build-review-packet.py`, reused by the big:little verify step.
+- `code-review` skill (`references/parallel-subagent-review.md`) — the parallel-reviewer dispatch templates and `build_review_packet.py`, reused by the big:little verify step.

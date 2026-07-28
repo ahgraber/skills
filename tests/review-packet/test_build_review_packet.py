@@ -5,7 +5,7 @@
 #   "pytest>=8",
 # ]
 # ///
-"""Tests for scripts/build-review-packet.py."""
+"""Tests for scripts/build_review_packet.py."""
 
 import importlib.util
 from pathlib import Path
@@ -13,7 +13,7 @@ import subprocess
 
 import pytest
 
-SCRIPT = Path(__file__).resolve().parents[2] / "scripts" / "build-review-packet.py"
+SCRIPT = Path(__file__).resolve().parents[2] / "scripts" / "build_review_packet.py"
 
 
 def _load_module():

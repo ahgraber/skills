@@ -14,7 +14,7 @@ Determine what changed and what tooling is available before any analysis.
 
 ### Scope detection
 
-Run `scripts/build-review-packet.py` (shipped in this skill's `scripts/`) to resolve scope and pre-bake one packet — diff plus changed-file list — that the three review agents read by path instead of each re-running git.
+Run `scripts/build_review_packet.py` (shipped in this skill's `scripts/`) to resolve scope and pre-bake one packet — diff plus changed-file list — that the three review agents read by path instead of each re-running git.
 It auto-detects staged vs. branch vs. worktree and prints `packet_path` in its JSON.
 Fall back to `git diff` (or `git diff HEAD`) for a manual scope.
 If there are no git changes, review the most recently modified files that the user mentioned or that you edited earlier in this conversation.

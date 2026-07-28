@@ -57,7 +57,7 @@ Gather what they need first, or dispatch is wasted.
    - Any areas the user already knows are rough and wants (or does not want) scrutinized?
 
 3. **Package a shared context block.**
-   The review packet from Step 0 (`scripts/build-review-packet.py`) is this block — build it once and hand every subagent its `packet_path` rather than inlining the diff into each prompt.
+   The review packet from Step 0 (`scripts/build_review_packet.py`) is this block — build it once and hand every subagent its `packet_path` rather than inlining the diff into each prompt.
    The packet already carries:
 
    - Scope refs (base branch, merge-base SHA, or staged) and the full diff.

@@ -1,1 +1,0 @@
-../../../scripts/render-dot.py

@@ -142,13 +142,13 @@ digraph when_flowchart {
 - Follow `references/graphviz-conventions.dot` for node shapes and labels.
 - Keep flowcharts small and trigger-based; split large flows into focused subgraphs.
 
-Render DOT to SVG with `scripts/render-dot.py`.
+Render DOT to SVG with `scripts/render_dot.py`.
 Output SVGs are written to the target skill's `assets/` directory.
 
 ```bash
-scripts/render-dot.py skills/optimize-skills/references/skill-workflow.dot
-scripts/render-dot.py skills/optimize-skills/SKILL.md
-scripts/render-dot.py skills/optimize-skills/SKILL.md --force # overwrite existing SVGs
+scripts/render_dot.py skills/optimize-skills/references/skill-workflow.dot
+scripts/render_dot.py skills/optimize-skills/SKILL.md
+scripts/render_dot.py skills/optimize-skills/SKILL.md --force # overwrite existing SVGs
 ```
 
 ## Output

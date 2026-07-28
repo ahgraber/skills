@@ -41,7 +41,7 @@ The conventional location is a hidden `.specs/` at a project root; in a monorepo
 Before routing, run the discovery script and parse its JSON:
 
 ```sh
-skills/sdd/scripts/find-specs-roots.py [--explicit PATH]
+skills/sdd/scripts/find_specs_roots.py [--explicit PATH]
 ```
 
 Pass `--explicit PATH` only if the user named a specific directory.
@@ -216,4 +216,4 @@ Unlike baseline specs, it carries product intent, not contracts — keep it shor
 - `references/sdd-schema.md` — schema artifacts and lifecycle policy
 - `references/sdd-router.dot` — canonical DOT source for the routing flowchart above
 - `references/find-specs-roots.md` — output schema for the discovery script used in **Locate Specs Root**
-- `scripts/find-specs-roots.py` — discovery script that resolves `.specs/`, fallback `specs/`, and `SPECS_ROOT` pointer files
+- `scripts/find_specs_roots.py` — discovery script that resolves `.specs/`, fallback `specs/`, and `SPECS_ROOT` pointer files

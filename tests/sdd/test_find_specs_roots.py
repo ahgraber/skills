@@ -5,11 +5,11 @@
 #   "pytest>=8.0.0",
 # ]
 # ///
-"""Regression tests for sdd's find-specs-roots.py.
+"""Regression tests for sdd's find_specs_roots.py.
 
 Behavior-level: exercise the discovery/parse functions against a tmp tree, and
 drive main() via --workspace (which overrides the git/cwd anchor) so the JSON
-output is deterministic. find-specs-roots.py is stdlib-only.
+output is deterministic. find_specs_roots.py is stdlib-only.
 
 Run: uv run tests/sdd/test_find_specs_roots.py
 """
@@ -25,7 +25,7 @@ import sys
 
 import pytest
 
-_MODULE_PATH = Path(__file__).resolve().parents[2] / "skills" / "sdd" / "scripts" / "find-specs-roots.py"
+_MODULE_PATH = Path(__file__).resolve().parents[2] / "skills" / "sdd" / "scripts" / "find_specs_roots.py"
 _spec = importlib.util.spec_from_file_location("find_specs_roots", _MODULE_PATH)
 assert _spec is not None and _spec.loader is not None
 fsr = importlib.util.module_from_spec(_spec)
@@ -241,7 +241,7 @@ def test_find_anchor_cwd_when_not_git(tmp_path, monkeypatch):
 
 def test_main_discovers_dot_specs(tmp_path, monkeypatch, capsys):
     (tmp_path / ".specs").mkdir()
-    monkeypatch.setattr(sys, "argv", ["find-specs-roots.py", "--workspace", str(tmp_path)])
+    monkeypatch.setattr(sys, "argv", ["find_specs_roots.py", "--workspace", str(tmp_path)])
 
     rc = fsr.main()
 
@@ -253,7 +253,7 @@ def test_main_discovers_dot_specs(tmp_path, monkeypatch, capsys):
 
 def test_main_falls_back_to_specs(tmp_path, monkeypatch, capsys):
     (tmp_path / "pkg" / "specs").mkdir(parents=True)
-    monkeypatch.setattr(sys, "argv", ["find-specs-roots.py", "--workspace", str(tmp_path)])
+    monkeypatch.setattr(sys, "argv", ["find_specs_roots.py", "--workspace", str(tmp_path)])
 
     fsr.main()
 
@@ -266,7 +266,7 @@ def test_main_explicit_skips_discovery(tmp_path, monkeypatch, capsys):
     (tmp_path / ".specs").mkdir()  # present, but must be ignored when --explicit is given
     target = tmp_path / "chosen"
     target.mkdir()
-    monkeypatch.setattr(sys, "argv", ["find-specs-roots.py", "--workspace", str(tmp_path), "--explicit", str(target)])
+    monkeypatch.setattr(sys, "argv", ["find_specs_roots.py", "--workspace", str(tmp_path), "--explicit", str(target)])
 
     fsr.main()
 

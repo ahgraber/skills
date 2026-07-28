@@ -1,6 +1,6 @@
-# `find-specs-roots.py` — output schema
+# `find_specs_roots.py` — output schema
 
-The discovery script at `skills/sdd/scripts/find-specs-roots.py` emits a single JSON object on stdout.
+The discovery script at `skills/sdd/scripts/find_specs_roots.py` emits a single JSON object on stdout.
 The sdd skill consumes this to drive the **Locate Specs Root** dialogue.
 
 ## What is a SPECS_ROOT?
@@ -11,7 +11,7 @@ The conventional location is a hidden `.specs/` at a project root; in a monorepo
 ## Invocation
 
 ```sh
-skills/sdd/scripts/find-specs-roots.py [--explicit PATH] [--workspace PATH]
+skills/sdd/scripts/find_specs_roots.py [--explicit PATH] [--workspace PATH]
 ```
 
 - `--explicit PATH` — user-supplied path.

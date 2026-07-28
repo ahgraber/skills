@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-07-28
+
 ### Breaking Changes
 
 - Python scripts use snake_case filenames, matching PEP 8 module naming. Shipped script paths change: `build-review-packet.py` → `build_review_packet.py` (`code-review`, `simplify`), `render-dot.py` → `render_dot.py` (`optimize-skills`), `find-specs-roots.py` → `find_specs_roots.py` (`sdd`). References inside each skill are updated; update any external hook, command, or wrapper that invokes these by path.
@@ -361,4 +363,5 @@ MINOR, fixes bump PATCH.
 [2.0.1]: https://github.com/ahgraber/skills/compare/skills-v2.0.0...skills-v2.0.1
 [2.0.2]: https://github.com/ahgraber/skills/compare/skills-v2.0.1...skills-v2.0.2
 [2.0.3]: https://github.com/ahgraber/skills/compare/skills-v2.0.2...skills-v2.0.3
-[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.0.3...HEAD
+[2.1.0]: https://github.com/ahgraber/skills/compare/skills-v2.0.3...skills-v2.1.0
+[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.1.0...HEAD

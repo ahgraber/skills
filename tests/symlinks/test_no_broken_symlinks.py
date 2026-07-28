@@ -13,7 +13,7 @@ whose target is missing in the clone is skipped with a warning, silently
 dropping the file from the installed skill. A symlink whose target escapes the
 repo is never in the clone at all. Either way the installed skill breaks at
 runtime. This test fails fast on both, so shared-script symlinks (e.g. the
-sdd/spec-kit families and build-review-packet) stay installable.
+sdd/spec-kit families and build_review_packet) stay installable.
 """
 
 from pathlib import Path

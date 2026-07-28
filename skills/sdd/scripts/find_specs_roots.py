@@ -15,7 +15,7 @@ drive user dialogue and select a final `SPECS_ROOT`. This script makes no
 interactive decisions.
 
 Usage:
-    find-specs-roots.py [--explicit PATH] [--workspace PATH]
+    find_specs_roots.py [--explicit PATH] [--workspace PATH]
 """
 
 from __future__ import annotations

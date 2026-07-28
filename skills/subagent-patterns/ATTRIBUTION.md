@@ -12,4 +12,4 @@ This file records external sources referenced while building or maintaining this
 
 ## Related skills in this repo
 
-- `code-review` — the parallel-subagent reviewer templates (`references/parallel-subagent-review.md`) and the shared `build-review-packet.py`, reused by this skill's orchestrator review step rather than duplicated.
+- `code-review` — the parallel-subagent reviewer templates (`references/parallel-subagent-review.md`) and the shared `build_review_packet.py`, reused by this skill's orchestrator review step rather than duplicated.

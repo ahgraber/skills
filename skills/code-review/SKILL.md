@@ -71,12 +71,12 @@ Determine review scope and available tooling before doing any analysis.
 Identify whether this is a pre-commit or pre-merge review, then set the `base` ref accordingly.
 
 **Build the review packet first.**
-Run `scripts/build-review-packet.py` (shipped in this skill's `scripts/`) to resolve scope deterministically and write one packet — diff, changed-file list, and source-of-truth — that every later step and every subagent reads by path instead of re-deriving the base ref and re-running git:
+Run `scripts/build_review_packet.py` (shipped in this skill's `scripts/`) to resolve scope deterministically and write one packet — diff, changed-file list, and source-of-truth — that every later step and every subagent reads by path instead of re-deriving the base ref and re-running git:
 
 ```sh
 # Auto-detects staged vs. branch vs. worktree. Pass the spec so the packet
 # carries what the change is judged against (see source-of-truth note below).
-scripts/build-review-packet.py --intent "<what this change is for>" --include <spec-or-plan-if-any>
+scripts/build_review_packet.py --intent "<what this change is for>" --include <spec-or-plan-if-any>
 ```
 
 It prints JSON with `packet_path` and `has_source_of_truth`.
