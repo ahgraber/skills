@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-07-31
+
+### Changed
+
+- `antislop-writing` — instructional passages (runbook steps, procedures, error messages) now follow ASD-STE100 Simplified Technical English: condition before command, one instruction per sentence, modals restricted to `can`/`will`/`must`, and a deliberately flat rhythm the metronome tell no longer flags. Correspondence is exempt (an email request softens on purpose), RFC 2119 keywords take precedence in normative documents, and STE's approved dictionary and tense/contraction restrictions are declined. The tell catalog and audit checklist also draw on Orwell and The Economist's style guide: press-release clichés ("game-changer," "perfect storm"), moral instruction (the closing turn from analysis to sermon), neutral reporting verbs, matching the draft's spelling dialect and date conventions, and when hedging is earned — without adopting Economist newspaper conventions (dropped serial comma, spelled-out numbers, honorifics).
+
 ## [2.1.1] - 2026-07-28
 
 ### Fixed
@@ -371,4 +377,5 @@ MINOR, fixes bump PATCH.
 [2.0.3]: https://github.com/ahgraber/skills/compare/skills-v2.0.2...skills-v2.0.3
 [2.1.0]: https://github.com/ahgraber/skills/compare/skills-v2.0.3...skills-v2.1.0
 [2.1.1]: https://github.com/ahgraber/skills/compare/skills-v2.1.0...skills-v2.1.1
-[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.1.1...HEAD
+[2.2.0]: https://github.com/ahgraber/skills/compare/skills-v2.1.1...skills-v2.2.0
+[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.2.0...HEAD

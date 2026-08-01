@@ -7,20 +7,23 @@ The output of an audit is named changes, not a pass/fail feeling.
 ## Diction (word choice)
 
 - **Prefer plain words**: familiar words over ornate synonyms — "use," not "utilize."
+  The test is precision lost, not syllable count: the AI-vocabulary tell is a fancy word vaguer than the plain one; a rare word that is the most exact word for the meaning stays, especially in a human-authored draft where it was chosen on purpose.
 - **Be specific**: replace vague adjectives with facts, numbers, or examples.
 - **Use is/are/has when accurate**: avoid "serves as," "stands as," "represents," "boasts."
 - **Use concrete verbs**: dissolve nominalizations, so "implementation of improvements" becomes "we improved X."
 - **Cut empty intensifiers**: "very," "highly," "extremely," unless load-bearing.
 - **Reuse the exact term**: do not cycle synonyms for one thing; repetition beats elegant variation when it aids clarity.
+- **Choose neutral reporting verbs**: "said" is neutral, while "claimed," "admitted," "revealed," and "insisted" import doubt, fault, concealment, or stubbornness — use them only where that reading is the point.
 
 ## Syntax (sentences)
 
-- **Prefer the active voice**: passive only when the actor is unknown or irrelevant.
+- **Prefer the active voice**: passive when the actor is unknown or irrelevant, or when it keeps the topic in subject position (see "Old before new" under Cohesion).
 - **Keep sentences lean**: cut filler, hedging, and throat-clearing.
 - **Emphasize by position**: put the most important words at the end.
 - **Keep parallel structure**: align lists and paired clauses grammatically.
 - **Avoid dangling modifiers; keep subject and verb close**: no long interruptions between them.
-- **Vary sentence length**: mix lengths and let a short sentence land.
+- **Vary sentence length**: mix lengths and let a short sentence land — except in instructions, where short and uniform is the genre's shape.
+- **Lead an instruction with its condition**: "if the build fails, run X," so the reader learns the gate before the imperative.
 
 ## Cohesion (local flow)
 
@@ -35,3 +38,5 @@ The output of an audit is named changes, not a pass/fail feeling.
 - **Possessive singular with 's,** including names ending in s.
 - **Straight quotes, sentence-case headings, no emoji.**
 - **Fragments only for deliberate emphasis.**
+- **Match the document's existing conventions**: spelling dialect, date format, and terminology follow the draft you were handed — do not Americanize a British document.
+  The scope is those three: the fixed rules above still apply, so a draft's dropped serial commas or curly quotes are corrections to make, not conventions to keep.

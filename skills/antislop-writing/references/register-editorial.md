@@ -21,6 +21,12 @@ A single antithesis, one metaphor, or one well-placed short sentence can land a 
 Use a device, make it earn its place, and move on.
 Voice comes from specifics and stance, not from cadence: a real opinion, concrete evidence, and a claim you are willing to be wrong about, never a voice manufactured with punchy fragments, rhetorical questions, and "here's the kicker" — the same moves the rhetorical-stance tells in `ai-tells.md` flag when they are faked.
 
+Confidence has two failure modes.
+"It could perhaps be argued that the policy may have underperformed" concedes the argument before making it.
+"Only a fool would deny the policy has failed" is written for readers who already agree.
+"The policy has failed" is the register.
+Hedge where the evidence is genuinely uncertain, where you are predicting, or where you are reporting someone else's view; hedging past that is flinching from a conclusion you have already earned.
+
 Persuasion tempts stakes inflation, so argue the actual consequence at its real scale; a concrete, defensible claim persuades better than "this will reshape everything."
 
 ## What still fails here

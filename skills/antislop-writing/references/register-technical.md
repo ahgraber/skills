@@ -33,7 +33,8 @@ If not, it is narration; restore the verbs.
 And the surface pass still runs here — no technical document legitimizes emoji, decorative arrows, bold-first bullets, or em-dash pile-ups.
 
 Precision beats elegance, so name each thing the same way every time; elegant variation ("the endpoint," "the route," "the handler" for one thing) is a defect here, not a virtue.
-Where behavior is a contract — specs, RFCs, protocol docs — the normative keywords MUST, SHOULD, and MAY (RFC 2119) carry real weight; use them deliberately, and keep them out of tutorials and explanations.
+Where behavior is a contract — specs, RFCs, protocol docs — the normative keywords MUST, SHOULD, and MAY (RFC 2119) carry real weight; use them deliberately, and keep the capitalized keywords out of tutorials and explanations.
+A plain "must" in a tutorial step is a modal, not a normative keyword.
 
 Every example is correct, runnable, and shows its output: snippets copy-paste and produce what you claim, pinned to a version where behavior depends on it, and they show the error path, not only the happy one.
 A plausible example that does not run is worse than none.
@@ -42,6 +43,34 @@ Claims are verifiable and version-scoped — if a claim depends on a version, na
 State prerequisites and scope up front, then disclose progressively: say what the reader must already have and know, and introduce each concept before the one that depends on it.
 Passive voice is legitimate when the system is the actor ("the request is retried three times"); keep the active voice for what the reader does ("run `x`," "set `FOO`").
 Close a section by pointing forward — the next task, the related reference, the failure to watch for — not on a flourish like "and that is the power of X."
+
+## Instructional passages follow Simplified Technical English
+
+Content that tells the reader to do something — a runbook step, a how-to procedure, an error message, a remediation line in an incident report — is governed by ASD-STE100 Simplified Technical English, the controlled language aerospace maintenance manuals are written in.
+Its test is a tired reader who is not a native English speaker: that reader must not be able to misread the instruction.
+Where that reader and the "an engineer would trust and act on" target disagree, the reader wins.
+Its one-word-one-concept rule is the precision rule above, seen from the word's side.
+
+Three rules follow that the core does not otherwise give you:
+
+- **Put the condition before the command.**
+  Write "If the build fails, run `make clean`," not "Run `make clean` if the build fails."
+  A reader who does not meet the condition has to learn that before meeting an imperative they might execute.
+  This inverts the core's point-first rule, and it holds only for instructions — in argument and explanation the claim still leads.
+- **Keep instructions short and let the rhythm go flat.**
+  One instruction per sentence, roughly twenty words for a step and twenty-five for the description around it.
+  The core's rhythm-variation commitment is suspended here: uniform sentences serve a reader scanning for the next action, and varying them for texture costs scannability.
+  Uniformity is the shape of the genre, so the metronome tripwires do not apply.
+- **Restrict the modals.**
+  In a procedure, `can`, `will`, and `must` carry the meaning; `should`, `would`, `may`, and `might` leave the reader deciding whether the step is optional.
+  In a normative document the RFC 2119 keywords above take precedence: SHOULD and MAY are legitimate there because the spec defines their force.
+  A runbook has no such definitions, so it keeps to the three plain modals.
+
+Take the discipline, not the dictionary.
+The rest of STE's apparatus — the approved vocabulary of roughly nine hundred words with one sanctioned word per concept, simple tenses only, no contractions, no `-ing` forms — buys unambiguity with enforced uniformity, and outside a procedure that uniformity reads as the flat, interchangeable texture the core exists to remove.
+The kept part is naming one referent the same way every time (the precision rule); the declined part is letting a dictionary choose that name.
+A passage can satisfy every STE rule and still fail the standard: compliance with a ban-list does not produce prose someone would sign.
+The approved dictionary is ASD's own artifact; consult it at <https://asd-ste100.org>.
 
 ## Common shapes
 

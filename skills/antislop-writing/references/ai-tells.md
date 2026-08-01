@@ -49,6 +49,15 @@ Grandiose nouns where a plain one would do: tapestry (anything interconnected), 
 Avoid: "the rich tapestry of human experience," "navigating the complex landscape of modern AI."
 Fix: name the actual thing.
 
+### Press-release phrases — [strip]
+
+Figures of speech worn smooth by repetition: game-changer, perfect storm, low-hanging fruit, move the needle, paradigm shift, silver bullet, sea change, tip of the iceberg, double-edged sword.
+Orwell's first rule covers them: never use a figure of speech you are used to seeing in print.
+The dead-metaphor entry in §3 handles the other failure, a fresh image repeated until it dies.
+The test: a phrase that would sit unremarked in any company's press release is doing no work in yours.
+Avoid: "a perfect storm of factors made this a genuine game-changer."
+Fix: say what the phrase stands in for — which factors coincided, how far the needle moved.
+
 ### Copula avoidance ("serves as") — [strip]
 
 Replacing "is/are/has" with pompous alternatives — serves as, stands as, marks, represents, features, boasts.
@@ -322,6 +331,12 @@ Fix: show the point; delete the claim of obviousness.
 
 The teacher-student voice imposed on expert readers: "let's unpack this," "let's explore," "let's dive in."
 Fix: just present the material.
+
+### Moral instruction — [rewrite]
+
+Analysis that stops and turns into a sermon: "governments must act now," "this cannot be allowed to continue," "we should all recognize that...," "it is vital that people understand..."
+The reader gets a verdict where the evidence should be.
+Fix: state the case and its consequence and let the imperative follow — "the case for acting is strong, and each quarter of delay costs about $2m."
 
 ### Preamble and self-narration — [rewrite]
 

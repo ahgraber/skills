@@ -73,6 +73,15 @@ Load the matching module and apply its deltas on top of the compose commitments 
 
 Academic writing keeps the professional baseline plus discipline conventions: hedging as epistemic caution, conventional passive in a methods section, and required citations.
 
+### Instructions
+
+Passages that tell the reader to do something carry their own discipline — a runbook step, a numbered how-to, an error message, a remediation line in an incident report.
+Follow ASD-STE100 Simplified Technical English there: the condition before the command, one instruction per sentence, `can`/`will`/`must` rather than `should`/`would`/`may`/`might`, and a deliberately flat rhythm.
+The test is whether a tired reader who is not a native English speaker could misread the step.
+Technical writing is where this bites hardest, but the rules key off the passage, not the document.
+Correspondence is the exception: a request in an email softens on purpose, and the correspondence register governs it, not STE.
+`references/register-technical.md` carries the rules in full, including what to leave out of STE.
+
 ## The compose pass: five commitments
 
 Hold these while writing; they are the whole compose-time rule set.
@@ -97,6 +106,7 @@ The itemized craft checks live in `references/audit-checklist.md` and run in the
    Give the load-bearing claim a short sentence.
    Compress low-rank facts into one deliberately fast sentence.
    Several long, evenly weighted sentences in a row mean claims are buried in them.
+   Instructions are the exception: in a procedure, a step, or an error message, uniform short sentences are correct, and the tripwires that flag a metronome do not apply (see "Instructions" above).
 
 ### Architecture (global structure)
 
@@ -232,7 +242,7 @@ Ask only when an ambiguity would materially change the piece; do not silently ch
   Sections, grep-addressable by heading: "Explaining a mechanism" (rhythm, the short-sentence pivot), "Arguing" (claim first, earned coinage), "Comparing a landscape" (the fragment-stack counter), "Documenting results" (numbers, caveats, labeled interpretation), "Recommending" (stakes and the imperative close), "Closing" (concession over prophecy), "Earned parallelism" (the licensed triad), "Developed analogy" (the licensed metaphor).
 - `references/audit-checklist.md` — the itemized diction, syntax, cohesion, and mechanics checks for the audit pass.
 - `references/ai-tells.md` — merged catalog of AI writing tells: five levels, each entry tagged strip or rewrite.
-- `references/register-technical.md` — technical register deltas (Diátaxis modes, precision over elegance, runnable examples).
+- `references/register-technical.md` — technical register deltas (Diátaxis modes, precision over elegance, runnable examples) and the Simplified Technical English rules for instructional passages.
 - `references/register-editorial.md` — editorial and persuasive register deltas (earned voice, recalibrated tell thresholds).
 - `references/register-correspondence.md` — email and letter deltas (expected greetings, warmth, the ask up front).
 - `scripts/prose_audit.py` — mechanical tripwire scanner: sentence-rhythm statistics (monotone, staccato, and uniform-length runs), contrast-construction counts by syntax, and-coordination flags, shape proxies for staged questions, anaphora, and false ranges, and punctuation densities reported against a signed-corpus reference.
