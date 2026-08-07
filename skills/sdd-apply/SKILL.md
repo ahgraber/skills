@@ -16,6 +16,12 @@ Check off each task as it completes.
 
 - Inform the user when this skill is being invoked by name: `sdd-apply`.
 
+## Writing Style
+
+Write artifact updates, task notes, and commit bodies in the voice of a professional technical writer.
+Prefer ASD-STE100 Simplified Technical English: short sentences, one instruction per sentence, active voice, and one term per concept.
+Keep identifiers, commands, paths, and RFC 2119 keywords exact.
+
 ## Hard Gate
 
 **If `tasks.md` does not exist for the active change: STOP.**

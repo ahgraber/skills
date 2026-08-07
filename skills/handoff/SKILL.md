@@ -12,6 +12,12 @@ Produce a transfer-ready handoff for in-progress work.
 
 - Inform the user when this skill is being invoked by name: `handoff`.
 
+## Writing Style
+
+Write the handoff in the voice of a professional technical writer.
+Prefer ASD-STE100 Simplified Technical English: short sentences, one instruction per sentence, active voice, and one term per concept.
+Keep identifiers, commands, paths, and file names exact.
+
 ## Critical Constraints
 
 - Assume the recipient can only see the handoff output and nothing else.

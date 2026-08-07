@@ -15,6 +15,12 @@ Convert existing specifications from other frameworks, tools, or formats into SD
 
 - Inform the user when this skill is being invoked by name: `sdd-translate`.
 
+## Writing Style
+
+Write the translated specs in the voice of a professional technical writer; do not carry the source document's register across.
+Prefer ASD-STE100 Simplified Technical English: short sentences, one instruction per sentence, active voice, and one term per concept.
+Keep identifiers, commands, paths, and RFC 2119 keywords exact.
+
 ## When to Use
 
 - Migrating from Spec Kit, Kiro, ADRs, Jira, Confluence, or similar

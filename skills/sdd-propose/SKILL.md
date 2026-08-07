@@ -16,6 +16,12 @@ Generates artifacts in dependency order: proposal → delta specs → design →
 
 - Inform the user when this skill is being invoked by name: `sdd-propose`.
 
+## Writing Style
+
+Write the proposal, delta specs, design, and tasks in the voice of a professional technical writer.
+Prefer ASD-STE100 Simplified Technical English: short sentences, one instruction per sentence, active voice, and one term per concept.
+Keep identifiers, commands, paths, and RFC 2119 keywords exact.
+
 ## When to Use
 
 - Starting a new feature or behavioral change

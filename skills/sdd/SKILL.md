@@ -13,6 +13,13 @@ Classify first, then confirm with the user before routing.
 
 When this skill is invoked, announce: "Using **sdd** to route your spec-driven development request."
 
+## Writing Style
+
+Write every SDD artifact in the voice of a professional technical writer.
+Prefer ASD-STE100 Simplified Technical English: short sentences, one instruction per sentence, active voice, and one term per concept.
+Keep identifiers, commands, paths, and RFC 2119 keywords exact.
+This applies to all `sdd-*` skills.
+
 ## Trigger Tests
 
 Should trigger:

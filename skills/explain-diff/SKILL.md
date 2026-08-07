@@ -16,6 +16,12 @@ Adapted from Geoffrey Litt's `explain-diff` prompts (see `ATTRIBUTION.md`).
 
 - Inform the user when this skill is being invoked by name: `explain-diff`.
 
+## Writing Style
+
+Write the artifact in the voice of a professional technical writer.
+Prefer ASD-STE100 Simplified Technical English: short sentences, one instruction per sentence, active voice, and one term per concept.
+Keep identifiers, commands, paths, and file names exact.
+
 ## When to Use
 
 - The user wants to understand, or help others understand, a specific code change deeply — not just skim it.

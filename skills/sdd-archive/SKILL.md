@@ -15,6 +15,12 @@ Complete a change by moving its directory to the archive.
 
 - Inform the user when this skill is being invoked by name: `sdd-archive`.
 
+## Writing Style
+
+Write the archive report in the voice of a professional technical writer.
+Prefer ASD-STE100 Simplified Technical English: short sentences, one instruction per sentence, active voice, and one term per concept.
+Keep identifiers, commands, paths, and RFC 2119 keywords exact.
+
 ## When to Use
 
 - All tasks in `tasks.md` are complete (`- [x]`)

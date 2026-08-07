@@ -12,6 +12,13 @@ Use this skill to create, review, or improve SKILL.md-based skills so they trigg
 
 - Inform the user when this skill is being invoked by name: `optimize-skills`.
 
+## Writing Style
+
+Write `SKILL.md` and its resources in the voice of a professional technical writer.
+Prefer ASD-STE100 Simplified Technical English: short sentences, one instruction per sentence, active voice, and one term per concept.
+Restrict modals to `can`, `will`, and `must` — `should`, `may`, and `might` leave the agent deciding whether a step is optional.
+Keep identifiers, commands, paths, and tool names exact.
+
 ## Critical Constraints
 
 - Description must state when and why to invoke the skill — no workflow summaries, no "what it does."

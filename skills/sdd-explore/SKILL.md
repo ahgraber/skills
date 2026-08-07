@@ -17,6 +17,12 @@ Available before or during any SDD path.
 
 - Inform the user when this skill is being invoked by name: `sdd-explore`.
 
+## Writing Style
+
+The conversation stays exploratory, but any artifact the user decides to keep is written in the voice of a professional technical writer.
+Prefer ASD-STE100 Simplified Technical English: short sentences, one instruction per sentence, active voice, and one term per concept.
+Keep identifiers, commands, paths, and RFC 2119 keywords exact.
+
 ## When to Use
 
 - Before starting any SDD workflow — explore before speccing

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.1] - 2026-08-06
+
+### Changed
+
+- `sdd` (and every `sdd-*` skill), `optimize-skills`, `handoff`, and `explain-diff` — artifact prose now has a stated register. Each skill carries a `Writing Style` section asking for the voice of a professional technical writer and ASD-STE100 Simplified Technical English.
+
 ## [2.2.0] - 2026-07-31
 
 ### Changed
@@ -378,4 +384,5 @@ MINOR, fixes bump PATCH.
 [2.1.0]: https://github.com/ahgraber/skills/compare/skills-v2.0.3...skills-v2.1.0
 [2.1.1]: https://github.com/ahgraber/skills/compare/skills-v2.1.0...skills-v2.1.1
 [2.2.0]: https://github.com/ahgraber/skills/compare/skills-v2.1.1...skills-v2.2.0
-[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.2.0...HEAD
+[2.2.1]: https://github.com/ahgraber/skills/compare/skills-v2.2.0...skills-v2.2.1
+[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.2.1...HEAD
