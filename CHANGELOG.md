@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-08-07
+
+### Added
+
+- `refactor` — new skill for behavior-preserving structural change: decomposing a function, extracting or merging a module, collapsing a layer, breaking an import cycle, renaming across the tree. The edits it takes differ from `simplify` by risk rather than size: their behavior preservation cannot be verified on the spot. It plans first with counted (not estimated) blast radius, takes approval per move rather than for the whole plan, and executes one move at a time with verification green between each, so a restructuring cannot land as a single unreviewable diff. A test edit the plan did not enumerate requires stating what the test asserted, what coupled it to structure, and what still proves the contract holds; anything less is treated as a behavior change and reverted. It accepts work from a simplify ledger, a review report, or a direct request, with no dependency on another skill.
+
+### Changed
+
+- `simplify` — reworked around selectable lenses, verifiability-tiered edits, and a persisted report. Scope is now a parameter (current changes by default; a file, directory, or repo when named). Five lenses (duplication, obfuscative complexity, removal, comments, semantic naming) sit behind a selection gate; the efficiency lens is retired, and correctness, security, test adequacy, and hot-path concerns route to `code-review`. Edits whose behavior preservation is verifiable now apply directly, one at a time with verification between; contract changes, spec conflicts, and the unverifiable become recorded proposals. Deletion is the default only when nothing consumes the code and no historical reason still applies, and each pass writes a dated report to `.simplify/`.
+
 ## [2.2.2] - 2026-08-07
 
 ### Changed
@@ -392,4 +402,5 @@ MINOR, fixes bump PATCH.
 [2.2.0]: https://github.com/ahgraber/skills/compare/skills-v2.1.1...skills-v2.2.0
 [2.2.1]: https://github.com/ahgraber/skills/compare/skills-v2.2.0...skills-v2.2.1
 [2.2.2]: https://github.com/ahgraber/skills/compare/skills-v2.2.1...skills-v2.2.2
-[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.2.2...HEAD
+[2.3.0]: https://github.com/ahgraber/skills/compare/skills-v2.2.2...skills-v2.3.0
+[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.3.0...HEAD

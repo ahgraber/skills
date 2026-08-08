@@ -36,33 +36,53 @@ The `base` ref follows review scope:
 | `get_architecture_overview_tool` | Change spans 3+ directories/modules                  | `get_architecture_overview_tool()`                 |
 | `get_impact_radius_tool`         | Need raw blast-radius data beyond detect_changes     | `get_impact_radius_tool(base=<base>, max_depth=2)` |
 
-## Phase 2 — Agent Enhancements
+## Phase 2 — Lens Enhancements
 
-### Agent 1: Code Reuse
+Lens IDs match the table in `SKILL.md`.
+Only lenses selected at the Phase 0 gate run.
+
+### L1: Duplication & reuse
 
 | Tool                         | Use when                                                   | Call                                                               |
 | ---------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------ |
 | `semantic_search_nodes_tool` | New function/class added — check for existing similar code | `semantic_search_nodes_tool(query=<function_name_or_description>)` |
 | `query_graph_tool`           | Confirm a utility is an established reuse pattern          | `query_graph_tool(pattern="callers_of", target=<utility_name>)`    |
-| `refactor_tool`              | Functions deleted or replaced — check for orphaned code    | `refactor_tool(mode="dead_code", file_pattern=<changed_file>)`     |
 
-### Agent 2: Code Quality
+### L2: Obfuscative complexity
 
-| Tool                        | Use when                                                        | Call                                                                        |
-| --------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `get_impact_radius_tool`    | Verify abstraction boundaries — wide blast radius = likely leak | `get_impact_radius_tool(base=<base>, max_depth=2)`                          |
-| `find_large_functions_tool` | Flag functions that grew past complexity thresholds             | `find_large_functions_tool(min_lines=50, file_path_pattern=<changed_file>)` |
-| `query_graph_tool`          | Signature/contract changes — verify callers are updated         | `query_graph_tool(pattern="callers_of", target=<function_name>)`            |
-| `query_graph_tool`          | Base class changes — check subclass compatibility               | `query_graph_tool(pattern="inheritors_of", target=<class_name>)`            |
-| `query_graph_tool`          | Test coverage gaps — flag changed functions without tests       | `query_graph_tool(pattern="tests_for", target=<function_name>)`             |
+| Tool                        | Use when                                                                   | Call                                                                        |
+| --------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `get_impact_radius_tool`    | Before collapsing a layer — wide radius means the collapse is Tier 2       | `get_impact_radius_tool(base=<base>, max_depth=2)`                          |
+| `query_graph_tool`          | Trace forwarding chains — a callee chain that only forwards is indirection | `query_graph_tool(pattern="callees_of", target=<function_name>)`            |
+| `find_large_functions_tool` | Size flag; decomposition itself is Tier 2, so record rather than apply     | `find_large_functions_tool(min_lines=50, file_path_pattern=<changed_file>)` |
+| `query_graph_tool`          | Single-implementation check before collapsing an interface                 | `query_graph_tool(pattern="inheritors_of", target=<class_name>)`            |
 
-### Agent 3: Efficiency
+### L3: Removal
 
-| Tool               | Use when                                                              | Call                                                                |
-| ------------------ | --------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| `query_graph_tool` | Trace downstream call chains to spot redundant/overlapping work       | `query_graph_tool(pattern="callees_of", target=<function_name>)`    |
-| `query_graph_tool` | Check consumer breadth — broad imports amplify inefficiency costs     | `query_graph_tool(pattern="importers_of", target=<file_or_module>)` |
-| Affected flows     | Cross-reference Phase 1 flow data — high-criticality = extra scrutiny | Use `get_affected_flows_tool` results from Phase 1                  |
+The graph answers only the static half of the consumer question.
+
+| Tool               | Use when                                        | Call                                                           |
+| ------------------ | ----------------------------------------------- | -------------------------------------------------------------- |
+| `refactor_tool`    | Find orphans after a deletion or replacement    | `refactor_tool(mode="dead_code", file_pattern=<changed_file>)` |
+| `query_graph_tool` | Consumer question — is anything calling this?   | `query_graph_tool(pattern="callers_of", target=<name>)`        |
+| `query_graph_tool` | Consumer question — does a test assert on this? | `query_graph_tool(pattern="tests_for", target=<name>)`         |
+| `query_graph_tool` | Consumer question — is this imported anywhere?  | `query_graph_tool(pattern="importers_of", target=<module>)`    |
+
+Empty results on all three do **not** close the question.
+The graph is static structure; it cannot see string-keyed dispatch, entry-point declarations, config-registered classes, fixtures, templates, or serialized references.
+The Removal Rule's textual sweep is still required, and the history question still needs `git blame` and the introducing commit.
+
+### L4: Comments
+
+No graph tools apply.
+Use `query_graph_tool(pattern="tests_for", target=<function>)` when a comment documents a gotcha, to check whether a test covers it before recording the gap.
+
+### L5: Naming & constants
+
+| Tool               | Use when                                                | Call                                                                |
+| ------------------ | ------------------------------------------------------- | ------------------------------------------------------------------- |
+| `query_graph_tool` | Before renaming anything exported — count the importers | `query_graph_tool(pattern="importers_of", target=<file_or_module>)` |
+| `refactor_tool`    | Preview a rename's full reference set                   | `refactor_tool(mode="rename", old_name=<old>, new_name=<new>)`      |
 
 ## Tool Quick Reference
 
