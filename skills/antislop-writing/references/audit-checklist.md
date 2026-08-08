@@ -14,6 +14,8 @@ The output of an audit is named changes, not a pass/fail feeling.
 - **Cut empty intensifiers**: "very," "highly," "extremely," unless load-bearing.
 - **Reuse the exact term**: do not cycle synonyms for one thing; repetition beats elegant variation when it aids clarity.
 - **Choose neutral reporting verbs**: "said" is neutral, while "claimed," "admitted," "revealed," and "insisted" import doubt, fault, concealment, or stubbornness — use them only where that reading is the point.
+- **Cut decorative figuration**: a vivid word swapped for a plain one that carries the same meaning ("shape" for structure, "rung" for level) is ornament, not precision, and one instance is enough to fix — but a figure that genuinely clarifies stays, even in technical prose.
+  The test is whether the image does work the plain word cannot (see "Dead metaphor" in `ai-tells.md`).
 
 ## Syntax (sentences)
 
@@ -24,6 +26,8 @@ The output of an audit is named changes, not a pass/fail feeling.
 - **Avoid dangling modifiers; keep subject and verb close**: no long interruptions between them.
 - **Vary sentence length**: mix lengths and let a short sentence land — except in instructions, where short and uniform is the genre's shape.
 - **Lead an instruction with its condition**: "if the build fails, run X," so the reader learns the gate before the imperative.
+- **Name the actor; do not let an abstraction or the text act**: rewrite "verification licenses the edit" or "the data demands a rethink" to name who does the work — the writer, the reader, you, the system.
+- **Rewrite a maxim as an instruction**: in explanatory or instructional prose, a line that could be an epigraph ("Refactor changes the shape of working code and nothing else") should state the directive it stands for; editorial writing may earn one.
 
 ## Cohesion (local flow)
 

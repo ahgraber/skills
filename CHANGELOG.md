@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.2] - 2026-08-07
+
+### Changed
+
+- `antislop-writing` — add a *performed voice* class to the AI-tell catalog: maxims stated as instruction, and abstractions or the text itself given agency, with a technical-register rule holding explanation prose to the same plainness as instructions, plus self-check and audit-checklist prompts. Figuration is judged by the work it does, not by presence, so a clarifying metaphor stays while decorative substitution is cut; the maxim and reification rules are scoped by register, and editorial writing may earn one.
+
 ## [2.2.1] - 2026-08-06
 
 ### Changed
@@ -385,4 +391,5 @@ MINOR, fixes bump PATCH.
 [2.1.1]: https://github.com/ahgraber/skills/compare/skills-v2.1.0...skills-v2.1.1
 [2.2.0]: https://github.com/ahgraber/skills/compare/skills-v2.1.1...skills-v2.2.0
 [2.2.1]: https://github.com/ahgraber/skills/compare/skills-v2.2.0...skills-v2.2.1
-[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.2.1...HEAD
+[2.2.2]: https://github.com/ahgraber/skills/compare/skills-v2.2.1...skills-v2.2.2
+[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.2.2...HEAD

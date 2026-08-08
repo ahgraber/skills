@@ -141,7 +141,7 @@ They are symptoms of the reflex above, and they sort by linguistic level and by 
 
 - **Strip** — surface tics removable without touching meaning: em-dash pile-ups, "delve"/"tapestry," curly quotes, emojis, bold-first bullets, chatbot phrases.
   A checklist pass handles these.
-- **Rewrite** — structural reflexes that encode a rhetorical move, not a token: negative parallelism, engineered symmetry, one-point dilution, fractal summaries, significance inflation.
+- **Rewrite** — structural reflexes that encode a rhetorical move, not a token: negative parallelism, engineered symmetry, one-point dilution, fractal summaries, significance inflation, performed voice (maxims and abstraction-as-agent in explanatory and instructional prose).
   You cannot find-replace these; return to what the passage is actually asserting.
 
 Stripping tics while the reflex runs is a losing game — surface-laundered text still reads as machine-made, because the structure is the signal.
@@ -234,6 +234,8 @@ Ask only when an ambiguity would materially change the piece; do not silently ch
 - Does every fact inventory reconcile — nothing lost, nothing invented, every deliberate cut named?
 - Does every heading and opener do its section's job — a claim where the piece argues or explains, a stable label where it is looked up?
 - Is the contrast move within budget, in every syntax it wears?
+- Does any line read as a maxim, give an abstraction or the text itself agency, or swap a plain term for decorative figuration?
+  Name the actor and the plain action — unless the register is editorial, where one maxim can be earned.
 - Name what you did not fix and why, and what you asked the user versus decided alone.
 
 ## References

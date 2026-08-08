@@ -242,6 +242,12 @@ Fix: choose the target register and hold it end to end; smooth the seam.
 Latching onto one metaphor and repeating it five to ten times across the piece.
 Avoid: "walls and doors" used thirty times; "the ecosystem needs ecosystems to build ecosystem value."
 Fix: introduce a metaphor once, use it, and move on.
+In technical or instructional register the test is the work the figure does, not the count — the precision-lost test from the diction checklist, not a presence rule.
+A metaphor that genuinely clarifies or compresses earns its place, even on first use and even here.
+What fails on first use is decorative substitution: a vivid word swapped for a plain one that carries the same meaning — "shape" for structure, "rung" for level, "budget" for effort — ornament that makes the reader decode an image where a term would land faster.
+That is the copula-avoidance class (§1), fixed on sight; it is not the developed-analogy class, which is licensed when it clarifies.
+Judge whether the figure clarifies, not whether it is figurative.
+The earned-coinage exception still holds: a term the argument pays for before it appears (the "verification tax" case under "Invented concept labels") is craft, not decoration.
 
 ### Historical-analogy stacking — [rewrite]
 
@@ -269,6 +275,31 @@ Fix: rewrite toward prose a person would sign; keep at most one contrast per str
 ## 4. Rhetorical stance (the "AI voice")
 
 All \[rewrite\]: these are a posture toward the reader and the material, not a phrase.
+
+The next two entries share one reflex — performing wisdom and authority rather than transmitting the point.
+It is a second engine of slop alongside engineered symmetry, and it hides in explanatory and instructional prose, where each figure is used once and so slips past the density rule that governs dead metaphor.
+The unifying test: does the line draw attention to itself as writing?
+Where the register's job is transparency — technical, instructional, most professional prose — a sentence the reader admires as prose has already failed.
+Editorial and persuasive writing recalibrates this: one earned maxim is a legitimate device there, so apply both tells by the register (see `register-editorial.md`).
+
+### Maxim as instruction (sententious voice) — [rewrite]
+
+Casting a directive or a plain fact as a general truth or a crafted definition, so the line reads as wisdom instead of instruction.
+Signatures: a short, self-contained declarative that generalizes; an emphatic tail ("and nothing else," "is what needs an argument," "becomes permanent"); definitional cadence stated for resonance.
+Avoid: "Refactor changes the shape of working code and nothing else." / "A shim added for safety becomes permanent." / "Backups you have not tested are backups you do not have."
+Fix: state the directive or fact plainly — "Refactor changes code structure only; it does not change behavior." / "Test your backups; an untested backup may not restore."
+The test: could the line be an epigraph or a poster?
+If it reads as a maxim, rewrite it as the instruction it stands for.
+
+### Abstraction or document as agent — [rewrite]
+
+Making an abstract noun, or the text itself, the subject of a vivid, agentive verb, so a concept appears to act and no one is named as doing the work.
+The reified cousin of copula avoidance (§1) and self-narration below.
+Avoid: "This report recommends caution." / "The data demands a rethink." / "Verification licenses the change." / "Requirements arrive from three places."
+Fix: name the real actor — the writer, the reader, you, the system — and the concrete action.
+"We recommend caution." / "A change is safe only once verification confirms it."
+The test: is the subject a concept or the text itself, doing a verb only a person could?
+Point to the actor and the action.
 
 ### Significance and stakes inflation — [rewrite]
 

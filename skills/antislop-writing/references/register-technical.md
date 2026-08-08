@@ -44,6 +44,17 @@ State prerequisites and scope up front, then disclose progressively: say what th
 Passive voice is legitimate when the system is the actor ("the request is retried three times"); keep the active voice for what the reader does ("run `x`," "set `FOO`").
 Close a section by pointing forward — the next task, the related reference, the failure to watch for — not on a flourish like "and that is the power of X."
 
+## Explanation prose holds the same plainness
+
+Explanation is the rationale, overview, and "why this exists" prose that is neither a numbered step nor a lookup table — the Diátaxis mode that carries a document's reasoning.
+It is where the sententious reflex hides, because it is exempt from the STE uniformity below and clears the "precise and unadorned" bar on lean grammar alone: a maxim can be short, active, and grammatically clean and still be slop.
+Hold explanation to the same plainness as an instruction, minus STE's flat rhythm.
+No maxim in place of a directive or a fact ("Refactor changes the shape of working code and nothing else").
+No abstraction or the document itself as the agent of a verb ("verification licenses the edit," "the pipeline decides what to keep").
+No decorative figure standing in for a plain term ("shape" for structure, "rung" for level); a figure that genuinely clarifies stays, so the test is whether the image does work the plain word cannot, not whether it is figurative.
+This register performs authority when left to polish, and transparency is the whole job, so a line the reader admires as writing has already failed.
+See `ai-tells.md`: "Maxim as instruction," "Abstraction or document as agent," and the technical-register clause of "Dead metaphor."
+
 ## Instructional passages follow Simplified Technical English
 
 Content that tells the reader to do something — a runbook step, a how-to procedure, an error message, a remediation line in an incident report — is governed by ASD-STE100 Simplified Technical English, the controlled language aerospace maintenance manuals are written in.
