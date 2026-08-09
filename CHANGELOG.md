@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.1] - 2026-08-09
+
+### Changed
+
+- `receiving-feedback` — narrow the trigger so it fires only when a message gives something to evaluate: a claim, concern, question, or rationale about an artifact (asserting a defect, questioning a decision, supplying reasoning, or proposing a change to assess), plus external review comments to assess before implementing. An unambiguous parameter choice, approval, confirmation, typo or formatting fix, or bare revision instruction that carries no claim to evaluate no longer triggers it.
+
 ## [2.3.0] - 2026-08-07
 
 ### Added
@@ -403,4 +409,5 @@ MINOR, fixes bump PATCH.
 [2.2.1]: https://github.com/ahgraber/skills/compare/skills-v2.2.0...skills-v2.2.1
 [2.2.2]: https://github.com/ahgraber/skills/compare/skills-v2.2.1...skills-v2.2.2
 [2.3.0]: https://github.com/ahgraber/skills/compare/skills-v2.2.2...skills-v2.3.0
-[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.3.0...HEAD
+[2.3.1]: https://github.com/ahgraber/skills/compare/skills-v2.3.0...skills-v2.3.1
+[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.3.1...HEAD

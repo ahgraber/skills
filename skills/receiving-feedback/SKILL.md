@@ -1,12 +1,16 @@
 ---
 name: receiving-feedback
 description: |-
-  You MUST use this when receiving feedback, review, or commentary on any text-based work artifact — code, specs, design docs, PRDs, proposals, plans, or prose — before implementing suggestions, especially if feedback seems unclear or technically questionable.
+  You MUST use this when receiving review feedback that evaluates a text-based work artifact — code, specs, design docs, PRDs, proposals, plans, or prose — by asserting a defect, questioning a decision, supplying reasoning, or proposing a change for assessment. Also use when asked to implement external review comments that must first be assessed. Not for an unambiguous parameter choice, approval, confirmation, typo or formatting fix, or direct revision instruction that supplies no claim or rationale to evaluate.
 ---
 
 # Receiving Feedback
 
 ## When to Use
+
+Feedback gives a claim, concern, question, or rationale about a work artifact that can be evaluated.
+A revision request alone is an instruction, not feedback.
+Use this skill when the message contains something to evaluate:
 
 - Receiving review comments on code, specs, design docs, PRDs, proposals, plans, or prose.
 - Feedback seems unclear, contradictory, or technically questionable.
@@ -17,6 +21,12 @@ description: |-
 
 - You are the one _giving_ feedback (use `code-review` instead).
 - Feedback is a simple typo fix or formatting correction with no ambiguity — just fix it.
+- The message is not feedback on an artifact.
+  These are directives to carry out, not commentary to evaluate — act on them directly:
+  - A **parameter choice** ("use Postgres", "make the timeout 30s", "call it `sync`").
+  - An **approval** ("looks good", "ship it", "approved").
+  - A **confirmation** (answering a question you asked — "yes", "the second one").
+  - A **direct execution instruction** ("add a login endpoint", "rename this function").
 
 ## Overview
 
