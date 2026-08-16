@@ -66,6 +66,37 @@ Do not manually add linebreaks, trust linters and formatters for this.
 - Run with `uv run tests/<skill_name>/test_<name>.py`.
 - `.ruff.toml` ignores `D`, `S101`, and `S301` under `**/tests/**`, so idiomatic `assert`s and undocumented test functions pass lint.
 
+## Definition of Done
+
+The required checks are the full test suite and every hook in `.pre-commit-config.yaml`.
+Slow, or looking unrelated to the change, is not a reason to skip one.
+
+- The requested behavior works as specified.
+
+- The test suite passes, not just tests for this change; previously working behavior is part of the acceptance criteria.
+
+- Behavior changes are covered by tests, or testing gaps are explicitly stated.
+
+- Public contract changes are documented.
+
+- The hooks pass on everything changed since `HEAD`, staged or not, including new files.
+  Pass the paths NUL-delimited so names with spaces survive:
+
+  ```sh
+  { git diff -z --name-only --diff-filter=d HEAD; git ls-files -z --others --exclude-standard; } | xargs -0 {{ hook_runner }} run --files
+  ```
+
+  Report failing hook output verbatim and fix the cause — a failure is a defect, not an unavailable check.
+
+- A check is unavailable only when the command itself fails to run — missing binary, permission error, no network.
+  Then name the check, quote the error, and give the user the exact command to run.
+
+- Never call a change "confirmed", "verified", or "working" unless you ran the command in this session and read its output.
+  Do not describe expected output as if you had seen it.
+
+- Re-read a file immediately before reporting on it.
+  Never report from a snapshot taken earlier in the session — the user edits files between turns.
+
 ## Versioning & releases
 
 This repo ships **two independently versioned components**; never fold one's release into the other's.
