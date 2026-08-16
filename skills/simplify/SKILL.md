@@ -1,7 +1,7 @@
 ---
 name: simplify
 description: |-
-  Use when cutting slop out of working code: duplication, dead code, needless indirection, comment noise, defensive padding. Scope is whatever you point it at: current changes (default), a file, a directory, or the repo. Triggers: 'simplify this', 'clean this up', 'de-slop this code', 'strip the cruft', 'tighten this diff', 'this code is bloated'. Not for judging correctness or merge readiness (use code-review), and not for structural change that needs a plan and approval (use refactor).
+  Use to cut slop out of working code: duplication, dead code, needless indirection, comment noise, defensive padding. Point it at the current changes, a file, a directory, or the whole repo. Triggers: 'simplify this', 'clean this up', 'de-slop this code', 'strip the cruft', 'tighten this diff', 'this code is bloated', 'audit this for slop'. Not for judging correctness or merge readiness (use code-review), and not for structural change that needs a plan and approval (use refactor).
 ---
 
 # Simplify: Remove Slop from Working Code
@@ -16,7 +16,11 @@ Simplify assumes the code is correct and asks whether it is as simple as it coul
 It exists because models drift additively: left alone, agent-written code accumulates verbosity and structural padding that prompting alone does not prevent.
 This skill is the recurring corrective pass.
 
-It edits directly, preserves behavior exactly, and verifies each edit before making the next.
+Ask the user which mode to use:
+
+- **audit** mode to report findings but make no changes.
+- **fix** mode audit, then apply safe edits and preserve behavior exactly.
+
 Scope is configurable: the default is the current change set, but a file, a directory, or the whole repo are equally valid targets when the user names one.
 
 Every pass ends with a report persisted to a dated file (see `references/edit-ledger.md`).
@@ -31,12 +35,14 @@ Run the tool instead, and review only what those tools cannot check.
 - A change works but feels padded: wrappers on wrappers, checks that cannot fire, flags with one caller.
 - A feature was deleted, and the code that only served it needs to go too.
 - The comments in a change are noise and need auditing.
+- Someone wants to know how much slop is in a file, a package, or the repo before deciding whether to touch it.
 
 ## When Not to Use
 
 - Judging code belongs to `code-review`: correctness, edge cases, security, test adequacy, merge readiness.
 - Structural change that needs a plan belongs to `refactor`: decomposing a large function, splitting a module, breaking an import cycle.
-- If the tests are red, fix them first.
+- If the tests are red, stop.
+  Simplify assumes the code is correct; if it is not, the findings are irrelevant and the edits unsafe.
 - Simplify never adds capability.
   New behavior is a different task.
 
@@ -61,8 +67,9 @@ For example, error handling that catches and re-raises unchanged is a simplify f
 ## Edit Tiers
 
 Classify every finding before applying anything.
+Audit mode applies nothing, and the tiers still hold: they record which findings a fix pass would take on the spot and which need a decision from the user first.
 
-**Tier 1 — apply directly — is any edit whose behavior preservation you can verify right now**, at the current rung of the verification ladder, within the stated scope.
+**Tier 1 — apply directly — is any edit whose behavior preservation you can verify right now**, with the check established in Phase 0, within the stated scope.
 Deleting dead code, collapsing a forwarding wrapper, flattening nesting with a guard clause, fixing a stale comment, unifying duplicated logic: all Tier 1 when the verification passes afterward.
 
 **Tier 2 — record as a proposal, never apply** — is everything you cannot verify now, plus these regardless of verifiability:
@@ -79,10 +86,10 @@ If an edit needs a test's assertions changed to pass, the behavior changed.
 Revert it and record it as Tier 2.
 Fixing a stale comment or a typo inside a test file is an ordinary Tier 1 edit; the rule guards assertions, not file paths.
 
-## Verification Ladder
+## Verification Levels
 
 A Tier 1 edit is safe only when verification can confirm it.
-Establish the strongest available rung before editing, and use it for every edit:
+Establish the strongest available check before editing, and use it for every edit:
 
 1. **Full test suite** with the relevant code exercised.
 2. **Typecheck plus lint**, when no suite exists or it does not cover the target.
@@ -91,7 +98,7 @@ Establish the strongest available rung before editing, and use it for every edit
 5. **Report-only.**
    If nothing above is available for the target, do not edit it; record the finding instead.
 
-Record the rung in the ledger header.
+Record the check in the ledger header.
 If a check fails after an edit and the failure looks unrelated, re-run once before attributing it to the edit.
 For a risky deletion whose safety rests on a covering test, confirm the test actually guards it: break the invariant deliberately and check the test fails.
 
@@ -111,8 +118,8 @@ Ask two questions of every removal candidate:
    A platform quirk that is still shipped, a workaround for a bug still open: keep, and record the reason.
    A shim whose other side is gone: the reason expired; remove.
 
-If both questions come up empty, remove the code and record both answers in the ledger.
-If either is answered, keep it and record the answer.
+Record both answers in the ledger.
+If both return empty, audit should propose the removal, while fix should process the removal.
 
 Boundary cases:
 
@@ -130,35 +137,23 @@ Never delete to move a number; line count is a report, not a target.
 
 ## Phase 0 — Gate
 
-### 1. Baseline
+### 1. Mode
 
-Find the repo's checks and establish the highest verification-ladder rung available.
-Run it before any edit.
-If the suite exists and is red, stop and report; without a green start, no later failure is attributable.
-Record the rung, the command, and the result for the ledger header.
+**Mode** decides whether the pass ends at the ledger.
+Do not assume the mode based on context; the user must name it (elicit if unspecified).
+
+Recommend fix as the default for a file- or change-set scope, and audit as the default for a directory or repo scope.
 
 ### 2. Scope
 
-Take the scope the user named: a file, a directory, the repo, or a change set.
+Take the scope the user named: a file, a directory, the repo, or a change set (elicit if unspecified).
 When the scope is the current changes (the default), run `scripts/build_review_packet.py` to resolve it deterministically and pre-bake one packet — diff plus changed-file list — that the lens agents read by path.
 Fall back to `git diff` or `git diff HEAD` for a manual change set; with no git changes and no named scope, use the files edited earlier in this conversation.
 For a file, directory, or repo scope, the file list is the packet; note that broad scopes deserve narrow lens selection or the pass sprawls.
 
-### 3. Specs
+### 3. Lens selection
 
-Look for a spec source: an `openspec/` or `specs/` tree, or artifacts from the `sdd` family.
-When one exists, every edit must leave the code compliant with it.
-Suggested spec revisions go in the ledger, and this skill never applies them.
-
-### 4. Graph tooling
-
-If the `code-review-graph` MCP plugin is available, call `build_or_update_graph_tool(base=<base>)`, then `list_graph_stats_tool()` to confirm the graph has nodes.
-If either call fails or the graph is empty, continue on the git-only path and do not retry.
-When the graph is available, follow `references/code-review-graph-integration.md` at each later phase.
-
-### 5. Lens selection
-
-The lenses are independent, and a user often wants only one.
+**Lenses** are independent, and a user may only want one.
 
 | ID  | Lens                   | Covers                                                                                                     | Reference                            |
 | --- | ---------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------ |
@@ -171,20 +166,29 @@ The lenses are independent, and a user often wants only one.
 L5 covers only what a linter cannot: a `get*` that mutates, the same value named three ways across layers, the same constant defined twice with different spellings.
 Stylistic naming and formatting stay with the linter.
 
-If the user's request already names a concern, run the matching lenses and say which you selected.
+If the request already names a concern, run the matching lenses and say which you selected.
 Otherwise ask which to run, offering all five as the default.
 Do not fan out five agents on a request the user meant narrowly.
+
+State the mode and the lenses back before Phase 1 starts.
+Never switch modes mid-pass: an audit that turns up an obvious fix stays an audit, and the user can ask for the fix pass next.
+
+### 4. Baseline
+
+Find the codebase's tests and checks and establish the strongest check available by running all - tests, checks, lint rules, etc.
+If the suite exists and is red, stop and report; without a green start, no later failure is attributable.
+Record the baseline test and check run with the associated commands and results in the ledger.
+
+### 5. Specs
+
+Look for a spec source: an `openspec/` or `specs/` tree, or artifacts from the `sdd` family.
+When one exists, every edit must leave the code compliant with it.
+Suggested spec revisions go in the ledger, and this skill never applies them.
 
 ## Phase 1 — Triage
 
 Read the scope to understand what the code is doing and why.
 Intent matters: code that looks over-built can be implementing a requirement the diff does not show.
-
-When the graph is available, see `references/code-review-graph-integration.md` Phase 1:
-
-- `detect_changes_tool(base=<base>)` for risk-scored, priority-ordered triage (change-set scopes).
-- `get_review_context_tool(base=<base>)` for structural context without reading whole files.
-- Optionally `get_affected_flows_tool` (2+ files) or `get_architecture_overview_tool` (3+ directories).
 
 ## Phase 2 — Lens Agents
 
@@ -194,29 +198,28 @@ Give each agent the packet path (or file list), its lens reference, the Edit Tie
 Tell each agent the scope is a floor and not a ceiling: L1's search for existing utilities is inherently outside it, and L3 must check consumers across the whole repo.
 
 **Agents report; they do not edit.**
-Parallel edits conflict, and verification has to run against one coherent state.
+This constraint holds regardless of audit/fix mode: parallel edits conflict, and verification has to run against one coherent state.
+Dispatch, tiering, and the removal proof are the same in audit mode; only Phase 3 differs.
 
 Each finding comes back with the file and line, the lens, what to change, why, and a tier with the reason for that tier.
 An agent that cannot justify Tier 1 assigns Tier 2.
 
-Graph tools per lens, when available:
+## Phase 3 — Resolve Findings
 
-- L1 uses `semantic_search_nodes_tool` for existing equivalents, and `query_graph_tool("callers_of")`.
-- L2 uses `get_impact_radius_tool` before collapsing a layer, and `find_large_functions_tool`.
-- L3 uses `refactor_tool(mode="dead_code")`, plus `query_graph_tool("callers_of")` and `query_graph_tool("tests_for")` for the static half of the consumer question.
-  The textual sweep and the history question remain manual.
-- L5 uses `query_graph_tool("importers_of")` before touching anything exported.
+Both modes start the same way: aggregate the findings, drop duplicates across lenses, and re-check every Tier 1 classification yourself.
+An agent that wants its finding applied has an incentive to under-report blast radius.
 
-## Phase 3 — Apply and Verify
+**Audit mode stops with aggregation and reporting.**
+Write the ledger per `references/edit-ledger.md` in its audit shape: every finding recorded, nothing applied, and the tier kept on each entry, because the tier is what tells the user which findings a later fix pass takes without a decision from them.
+Do not edit a file, not even a one-word comment fix.
 
-1. Aggregate findings and drop duplicates across lenses.
-2. Re-check every Tier 1 classification yourself.
-   An agent that wants its finding applied has an incentive to under-report blast radius.
-3. Apply Tier 1 edits **one at a time**: make the edit, run the verification rung, then move on.
+**In fix mode, continue:**
+
+1. Apply Tier 1 edits **one at a time**: make the edit, run the check, then move on.
    A failure attributes itself to the edit that caused it.
-4. On failure, revert that edit and reclassify it as Tier 2 with the failure recorded.
+2. On failure, revert that edit and reclassify it as Tier 2 with the failure recorded.
    Do not weaken an assertion, relax a type, or skip a test to get to green.
-5. Write the ledger per `references/edit-ledger.md`.
+3. Write the ledger per `references/edit-ledger.md`.
 
 Group trivially independent edits (comment deletions across files) into one verification step when running checks per edit would be absurd; the unit of revert is then the group.
 
@@ -231,10 +234,20 @@ The reader has the ledger next to the diff, and a comment narrating this pass is
 
 Tell the user, briefly:
 
+In audit mode:
+
+- What was found, grouped by lens, and how many of those findings a fix pass would apply without asking (the Tier 1 count)
+- The largest removal candidates, and the lines each would take out
+- What is in Deferred, and the ledger path
+- The check a fix pass would run, and its result if you ran it
+- That nothing was changed, and that a second pass in fix mode applies the Tier 1 findings
+
+In fix mode:
+
 - What was applied, grouped by lens
 - What was removed, and the net line movement
 - What is in Deferred, and the ledger path
-- The verification rung, with baseline and final results
+- The check, with baseline and final results
 
 Deferred items are proposals: the user decides what happens to them, and `refactor` is one way to execute the structural ones.
 Do not start that work here.
@@ -244,4 +257,3 @@ Do not start that work here.
 - `references/edit-ledger.md` — the persisted report: location, sections, and the deletion-proof format.
 - `references/obfuscation-patterns.md` — L2 pattern catalog with the disconfirming test for each.
 - `references/comment-audit.md` — L4 keep/delete/fix criteria and the docstring boundary.
-- `references/code-review-graph-integration.md` — tool dispatch playbook for the `code-review-graph` MCP plugin.

@@ -61,18 +61,18 @@ If that file is not available, the sections are simple enough to mirror from any
 
 ### 2. Baseline
 
-Find the repo's checks and establish the strongest available verification rung:
+Find the repo's checks and establish the strongest available check:
 
 1. **Full test suite** with the target code exercised — confirm with coverage, not assumption.
 2. **Typecheck plus lint**, when no suite covers the target.
 3. **Characterization test** written first, pinning current behavior; it stays afterward as a regression guard.
 4. **Stop.**
-   Below rung 3 there is no way to demonstrate behavior preservation, and a refactor that cannot demonstrate it is a rewrite.
+   Below level 3 there is no way to demonstrate behavior preservation, and a refactor that cannot demonstrate it is a rewrite.
    Say so and let the user decide.
 
 Run the baseline before any edit.
 If the suite is red, stop; without a green start, no later failure is attributable.
-Record the rung, the command, and the result — and the starting commit, which Phase 3's scope check needs.
+Record the check, the command, and the result — and the starting commit, which Phase 3's scope check needs.
 
 ### 3. Specs
 
@@ -136,7 +136,7 @@ For each move:
 2. Make the move, and only that move.
    If you notice something else, put it in the ledger.
 3. Update every caller, importer, and subclass the plan identified.
-4. Run the verification rung.
+4. Run the check.
 5. If green, record the outcome and continue to the next move.
 6. If red, revert the move entirely.
    Do not repair forward.

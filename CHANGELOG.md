@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.2] - 2026-08-16
+
+### Changed
+
+- `simplify` — a pass now runs in one of two modes, and the user names it at the gate: **audit** reports findings and changes nothing, **fix** applies the edits whose behavior preservation is verifiable. The mode is never inferred from phrasing and never switches mid-pass, so an audit that turns up an obvious fix still edits nothing. Both modes find, tier, and prove removals identically; the tier on an audit finding tells the reader which ones a later fix pass takes without asking. The ledger records the mode, and an audit ledger reports proposals rather than results: `Applied` becomes `Proposed` with a tier per finding, `Removed` becomes `Proposed removals` with both proof answers still required, and net line movement is stated as an estimate.
+
+### Removed
+
+- `simplify` — drop the `code-review-graph` MCP integration: the availability gate, the per-lens tool dispatch, and the reference playbook are gone, so a pass behaves the same with or without the plugin installed. `refactor` keeps its own graph integration for blast-radius analysis.
+
 ## [2.3.1] - 2026-08-09
 
 ### Changed
@@ -410,4 +420,5 @@ MINOR, fixes bump PATCH.
 [2.2.2]: https://github.com/ahgraber/skills/compare/skills-v2.2.1...skills-v2.2.2
 [2.3.0]: https://github.com/ahgraber/skills/compare/skills-v2.2.2...skills-v2.3.0
 [2.3.1]: https://github.com/ahgraber/skills/compare/skills-v2.3.0...skills-v2.3.1
-[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.3.1...HEAD
+[2.3.2]: https://github.com/ahgraber/skills/compare/skills-v2.3.1...skills-v2.3.2
+[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.3.2...HEAD

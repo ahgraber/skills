@@ -6,7 +6,7 @@ Cyclomatic complexity counts paths, and a tool can measure it.
 Obfuscative complexity is structure that adds no capability and costs comprehension: a reader must hold more in their head than the behavior warrants.
 A function can score 1 on every complexity metric and still be obfuscative: six files of indirection to reach one assignment.
 
-Resolving it is usually a Tier 1 edit: collapsing an unnecessary layer or flattening nesting preserves behavior exactly, and the verification rung confirms it on the spot.
+Resolving it is usually a Tier 1 edit: collapsing an unnecessary layer or flattening nesting preserves behavior exactly, and the check confirms it on the spot.
 It becomes Tier 2 when the fix touches an exported contract or when preservation cannot be verified now — a wide impact radius is the usual warning sign.
 
 ## The disconfirming test

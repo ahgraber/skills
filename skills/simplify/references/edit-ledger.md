@@ -4,6 +4,8 @@ The ledger is the pass's report, persisted to a file.
 It exists because the two questions a reader has about a cleanup land at different times: the diff answers _what changed_ now, and the ledger answers _why it was safe_ later — at review time, after the conversation is gone.
 Deletions depend on it most: a diff can show removed lines but cannot carry the proof that nothing consumed them.
 
+In audit mode the ledger is the whole deliverable, and the shape shifts accordingly — see "Audit mode" below.
+
 The ledger records one pass; it is not state that later passes read or update.
 No skill is obligated to read an old ledger, entries have no status lifecycle, and nothing accumulates across passes.
 
@@ -32,9 +34,10 @@ No skill is obligated to read an old ledger, entries have no status lifecycle, a
 ```markdown
 # Simplify Ledger — <YYYY-MM-DD HH:MM>
 
+- Mode: <audit or fix>
 - Scope: <what was passed in: change set, file, dir, or repo>
 - Lenses: <ids run>
-- Verification: <ladder rung and command> — baseline <result>, final <result>
+- Verification: <check and command> — baseline <result>, final <result>
 - Net: <n> files touched, <n> lines removed, <n> added
 
 ## Applied
@@ -80,6 +83,24 @@ Findings not acted on, with the reason: false positives, out-of-scope pre-existi
 - `specs/ingest.md` §3 describes a `--legacy` flag removed in D1.
   Suggest striking the clause.
 ```
+
+## Audit mode
+
+An audit pass applies nothing, so two sections change name and two header fields change meaning.
+Everything else — the proof requirement, the tiers, the ephemeral IDs, the hands-off rule for specs — is unchanged.
+
+| Fix mode | Audit mode        | What changes                                                                                                                |
+| -------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Applied  | Proposed          | Findings that were not applied; add a Tier column, so the reader sees which ones a fix pass takes without asking            |
+| Removed  | Proposed removals | Same block format and both proof answers; **Verified by** becomes **Would be verified by** — the check a fix pass would run |
+
+Header fields:
+
+- **Verification** records the check and the baseline result, and drops the final result; nothing ran after.
+- **Net** is an estimate of what the proposals would move, and says so: `would remove ~<n> lines across <n> files`.
+
+A removal proposal still needs both proof answers.
+Proposing a deletion without the consumer sweep and the history check is a guess, and a reader cannot act on it.
 
 ## Consumption by other skills
 
