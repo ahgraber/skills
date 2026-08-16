@@ -35,7 +35,8 @@ Keep identifiers, commands, paths, and file names exact.
   — just answer inline; the full artifact is overkill.
 - Writing the commit message for the change — use `commit-message`.
 - Reviewing the change for bugs, security, or style — use `code-review` or `securing-code`.
-- Explaining a whole codebase or writing sustained library docs — use `scaffold-docs`.
+- Explaining a whole codebase or writing sustained library documentation.
+  The scope here is one change, not a system.
 
 ## Workflow
 
