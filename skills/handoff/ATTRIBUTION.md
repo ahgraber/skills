@@ -7,3 +7,4 @@ This file records external sources referenced while building or maintaining thes
 - [beads/.claude/skills/handoff/SKILL.md at main · steveyegge/beads](https://github.com/steveyegge/beads/blob/main/.claude/skills/handoff/SKILL.md)
 - [agentops/skills/handoff/SKILL.md at main · boshu2/agentops](https://github.com/boshu2/agentops/blob/main/skills/handoff/SKILL.md)
 - [BoelenJ/copilot-studio-handoff-skill](https://github.com/BoelenJ/copilot-studio-handoff-skill)
+- [The /handoff Skill - AI Hero](https://www.aihero.dev/skills-handoff)

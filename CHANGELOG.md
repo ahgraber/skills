@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-08-17
+
+### Changed
+
+- `handoff` — record session evidence, never invent continuation. The skill now serves conversational transfers (ideation, research, writing) as well as repository work; repo state and the Changes Made and Validation sections are conditional. Every statement must trace to the user's words, the session's actions, or an artifact, and repository claims are verified against the working tree rather than conversation memory. Next Steps becomes Continuation and carries only user-given direction or the remainder of requested work — when none was established the author asks, and when none is given the section is omitted. A new References section passes along consulted sources with a note on why the recipient needs each.
+
 ## [2.3.2] - 2026-08-16
 
 ### Changed
@@ -421,4 +427,5 @@ MINOR, fixes bump PATCH.
 [2.3.0]: https://github.com/ahgraber/skills/compare/skills-v2.2.2...skills-v2.3.0
 [2.3.1]: https://github.com/ahgraber/skills/compare/skills-v2.3.0...skills-v2.3.1
 [2.3.2]: https://github.com/ahgraber/skills/compare/skills-v2.3.1...skills-v2.3.2
-[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.3.2...HEAD
+[2.4.0]: https://github.com/ahgraber/skills/compare/skills-v2.3.2...skills-v2.4.0
+[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.4.0...HEAD

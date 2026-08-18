@@ -2,17 +2,23 @@
 
 Use this exact structure for chat output.
 Assume the receiver can only see this handoff and nothing else.
+Sections marked `(repo-only)` apply to repository work; omit them when no repository is involved or repo state is irrelevant.
+Sections marked `(only-if-established)` record only what the session actually produced; omit them rather than invent content.
+Markers like `(repo-only)` and `(only-if-established)` are template annotations — do not include them in the output.
+Write `None` in a section that has no items; write `Unknown` only when the information is missing.
+Keep command results on one line with inline code; do not nest fenced code blocks inside the outer fence.
 
 ```md
 ## Handoff: [Short topic]
 
 - Date: YYYY-MM-DD
-- Project/Repo: [name]
+- Context: [project, repo, document, or topic]
 - Goal: [what success looks like]
 
 ### Current State
 
 - Status: [in progress | blocked | ready for handoff]
+- Repo (repo-only): [branch] @ [short-hash]; [clean | uncommitted changes in path/a, path/b]
 - Completed:
   - [concrete completed item]
 - Pending:
@@ -22,7 +28,11 @@ Assume the receiver can only see this handoff and nothing else.
 
 - [Decision]: [Reason, tradeoff, or constraint]
 
-### Changes Made
+### References (only-if-established)
+
+- `[path, URL, or artifact]`: [what it holds + why the recipient needs it]
+
+### Changes Made (repo-only)
 
 - Files touched:
   - `[path/to/file]`: [what changed and why]
@@ -31,7 +41,7 @@ Assume the receiver can only see this handoff and nothing else.
 - Commands run:
   - `[command]` -> [important result]
 
-### Validation
+### Validation (repo-only)
 
 - Checks run:
   - `[test/lint/check]`: [pass/fail + key detail]
@@ -45,19 +55,18 @@ Assume the receiver can only see this handoff and nothing else.
 - Risks:
   - [risk + likely impact + mitigation]
 
-### Next Steps (ordered)
+### Continuation (only-if-established)
 
-1. [first action to execute now]
-2. [second action]
-3. [third action or follow-up]
+1. [direction the user gave, or the remainder of requested work — executable now]
+2. [second established item]
 
-### Open Questions
+### Open Questions (only-if-established)
 
-- [question + information needed to resolve]
+- [question actually raised in the session + information needed to resolve]
 
 ### Startup Prompt for Next Conversation
 
 Continue this work using only this handoff.
 Assume no access to prior chat history.
-Start with: [first action from Next Steps].
+Start with: [first Continuation item | "read Current State and confirm direction with the user"].
 ```
