@@ -32,7 +32,9 @@ If a default conflicts with project constraints or worsens the outcome, follow t
 
 ## Invocation Notice
 
-- Inform the user when this skill is being invoked by name: `python`.
+- Tell the user when this skill is running: `python`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## Shared Defaults
 

@@ -6,10 +6,6 @@ description: |-
 
 # Subagent Patterns
 
-## Invocation Notice
-
-- Inform the user when this skill is being invoked by name: `subagent-patterns`.
-
 ## Overview
 
 This skill helps you decide what to dispatch to a subagent and how.
@@ -40,6 +36,12 @@ Resolve the five decisions in order, then apply the rules that hold for every di
 - **Driving another agent CLI non-interactively** (shelling out to Codex, Gemini, `llm`, Pi, and the like).
   A child harness's permission prompts can't surface back to the user, so its actions escape human oversight.
   Keep every dispatch inside your own harness, where approvals still reach the person running it.
+
+## Invocation Notice
+
+- Tell the user when this skill is running: `subagent-patterns`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## The Five Decisions
 

@@ -6,10 +6,6 @@ description: |-
 
 # MCP Docs and Research (Context7, Exa, Jina)
 
-## Invocation Notice
-
-- Inform the user when this skill is being invoked by name: `mcp-research`.
-
 ## Overview
 
 Use MCP-provided tools to retrieve current, verifiable information instead of relying on memory for fast-changing libraries, APIs, and ecosystem guidance.
@@ -21,6 +17,12 @@ Use MCP-provided tools to retrieve current, verifiable information instead of re
 - Implementing features tied to third-party SDKs or APIs.
 - Debugging behavior that may be version-specific.
 - Looking up current best practices, changelogs, or breaking changes.
+
+## Invocation Notice
+
+- Tell the user when this skill is running: `mcp-research`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## Tool Selection
 

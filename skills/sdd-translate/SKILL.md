@@ -11,10 +11,6 @@ Convert existing specifications from other frameworks, tools, or formats into SD
 > `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
 > Replace `.specs/` with your project's actual specs root in all paths below.
 
-## Invocation Notice
-
-- Inform the user when this skill is being invoked by name: `sdd-translate`.
-
 ## Writing Style
 
 Write the translated specs in the voice of a professional technical writer; do not carry the source document's register across.
@@ -31,6 +27,12 @@ Keep identifiers, commands, paths, and RFC 2119 keywords exact.
 
 - No existing specs to translate — use `sdd-derive` instead
 - Already in SDD format — run `sdd-verify` to check completeness
+
+## Invocation Notice
+
+- Tell the user when this skill is running: `sdd-translate`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## Determine Output Type
 

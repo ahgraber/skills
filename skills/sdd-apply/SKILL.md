@@ -12,10 +12,6 @@ Check off each task as it completes.
 > `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
 > Replace `.specs/` with your project's actual specs root in all paths below.
 
-## Invocation Notice
-
-- Inform the user when this skill is being invoked by name: `sdd-apply`.
-
 ## Writing Style
 
 Write artifact updates, task notes, and commit bodies in the voice of a professional technical writer.
@@ -70,6 +66,12 @@ When drafting a commit message during apply:
 
 - No `tasks.md` exists — run `sdd-propose` first
 - All tasks complete — run `sdd-verify`, then `sdd-sync`, then `sdd-archive`
+
+## Invocation Notice
+
+- Tell the user when this skill is running: `sdd-apply`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## Process
 

@@ -8,10 +8,6 @@ description: |-
 
 Draft or update a `CHANGELOG.md` following Keep a Changelog conventions.
 
-## Invocation Notice
-
-Inform the user when this skill is being invoked by name: `changelog`.
-
 ## When to Use
 
 - Writing or updating `CHANGELOG.md` for an upcoming or recent release
@@ -24,6 +20,12 @@ Inform the user when this skill is being invoked by name: `changelog`.
 - Writing a git commit message — use `commit-message` skill
 - Writing internal release notes or deployment runbooks (audience is operators, not users)
 - Full code review — use `code-review` skill
+
+## Invocation Notice
+
+- Tell the user when this skill is running: `changelog`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## Workflow
 

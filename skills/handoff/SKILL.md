@@ -8,10 +8,6 @@ description: |-
 
 Produce a transfer-ready handoff for in-progress work.
 
-## Invocation Notice
-
-- Inform the user when this skill is being invoked by name: `handoff`.
-
 ## Writing Style
 
 Write the handoff in the voice of a professional technical writer.
@@ -53,6 +49,12 @@ Keep identifiers, commands, paths, and file names exact.
 - Simple same-thread progress updates.
 - Creating long-lived project documentation.
 - Retrospectives not intended for immediate continuation.
+
+## Invocation Notice
+
+- Tell the user when this skill is running: `handoff`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## Workflow
 

@@ -30,7 +30,9 @@ When project constraints require deviation, call out tradeoffs and compensating 
 
 ## Invocation Notice
 
-- Inform the user when this skill is being invoked by name: `python-notebooks-async`.
+- Tell the user when this skill is running: `python-notebooks-async`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## Quick Reference
 

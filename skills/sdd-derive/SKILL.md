@@ -13,10 +13,6 @@ The orchestrator holds context across phases; subagents are dispatched for scope
 > `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
 > Replace `.specs/` with the project's actual specs root.
 
-## Invocation Notice
-
-- Inform the user when this skill is being invoked by name: `sdd-derive`.
-
 ## Writing Style
 
 Write the derived specs in the voice of a professional technical writer.
@@ -35,6 +31,12 @@ Keep identifiers, commands, paths, and RFC 2119 keywords exact.
 - Translating specs from another tool or format — use `sdd-translate`
 - No codebase and no existing behavior to anchor against — use `sdd-propose`
 - Exploring a problem before deciding what to spec — use `sdd-explore`
+
+## Invocation Notice
+
+- Tell the user when this skill is running: `sdd-derive`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## Determine Output Type
 

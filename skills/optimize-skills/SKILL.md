@@ -8,10 +8,6 @@ description: |-
 
 Use this skill to create, review, or improve SKILL.md-based skills so they trigger correctly, stay concise, and execute reliably.
 
-## Invocation Notice
-
-- Inform the user when this skill is being invoked by name: `optimize-skills`.
-
 ## Writing Style
 
 Write `SKILL.md` and its resources in the voice of a professional technical writer.
@@ -24,6 +20,12 @@ Keep identifiers, commands, paths, and tool names exact.
 - Description must state when and why to invoke the skill — no workflow summaries, no "what it does."
 - Don't duplicate reference content in SKILL.md; link to `references/` instead.
 - SKILL.md target: \<500 lines, \<5000 tokens.
+- Order the opening sections of every SKILL.md: H1 title, optional intro or `## Overview`, `## When to Use`, optional `## When Not to Use`, then `## Invocation Notice`.
+  The reader decides whether the skill applies before reading how it announces itself.
+  Place any remaining sections after the notice.
+- Word the notice exactly as `assets/skill-template.md` writes it, with the skill name in backticks.
+  It tells a user who did not ask for the skill which one is driving the reply, so it is skipped only when the user asked for the skill itself.
+  Keep the trigger-phrase clause: without it an agent reads its own trigger list as a name and suppresses the notice on the invocations that most need it.
 
 ## When to Use
 
@@ -32,6 +34,12 @@ Keep identifiers, commands, paths, and tool names exact.
 - Tightening a skill that is too long, redundant, or hard to execute.
 - Converting narrative guidance into concise, imperative instructions.
 - Rebalancing where content should live across `SKILL.md`, `references/`, `assets/`, and `scripts/`.
+
+## Invocation Notice
+
+- Tell the user when this skill is running: `optimize-skills`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## Overview
 

@@ -17,6 +17,12 @@ If you have not reproduced the failure and identified the cause, you cannot prop
 
 Skip this skill only when the user has explicitly told you the cause and asked for a specific change.
 
+## Invocation Notice
+
+- Tell the user when this skill is running: `debugging`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
+
 ## Phase 0: Preserve evidence
 
 When you discover a failure mid-task:

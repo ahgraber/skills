@@ -6,10 +6,6 @@ description: |-
 
 # Deep Research
 
-## Invocation Notice
-
-- Inform the user when this skill is being invoked by name: `deep-research`.
-
 ## Overview
 
 `deep-research` runs a recursive, multi-round web investigation.
@@ -53,6 +49,12 @@ Substitute your harness's equivalents and gate each on availability:
 - Library, API, SDK, dependency, or version questions — use `mcp-research`.
 - Open-ended ideation with no anchor — use `brainstorming`.
 - Reading/auditing a local codebase — use code search tools.
+
+## Invocation Notice
+
+- Tell the user when this skill is running: `deep-research`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## The Loop
 

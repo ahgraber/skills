@@ -44,6 +44,12 @@ For asyncio event-loop ownership (top-level `await`, kernel-owns-the-loop), defe
 - Pure asyncio mechanics (`RuntimeError: event loop already running`, `asyncio.run()` in a cell) — see `python-notebooks-async`.
 - One-shot throwaway exploration no one else will read.
 
+## Invocation Notice
+
+- Tell the user when this skill is running: `interactive-notebook-demo`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
+
 ## What the demo must orient the reader to
 
 A reader should come away understanding the feature, not just a list of callable methods.

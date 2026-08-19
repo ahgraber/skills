@@ -10,7 +10,9 @@ Proofread and lightly copy edit text while preserving wording, order, tone, and 
 
 ## Invocation Notice
 
-- Inform the user when this skill is being invoked by name: `proof`.
+- Tell the user when this skill is running: `proof`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## Critical Constraints
 

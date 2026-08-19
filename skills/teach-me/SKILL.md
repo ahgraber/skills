@@ -12,7 +12,9 @@ The structure comes from learning science — each design choice names its princ
 
 ## Invocation Notice
 
-- Inform the user when this skill is being invoked by name: `teach-me`.
+- Tell the user when this skill is running: `teach-me`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## Writing Style
 

@@ -13,10 +13,6 @@ Available before or during any SDD path.
 > `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
 > Replace `.specs/` with your project's actual specs root in all paths below.
 
-## Invocation Notice
-
-- Inform the user when this skill is being invoked by name: `sdd-explore`.
-
 ## Writing Style
 
 The conversation stays exploratory, but any artifact the user decides to keep is written in the voice of a professional technical writer.
@@ -34,6 +30,12 @@ Keep identifiers, commands, paths, and RFC 2119 keywords exact.
 
 - You already know what to build — jump to `sdd-propose` or `sdd-derive`
 - You have existing specs to convert — use `sdd-translate`
+
+## Invocation Notice
+
+- Tell the user when this skill is running: `sdd-explore`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## Hard Rule: No Code
 

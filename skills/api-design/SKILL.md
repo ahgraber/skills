@@ -24,7 +24,9 @@ description: |-
 
 ## Invocation Notice
 
-When invoked by name, announce: "Using **api-design** to guide API design decisions."
+- Tell the user when this skill is running: `api-design`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## Universal Principles
 

@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `interactive-notebook-demo` — gains the notebook event-loop reference shared from `python-notebooks-async`.
 - Fast-moving references (ruff coverage, the nox matrix, notebook async) now open with a `Last verified:` date naming what to re-check.
 - Skill scripts now run on Python 3.12 through 3.14. The previous `>=3.11,<3.13` bound refused to start on 3.13 or later, so a machine whose only interpreter was newer could not run them; Python 3.11 is no longer supported.
+- Refined invocation notice trigger conditions and position.
 
 ### Fixed
 

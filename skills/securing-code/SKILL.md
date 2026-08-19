@@ -6,10 +6,6 @@ description: |-
 
 # Securing Code
 
-## Invocation Notice
-
-Inform the user when this skill is being invoked: `securing-code`.
-
 ## When to Use
 
 - Implementing any feature, endpoint, service, or component
@@ -24,6 +20,12 @@ Inform the user when this skill is being invoked: `securing-code`.
 - Explaining code without modifying it
 - Formatting or linting only
 - Writing documentation unrelated to security controls
+
+## Invocation Notice
+
+- Tell the user when this skill is running: `securing-code`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ---
 

@@ -17,10 +17,6 @@ It does not formally prove universal properties — strong claims supported by t
 > `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
 > Replace `.specs/` with your project's actual specs root in all paths below.
 
-## Invocation Notice
-
-- Inform the user when this skill is being invoked by name: `sdd-verify`.
-
 ## Writing Style
 
 Write the report and its findings in the voice of a professional technical writer.
@@ -37,6 +33,12 @@ Keep identifiers, commands, paths, and RFC 2119 keywords exact.
 - No active change exists (`.specs/changes/<name>/` is missing) — the skill is change-scoped; use `sdd-derive` to retrofit specs from existing code instead
 - Schema-only validation with no spec context — run the project's schema generation directly and diff
 - During implementation itself — use `sdd-apply` to drive work; verify after
+
+## Invocation Notice
+
+- Tell the user when this skill is running: `sdd-verify`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## Soft Gate
 

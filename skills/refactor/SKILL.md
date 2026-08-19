@@ -6,10 +6,6 @@ description: |-
 
 # Refactor: Behavior-Preserving Structural Change
 
-## Invocation Notice
-
-- Inform the user when this skill is being invoked by name: `refactor`.
-
 ## Overview
 
 Refactor changes the structure of working code; it does not change behavior.
@@ -38,6 +34,12 @@ Every move is approved individually and executed on its own, with verification g
 - A rewrite that trades semantics for speed does not preserve behavior, so optimization work does not belong here.
 - Anything a configured linter or formatter flags is out of scope.
   Run the tool.
+
+## Invocation Notice
+
+- Tell the user when this skill is running: `refactor`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## Phase 0 — Gate
 

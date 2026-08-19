@@ -9,9 +9,11 @@ description: |-
 Draft or revise prose that can stand in professional correspondence, public writing, technical documentation, or longform messages.
 Aim for clarity, specificity, and a measured tone — and remove the characteristic tells of machine-generated text.
 
-## Invocation notice
+## Invocation Notice
 
-- Inform the user when this skill is invoked by name: `antislop-writing`.
+- Tell the user when this skill is running: `antislop-writing`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## The standard and the reflex
 

@@ -12,10 +12,6 @@ Generates artifacts in dependency order: proposal → delta specs → design →
 > `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
 > Replace `.specs/` with your project's actual specs root in all paths below.
 
-## Invocation Notice
-
-- Inform the user when this skill is being invoked by name: `sdd-propose`.
-
 ## Writing Style
 
 Write the proposal, delta specs, design, and tasks in the voice of a professional technical writer.
@@ -34,6 +30,12 @@ Keep identifiers, commands, paths, and RFC 2119 keywords exact.
 - Deriving specs from code analysis — use `sdd-derive`
 - A change already exists and needs implementation — use `sdd-apply`
 - Need to think before speccing — use `sdd-explore` first
+
+## Invocation Notice
+
+- Tell the user when this skill is running: `sdd-propose`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## Process
 

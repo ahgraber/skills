@@ -6,10 +6,6 @@ description: |-
 
 # Alt-Text
 
-## Invocation Notice
-
-Inform the user when this skill is being invoked by name: `alt-text`.
-
 ## When to Use
 
 - User attaches an image and asks for a description or alt-text
@@ -17,6 +13,12 @@ Inform the user when this skill is being invoked by name: `alt-text`.
 - User needs an accessible description for documentation or publishing
 
 If the image is not attached, ask the user to attach it before proceeding.
+
+## Invocation Notice
+
+- Tell the user when this skill is running: `alt-text`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## Instructions
 

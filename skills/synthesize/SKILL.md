@@ -8,7 +8,9 @@ description: |-
 
 Distill the through-line of one or more sources — a set of documents, or the ideas within a single rich piece — into a short, spine-led gist: a few tight paragraphs built around a **spine** drawn from the material, where support is insight on its own and the reader is pointed to the source, not served a copy.
 
-Inform the user when invoking this skill by name: `synthesize`.
+Tell the user when this skill is running: `synthesize`.
+Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 Two modal failure modes pull against this and **both reassert at draft time, even after a spine is chosen** — defeating them is the whole job, not a one-time setup step:
 

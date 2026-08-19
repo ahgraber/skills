@@ -6,10 +6,6 @@ description: |-
 
 # Simplify: Remove Slop from Working Code
 
-## Invocation Notice
-
-- Inform the user when this skill is being invoked by name: `simplify`.
-
 ## Overview
 
 Simplify assumes the code is correct and asks whether it is as simple as it could be.
@@ -45,6 +41,12 @@ Run the tool instead, and review only what those tools cannot check.
   Simplify assumes the code is correct; if it is not, the findings are irrelevant and the edits unsafe.
 - Simplify never adds capability.
   New behavior is a different task.
+
+## Invocation Notice
+
+- Tell the user when this skill is running: `simplify`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## What Goes Elsewhere
 

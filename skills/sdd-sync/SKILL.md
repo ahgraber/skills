@@ -12,10 +12,6 @@ Applies each delta marker intelligently, preserving existing content not mention
 > `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
 > Replace `.specs/` with your project's actual specs root in all paths below.
 
-## Invocation Notice
-
-- Inform the user when this skill is being invoked by name: `sdd-sync`.
-
 ## Writing Style
 
 Write any new baseline text and the sync report in the voice of a professional technical writer.
@@ -33,6 +29,12 @@ Keep identifiers, commands, paths, and RFC 2119 keywords exact.
 - Delta specs don't exist for this change — nothing to sync
 - Implementation isn't verified — run `sdd-verify` first
 - Blocking findings remain from `sdd-verify`
+
+## Invocation Notice
+
+- Tell the user when this skill is running: `sdd-sync`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## Soft Gate
 

@@ -11,10 +11,6 @@ description: |-
 Write shell code with an explicit portability target first, then apply strict quoting and a bounded ShellCheck remediation loop.
 Default to Bash readability and safety; switch to POSIX-only mode when the user asks for strict portability.
 
-## Invocation Notice
-
-- Inform the user when this skill is being invoked by name: `shell-scripts`.
-
 ## When to Use
 
 - Creating or refactoring Bash scripts.
@@ -27,6 +23,12 @@ Default to Bash readability and safety; switch to POSIX-only mode when the user 
 
 - The task is strictly `fish`, `powershell`, or Windows batch.
 - The user explicitly wants pure POSIX `sh` and no Bash features (use POSIX mode from `references/compatibility-matrix.md`).
+
+## Invocation Notice
+
+- Tell the user when this skill is running: `shell-scripts`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## Workflow
 

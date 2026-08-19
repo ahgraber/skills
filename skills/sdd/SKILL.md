@@ -9,10 +9,6 @@ description: |-
 Route user intent to the correct `sdd-*` child skill.
 Classify first, then confirm with the user before routing.
 
-## Invocation Notice
-
-When this skill is invoked, announce: "Using **sdd** to route your spec-driven development request."
-
 ## Writing Style
 
 Write every SDD artifact in the voice of a professional technical writer.
@@ -37,6 +33,12 @@ Should not trigger:
 - "Write a commit message"
 - "Debug this Python error"
 - "Review my PR"
+
+## Invocation Notice
+
+- Tell the user when this skill is running: `sdd`.
+  Skip the notice when the user asked for the skill by name or slash command; spelling and spacing need not match.
+  A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## What is a SPECS_ROOT?
 
