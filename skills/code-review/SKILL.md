@@ -6,22 +6,10 @@ description: |-
 
 # Code Review
 
-## Invocation Notice
-
-- Inform the user when this skill is being invoked by name: `code-review`.
-
 ## Overview
 
 Structured, actionable code review focused on correctness, bugs, style, and maintainability.
 Act as a senior engineer: thorough, pragmatic, impact-first.
-
-## Constraints
-
-- Do NOT modify code unless explicitly asked.
-- Do NOT guess missing code or behavior; ask for missing context.
-- Do NOT suggest adding suppressions (e.g., `#pragma warning disable`).
-- Stay focused on review quality; avoid unrelated commentary.
-- Work strictly from the provided diff or code context.
 
 ## When to Use
 
@@ -34,9 +22,21 @@ Act as a senior engineer: thorough, pragmatic, impact-first.
 **When NOT to use:**
 
 - Implementing new features from scratch.
-- Running test suites (see `python-testing` or equivalent).
+- Running test suites (see `writing-tests` or equivalent).
 - Refactoring without a prior review (review first, then refactor on request).
 - Linting or formatting only — use a linter or formatter directly.
+
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `code-review`.
+
+## Constraints
+
+- Do NOT modify code unless explicitly asked.
+- Do NOT guess missing code or behavior; ask for missing context.
+- Do NOT suggest adding suppressions (e.g., `#pragma warning disable`).
+- Stay focused on review quality; avoid unrelated commentary.
+- Work strictly from the provided diff or code context.
 
 ## Quick Reference
 

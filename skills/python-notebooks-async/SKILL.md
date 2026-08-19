@@ -24,9 +24,13 @@ When project constraints require deviation, call out tradeoffs and compensating 
 
 ### When NOT to Use
 
-- Pure script or service code with no notebook involvement — see `python-concurrency-performance`.
+- Pure script or service code with no notebook involvement.
 - Synchronous notebook workflows with no async needs.
-- General asyncio API design outside notebook contexts — see `python-runtime-operations`.
+- General asyncio API design outside notebook contexts — the `python` skill covers concurrency audit defaults.
+
+## Invocation Notice
+
+- Inform the user when this skill is being invoked by name: `python-notebooks-async`.
 
 ## Quick Reference
 
@@ -54,16 +58,6 @@ When project constraints require deviation, call out tradeoffs and compensating 
   Synchronous calls like `requests.get()` block the event loop, starving concurrent tasks.
   Use `aiohttp`, `httpx`, or `asyncio.to_thread()`.
 
-## Scope Note
-
-- Treat these recommendations as preferred defaults for common cases, not universal rules.
-- If a default conflicts with project constraints or worsens the outcome, suggest a better-fit alternative and explain why it is better for this case.
-- When deviating, call out tradeoffs and compensating controls (tests, observability, migration, rollback).
-
-## Invocation Notice
-
-- Inform the user when this skill is being invoked by name: `python-design-modularity`.
-
 ## References
 
-- `references/notebooks-async.md`
+- `references/notebooks-async.md` — event-loop ownership, background-work and fire-and-forget patterns, script/notebook compatibility, blocking-library interop, `nest_asyncio` policy

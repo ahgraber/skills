@@ -1,5 +1,7 @@
 # Async in Notebooks (`.ipynb` and `#%%` `.py`)
 
+> Last verified: 2026-08-18 — re-verify the task weak-reference behavior and top-level-await support against current CPython and ipykernel release notes.
+
 ## Outcome
 
 Notebook workflows remain async-safe and reproducible without event-loop patching.
@@ -8,7 +10,7 @@ Notebook workflows remain async-safe and reproducible without event-loop patchin
 
 - Prefer `#%%` `.py` notebooks for reviewability, diffs, and normal Python tooling.
 - Use `.ipynb` when rich notebook metadata/output is explicitly required.
-- Keep reusable logic in importable modules; notebook cells should orchestrate and inspect.
+- Keep reusable logic in importable modules; use notebook cells to orchestrate and inspect.
 
 ## Event Loop Ownership
 
@@ -34,7 +36,7 @@ Notebook workflows remain async-safe and reproducible without event-loop patchin
 
 The event loop holds only a **weak reference** to tasks.
 In Python 3.12+ a task created with `asyncio.create_task()` may be garbage-collected before it runs if nothing else holds a strong reference.
-This is a silent failure — no error, the task simply never executes.
+This is a silent failure: no error is raised, and the task never executes.
 
 Safe pattern: keep a module-level `set` as the strong-reference anchor and remove each task when it completes.
 

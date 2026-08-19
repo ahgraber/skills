@@ -172,5 +172,4 @@ If the user says any of these, return to Phase 1:
 
 ## Related skills
 
-- `test-driven-development` — for writing the Phase 5 regression test properly.
-- `python-errors-reliability`, `python-testing` — Python-specific reliability and test patterns.
+- `python` — Python-specific reliability and testing defaults, audit-shaped.

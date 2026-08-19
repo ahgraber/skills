@@ -1,5 +1,15 @@
 # Multi-Python Version Testing
 
+> Last verified: 2026-08-18 — re-verify nox/uv APIs, supported Python versions, and CI action versions against the nox docs and release notes.
+
+## Contents
+
+- [nox](#nox) — configuration, dependency-matrix parametrization, session selection, reuse, tags, interpreter download
+- [uv Integration](#uv-integration) — uv venv backend, lockfile-based installs, `nox-uv`
+- [CI Patterns (GitHub Actions)](#ci-patterns-github-actions) — version quoting, matrix + nox, caching
+- [PEP 735 Dependency Groups](#pep-735-dependency-groups)
+- [Common Pitfalls](#common-pitfalls) — interpreter discovery, venv reuse, resolution across versions, build overhead
+
 ## Outcome
 
 Test suite runs reliably across all supported Python versions with consistent dependency resolution, fast feedback, and minimal CI configuration drift.
@@ -12,8 +22,8 @@ Test suite runs reliably across all supported Python versions with consistent de
 
 ## nox
 
-nox uses a Python file (`noxfile.py`) for configuration, giving full programmatic control over test sessions.
-It pairs naturally with uv as the virtual environment backend.
+nox uses a Python file (`noxfile.py`) for configuration, which gives programmatic control over test sessions.
+It supports uv as the virtual environment backend.
 
 ### Basic Configuration
 
@@ -168,7 +178,7 @@ jobs:
       - run: nox --python ${{ matrix.python-version }}
 ```
 
-nox's `--python` flag runs only sessions matching the given version, pairing naturally with GitHub Actions matrix strategy.
+nox's `--python` flag runs only the sessions that match the given version, so it slots directly into a GitHub Actions matrix.
 
 ### nox GitHub Action (No Matrix Needed)
 

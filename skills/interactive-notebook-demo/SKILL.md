@@ -108,8 +108,7 @@ Pull these through as well — they are usually the difference between a tour an
    Top-level `await` in cells (the kernel owns the loop).
    No `if __name__ == "__main__"` script guard — straight-line `python file.py` is _not_ a supported mode.
    Make cleanup its own clearly-marked final cell the reader runs when done.
-7. **kwargs everywhere.**
-   `client.update(record_id=rid, data=payload, expected_revision=3)` — explicit names aid comprehension and survive signature drift.
+7. **kwargs everywhere.** `client.update(record_id=rid, data=payload, expected_revision=3)` — explicit names aid comprehension and survive signature drift.
    **Verify against the real signatures**; naive guesses drift (a parameter you'd call `path` is really `path_prefix`, `version` is really `target_version`).
    Read the source before you write the call.
 8. **try/except only where the error is the point.**
@@ -176,3 +175,4 @@ Its top-level `await`s are the part most likely to break interactively — so th
 
 - `references/headless-validation.md` — run the real `#%%` file through a live kernel, sandbox env setup, ruff per-file-ignores, gitignore/README checklist.
 - `references/cell-patterns.md` — copy-paste cell skeletons: header, section opener, point-into-the-code closer, markdown-then-operation pairing, prove-with-data idioms, the error-demo cell, the connectivity probe, and cleanup.
+- `references/notebooks-async.md` — event-loop ownership, top-level `await`, and background-task patterns for demos with async cells (shared from `python-notebooks-async`).

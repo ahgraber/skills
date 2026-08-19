@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Breaking Changes
 
 - Remove `explain-diff`, `mermaid`, and `visual-brainstorming`; their jobs move into the new skills below. Migrate installs: "explain this diff/PR" asks now trigger `teach-me` (same phrases; artifacts default to `.teach/` instead of `.explain/`); the Mermaid validate/render scripts ship inside `show-me` (`skills/show-me/scripts/`); the browser-based visual companion is `show-me`'s consent-gated session (`references/visual-session.md`).
+- Removed the routed `python-*` sub-skill family (`python-concurrency-performance`, `python-data-state`, `python-design-modularity`, `python-errors-reliability`, `python-integrations-resilience`, `python-runtime-operations`, `python-testing`, `python-types-contracts`, `python-workflow-delivery`) — install the reworked `python` skill instead; `python-notebooks-async` remains for notebook event-loop work. Free-threaded testing guidance drops to git history until a project targets free-threaded builds.
 
 ### Added
 
@@ -23,6 +24,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `handoff` — accepting another skill's offer to save now counts as the file request; the skill writes the file without asking again.
 - `code-review` — no longer triggers for building understanding of a change; those asks route to `teach-me`.
 - `receiving-feedback` — triggers on any feedback that evaluates an artifact the agent produced or is responsible for, not only review feedback.
+- `python` — reworked from a router into one house-style audit skill: a ruff pass under the project's own lint configuration, plus a judgment sweep for defaults no linter can check. It now fires when a change is about to be called done or on any review/audit request, reporting findings instead of imposing rules while writing, and local project policy outranks every house default.
+- `python` — the supply-chain audit scripts now audit the project they are invoked from: the workspace root resolves from the working directory rather than the scripts' install location, and `uv audit` support is probed rather than assumed, so a uv build too old to audit falls through to pip-audit instead of failing with the dependencies unaudited.
+- `writing-tests` — gains Python-specific testing practice (mocking, pytest, async, dependency audits) as a reference shared from `skills/python`.
+- `interactive-notebook-demo` — gains the notebook event-loop reference shared from `python-notebooks-async`.
+- Fast-moving references (ruff coverage, the nox matrix, notebook async) now open with a `Last verified:` date naming what to re-check.
 
 ## [2.4.0] - 2026-08-17
 

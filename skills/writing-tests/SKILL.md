@@ -1,14 +1,10 @@
 ---
 name: writing-tests
 description: |-
-  Use when writing or reviewing tests in any language, or diagnosing a suite that is slow, brittle, or hard to read. Triggers: "write tests", "how should I test this", "what kind of test", "test is flaky/fragile", "should I mock this", "test is hard to read". For Python-specific guidance see `python-testing`.
+  Use when writing or reviewing tests in any language, or diagnosing a suite that is slow, brittle, or hard to read. Triggers: "write tests", "how should I test this", "what kind of test", "test is flaky/fragile", "should I mock this", "test is hard to read". Python-specific practices (mocking, pytest, async) are included in `references/python-testing.md`.
 ---
 
 # Writing Tests
-
-## Invocation Notice
-
-Inform the user when this skill is being invoked by name: `writing-tests`.
 
 ## When to Use
 
@@ -18,9 +14,13 @@ Inform the user when this skill is being invoked by name: `writing-tests`.
 - Reviewing test structure, naming, or test double usage.
 - Unsure what test coverage a change needs.
 
-**When NOT to use:**
+## When NOT to use
 
-- Python-specific practices (fixtures, async, multi-version, free-threaded): see `python-testing`.
+- Auditing Python code for house-style violations outside tests: see the `python` skill.
+
+## Invocation Notice
+
+Inform the user when this skill is being invoked by name: `writing-tests`.
 
 ## Quick Reference
 
@@ -206,6 +206,13 @@ One rule from TDD that applies universally: when fixing a bug, write the failing
 A test you never saw fail doesn't prove the bug is gone.
 For failures that can't be reproduced locally (race conditions, load-dependent), write a characterization test capturing the known behavior and confirm the failure reproduces in CI before patching.
 
+## Intent and Scope
+
+- Infer intended behavior from names, docstrings, type signatures, usage patterns, and existing tests before writing new ones.
+  If intent is ambiguous, state assumptions explicitly and ask before encoding behavior in a test — a test locks in whatever it asserts, wrong or right.
+- When the task is test-only, do not modify production code.
+  If code changes would improve clarity or testability, record them as recommendations and keep implementation out of the test change.
+
 ## Common Mistakes
 
 - **Fragile Test** — breaks when unrelated code changes; caused by asserting on internals (call sequences, private state, string representations of objects).
@@ -224,3 +231,4 @@ For failures that can't be reproduced locally (race conditions, load-dependent),
 - `references/test-structure.md` — AAA in depth, naming conventions, DAMP vs. DRY, GWT vs. AAA
 - `references/test-portfolio.md` — pyramid, trophy, honeycomb, scope decision guide, property-based testing, mutation testing
 - `references/test-doubles.md` — full taxonomy with pseudocode, classical vs. mockist school, when to use each type
+- `references/python-testing.md` — Python-specific practices: `unittest.mock` discipline, pytest structure, async testing, dependency audits

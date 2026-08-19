@@ -49,16 +49,7 @@ npx --yes skills \
     handoff \
     mcp-research \
     python \
-    python-concurrency-performance \
-    python-data-state \
-    python-design-modularity \
-    python-errors-reliability \
-    python-integrations-resilience \
     python-notebooks-async \
-    python-runtime-operations \
-    python-testing \
-    python-types-contracts \
-    python-workflow-delivery \
     sdd \
     sdd-apply \
     sdd-archive \
