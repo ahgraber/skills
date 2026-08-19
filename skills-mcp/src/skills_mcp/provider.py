@@ -85,7 +85,5 @@ class DedupSkillsDirectoryProvider(SkillsDirectoryProvider):
 
     def __repr__(self) -> str:
         return (
-            f"DedupSkillsDirectoryProvider("
-            f"roots={[r.label for r in self._root_specs]}, "
-            f"skills={len(self.providers)})"
+            f"DedupSkillsDirectoryProvider(roots={[r.label for r in self._root_specs]}, skills={len(self.providers)})"
         )

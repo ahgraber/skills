@@ -132,7 +132,9 @@ def discover_roots(
 
         label = spec.label
         if label in used_labels:
-            logger.warning("Skipping root %s: label %r already in use; set an explicit label with LABEL=PATH", real, label)
+            logger.warning(
+                "Skipping root %s: label %r already in use; set an explicit label with LABEL=PATH", real, label
+            )
             continue
         used_labels.add(label)
 

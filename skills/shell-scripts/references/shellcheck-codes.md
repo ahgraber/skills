@@ -10,7 +10,8 @@ For authoritative details, open each linked ShellCheck wiki page.
 
 - [SC1000](https://github.com/koalaman/shellcheck/wiki/SC1000) $ is not used specially and should therefore be escaped.
 - [SC1001](https://github.com/koalaman/shellcheck/wiki/SC1001) This `\o` will be a regular 'o' in this context.
-- [SC1003](https://github.com/koalaman/shellcheck/wiki/SC1003) Want to escape a single quote? echo 'This is how it'\\''s done'.
+- [SC1003](https://github.com/koalaman/shellcheck/wiki/SC1003) Want to escape a single quote?
+  echo 'This is how it'\\''s done'.
 - [SC1004](https://github.com/koalaman/shellcheck/wiki/SC1004) This backslash+linefeed is literal.
   Break outside single quotes if you just want to break the line.
 - [SC1007](https://github.com/koalaman/shellcheck/wiki/SC1007) Remove space after = if trying to assign a value (or for empty string, use var='' ... ).
@@ -129,8 +130,8 @@ For authoritative details, open each linked ShellCheck wiki page.
   Delete and retype it (or ignore/doublequote for literal).
 - [SC1113](https://github.com/koalaman/shellcheck/wiki/SC1113) Use #!, not just #, for the shebang.
 - [SC1114](https://github.com/koalaman/shellcheck/wiki/SC1114) Remove leading spaces before the shebang.
-- [SC1115](https://github.com/koalaman/shellcheck/wiki/SC1115) Remove spaces between # and ! in the shebang.
-- [SC1116](https://github.com/koalaman/shellcheck/wiki/SC1116) Missing $ on a $((..)) expression? (or use ( ( for arrays).
+- [SC1115](https://github.com/koalaman/shellcheck/wiki/SC1115) Remove spaces between `#` and `!` in the shebang.
+- [SC1116](https://github.com/koalaman/shellcheck/wiki/SC1116) Missing `$` on a `$((..))` expression (or use `( (` for arrays).
 - [SC1117](https://github.com/koalaman/shellcheck/wiki/SC1117) Backslash is literal in `"\n"`.
   Prefer explicit escaping: `"\\n"`.
 - [SC1118](https://github.com/koalaman/shellcheck/wiki/SC1118) Delete whitespace after the here-doc end token.
@@ -302,7 +303,7 @@ For authoritative details, open each linked ShellCheck wiki page.
 - [SC2120](https://github.com/koalaman/shellcheck/wiki/SC2120) foo references arguments, but none are ever passed.
 - [SC2121](https://github.com/koalaman/shellcheck/wiki/SC2121) To assign a variable, use just 'var=value', no 'set ..'.
 - [SC2122](https://github.com/koalaman/shellcheck/wiki/SC2122) >= is not a valid operator.
-  Use '! a < b' instead.
+  Use `! a < b` instead.
 - [SC2123](https://github.com/koalaman/shellcheck/wiki/SC2123) PATH is the shell search path.
   Use another name.
 - [SC2124](https://github.com/koalaman/shellcheck/wiki/SC2124) Assigning an array to a string!
@@ -484,8 +485,8 @@ For authoritative details, open each linked ShellCheck wiki page.
 - [SC2248](https://github.com/koalaman/shellcheck/wiki/SC2248) Warn about variable references without braces.
 - [SC2249](https://github.com/koalaman/shellcheck/wiki/SC2249) Consider adding a default \*) case, even if it just exits with error.
 - [SC2250](https://github.com/koalaman/shellcheck/wiki/SC2250) Prefer putting braces around variable references even when not strictly required.
-- [SC2251](https://github.com/koalaman/shellcheck/wiki/SC2251) This ! is not on a condition and skips errexit.
-  Use `&& exit 1` instead, or make sure $? is checked.
+- [SC2251](https://github.com/koalaman/shellcheck/wiki/SC2251) This `!` is not on a condition and skips errexit.
+  Use `&& exit 1` instead, or make sure `$?` is checked.
 - [SC2252](https://github.com/koalaman/shellcheck/wiki/SC2252) You probably wanted && here, otherwise it's always true.
 - [SC2253](https://github.com/koalaman/shellcheck/wiki/SC2253) Use -R to recurse, or explicitly a-r to remove read permissions.
 - [SC2254](https://github.com/koalaman/shellcheck/wiki/SC2254) Quote expansions in case patterns to match literally rather than as a glob.

@@ -23,9 +23,7 @@
     },
     "scope": {
       "excludePaths": [],
-      "includePaths": [
-        "src/"
-      ]
+      "includePaths": ["src/"]
     },
     "sealedAt": "2026-05-31T18:09:00Z",
     "startedAt": "2026-05-31T18:00:00Z",

@@ -166,8 +166,7 @@ If the work came from chat, write a fresh ledger for the pass instead (same form
 **Rationale goes in the ledger, not the code.**
 Do not leave comments narrating the restructuring.
 
-**Ledger IDs are ephemeral.**
-`T3` addresses an entry in one file.
+**Ledger IDs are ephemeral.** `T3` addresses an entry in one file.
 It never appears in source, comments, commit messages, or PR descriptions.
 
 Then report: moves executed, moves declined, net file and line movement, final verification result, ledger path, and what remains deferred.

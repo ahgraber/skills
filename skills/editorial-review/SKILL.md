@@ -47,8 +47,7 @@ Diagnose before prescribing.
    Find the one problem whose fix would most improve the piece, and start there.
    Don't bury the lede in minor notes.
 3. **Probe with questions, not just verdicts.**
-   Ask the author to articulate their reasoning so they discover gaps themselves: 'What is the strongest objection to this claim, and where do you answer it?'
-   or 'If a skeptical reader stopped after this paragraph, what would they take away?'
+   Ask the author to articulate their reasoning so they discover gaps themselves: 'What is the strongest objection to this claim, and where do you answer it?' or 'If a skeptical reader stopped after this paragraph, what would they take away?'
 4. **Adapt to the author.**
    If they're defensive, get more concrete with evidence.
    If they're lost, narrow the focus.

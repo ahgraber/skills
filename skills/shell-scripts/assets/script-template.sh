@@ -19,7 +19,7 @@ DEBUG=0
 DRY_RUN=0
 
 usage() {
-  cat <<USAGE
+  cat << USAGE
 Usage: ${SCRIPT_NAME} [-h] [-v] [-n] <input>
 
 Options:
@@ -42,8 +42,8 @@ log() {
 }
 
 log_debug() { [[ "${DEBUG}" == "1" ]] && log "DEBUG" "$*"; }
-log_info()  { log "INFO" "$*"; }
-log_warn()  { log "WARN" "$*"; }
+log_info() { log "INFO" "$*"; }
+log_warn() { log "WARN" "$*"; }
 log_error() { log "ERROR" "$*"; }
 
 die() {
@@ -60,7 +60,10 @@ trap cleanup EXIT
 
 while getopts ":hvn" opt; do
   case "${opt}" in
-    h) usage; exit 0 ;;
+    h)
+      usage
+      exit 0
+      ;;
     v) DEBUG=1 ;;
     n) DRY_RUN=1 ;;
     :) die "Option -${OPTARG} requires a value." ;;

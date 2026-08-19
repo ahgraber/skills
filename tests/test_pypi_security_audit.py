@@ -202,10 +202,6 @@ def test_pip_audit_no_vulnerabilities():
         # Some other error occurred
         pytest.fail(f"pip-audit failed to run properly:\n\nReturn code: {result.returncode}\nOutput: {error_output}\n")
 
-    # Success - no vulnerabilities found
-    if result.returncode != 0:
-        pytest.fail("pip-audit should return 0 when no vulnerabilities are found")
-
 
 def test_pip_audit_runs_successfully():
     """

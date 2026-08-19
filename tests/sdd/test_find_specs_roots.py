@@ -280,5 +280,7 @@ def test_main_explicit_skips_discovery(tmp_path, monkeypatch, capsys):
 if __name__ == "__main__":
     _here = str(Path(__file__).resolve().parent)
     raise SystemExit(
-        pytest.main([str(Path(__file__).resolve()), "-v", "-p", "no:cacheprovider", "--rootdir", _here, "--confcutdir", _here])
+        pytest.main(
+            [str(Path(__file__).resolve()), "-v", "-p", "no:cacheprovider", "--rootdir", _here, "--confcutdir", _here]
+        )
     )

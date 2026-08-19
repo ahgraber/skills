@@ -14,8 +14,8 @@ log() {
 }
 
 log_debug() { [[ "${DEBUG:-0}" == "1" ]] && log "DEBUG" "$*"; }
-log_info()  { log "INFO" "$*"; }
-log_warn()  { log "WARN" "$*"; }
+log_info() { log "INFO" "$*"; }
+log_warn() { log "WARN" "$*"; }
 log_error() { log "ERROR" "$*"; }
 
 die() {

@@ -45,11 +45,11 @@ while [[ $# -gt 0 ]]; do
       URL_HOST="$2"
       shift 2
       ;;
-    --foreground|--no-daemon)
+    --foreground | --no-daemon)
       FOREGROUND="true"
       shift
       ;;
-    --background|--daemon)
+    --background | --daemon)
       FORCE_BACKGROUND="true"
       shift
       ;;
@@ -84,7 +84,7 @@ fi
 # Windows/Git Bash reaps nohup background processes. Auto-foreground when detected.
 if [[ "${FOREGROUND}" != "true" && "${FORCE_BACKGROUND}" != "true" ]]; then
   case "${OSTYPE:-}" in
-    msys*|cygwin*|mingw*) FOREGROUND="true" ;;
+    msys* | cygwin* | mingw*) FOREGROUND="true" ;;
     *) ;;
   esac
   if [[ -n "${MSYSTEM:-}" ]]; then
@@ -116,18 +116,21 @@ fi
 # Kill any existing server
 if [[ -f "${PID_FILE}" ]]; then
   old_pid=$(cat "${PID_FILE}")
-  kill "${old_pid}" 2>/dev/null || true
+  kill "${old_pid}" 2> /dev/null || true
   rm -f "${PID_FILE}"
 fi
 
-cd "${SCRIPT_DIR}" || { echo '{"error": "Failed to cd to script dir"}'; exit 1; }
+cd "${SCRIPT_DIR}" || {
+  echo '{"error": "Failed to cd to script dir"}'
+  exit 1
+}
 
 # Owner PID monitoring is off by default. In sandboxed tool-call environments
 # the grandparent resolves to a short-lived orchestrator that dies between
 # turns, causing spurious shutdowns. Pass --owner-monitor to opt in when the
 # grandparent is known to be a stable, long-lived process.
 if [[ "${OWNER_MONITOR}" == "true" ]]; then
-  grandparent_pid="$(ps -o ppid= -p "${PPID}" 2>/dev/null || true)"
+  grandparent_pid="$(ps -o ppid= -p "${PPID}" 2> /dev/null || true)"
   OWNER_PID="$(echo "${grandparent_pid}" | tr -d ' ')"
   if [[ -z "${OWNER_PID}" || "${OWNER_PID}" == "1" ]]; then
     OWNER_PID="${PPID}"
@@ -147,16 +150,16 @@ fi
 # Use nohup to survive shell exit; disown to remove from job table
 nohup env BRAINSTORM_DIR="${SESSION_DIR}" BRAINSTORM_HOST="${BIND_HOST}" BRAINSTORM_URL_HOST="${URL_HOST}" BRAINSTORM_OWNER_PID="${OWNER_PID}" node server.cjs > "${LOG_FILE}" 2>&1 &
 SERVER_PID=$!
-disown "${SERVER_PID}" 2>/dev/null || true
+disown "${SERVER_PID}" 2> /dev/null || true
 echo "${SERVER_PID}" > "${PID_FILE}"
 
 # Wait for server-started message (check log file)
 for _ in {1..50}; do
-  if grep -q "server-started" "${LOG_FILE}" 2>/dev/null; then
+  if grep -q "server-started" "${LOG_FILE}" 2> /dev/null; then
     # Verify server is still alive after a short window (catches process reapers)
     alive="true"
     for _ in {1..20}; do
-      if ! kill -0 "${SERVER_PID}" 2>/dev/null; then
+      if ! kill -0 "${SERVER_PID}" 2> /dev/null; then
         alive="false"
         break
       fi

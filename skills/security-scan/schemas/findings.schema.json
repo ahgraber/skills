@@ -3,12 +3,7 @@
   "$id": "urn:agentskills:security-scan:findings",
   "title": "Security scan findings",
   "type": "object",
-  "required": [
-    "documentType",
-    "schemaVersion",
-    "scanId",
-    "findings"
-  ],
+  "required": ["documentType", "schemaVersion", "scanId", "findings"],
   "properties": {
     "documentType": {
       "const": "security-scan.findings"
@@ -54,9 +49,7 @@
           },
           "identity": {
             "type": "object",
-            "required": [
-              "anchor"
-            ],
+            "required": ["anchor"],
             "properties": {
               "anchor": {
                 "type": "string",
@@ -70,10 +63,7 @@
           },
           "fingerprints": {
             "type": "object",
-            "required": [
-              "algorithm",
-              "primary"
-            ],
+            "required": ["algorithm", "primary"],
             "properties": {
               "algorithm": {
                 "const": "security-scan/v1"
@@ -94,18 +84,10 @@
           },
           "severity": {
             "type": "object",
-            "required": [
-              "level"
-            ],
+            "required": ["level"],
             "properties": {
               "level": {
-                "enum": [
-                  "critical",
-                  "high",
-                  "medium",
-                  "low",
-                  "informational"
-                ]
+                "enum": ["critical", "high", "medium", "low", "informational"]
               },
               "score": {
                 "type": "number",
@@ -132,17 +114,10 @@
           },
           "confidence": {
             "type": "object",
-            "required": [
-              "level",
-              "rationale"
-            ],
+            "required": ["level", "rationale"],
             "properties": {
               "level": {
-                "enum": [
-                  "high",
-                  "medium",
-                  "low"
-                ]
+                "enum": ["high", "medium", "low"]
               },
               "rationale": {
                 "type": "string",
@@ -152,10 +127,7 @@
           },
           "taxonomy": {
             "type": "object",
-            "required": [
-              "category",
-              "cwe"
-            ],
+            "required": ["category", "cwe"],
             "properties": {
               "category": {
                 "type": "string",
@@ -175,10 +147,7 @@
             "minItems": 1,
             "items": {
               "type": "object",
-              "required": [
-                "path",
-                "startLine"
-              ],
+              "required": ["path", "startLine"],
               "properties": {
                 "path": {
                   "type": "string",
@@ -203,14 +172,7 @@
             "type": "array",
             "items": {
               "type": "object",
-              "required": [
-                "id",
-                "label",
-                "path",
-                "startLine",
-                "code",
-                "explanation"
-              ],
+              "required": ["id", "label", "path", "startLine", "code", "explanation"],
               "properties": {
                 "id": {
                   "type": "string",
@@ -248,13 +210,8 @@
             }
           },
           "rootCause": {
-            "type": [
-              "object",
-              "string"
-            ],
-            "required": [
-              "summary"
-            ],
+            "type": ["object", "string"],
+            "required": ["summary"],
             "properties": {
               "summary": {
                 "type": "string",
@@ -282,16 +239,10 @@
             "minLength": 1
           },
           "validation": {
-            "type": [
-              "object",
-              "null"
-            ]
+            "type": ["object", "null"]
           },
           "attackPath": {
-            "type": [
-              "object",
-              "null"
-            ]
+            "type": ["object", "null"]
           },
           "remediationTests": {
             "type": "array",
@@ -309,9 +260,7 @@
           },
           "provenance": {
             "type": "object",
-            "required": [
-              "source"
-            ],
+            "required": ["source"],
             "properties": {
               "source": {
                 "type": "string",

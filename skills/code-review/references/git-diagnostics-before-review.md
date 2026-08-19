@@ -22,7 +22,8 @@ A 2005 Microsoft Research study found churn-based metrics predicted defects more
 git shortlog -sn --no-merges
 ```
 
-Ranks contributors by commit count. 60%+ concentration from one person indicates bus factor risk.
+Ranks contributors by commit count.
+60%+ concentration from one person indicates bus factor risk.
 Add `--since="6 months ago"` to assess current maintenance capacity.
 
 ## 3. Bug Clusters

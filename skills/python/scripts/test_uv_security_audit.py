@@ -57,11 +57,7 @@ def _resolve_workspace_root() -> Path:
     When neither search finds a lockfile, the working directory is returned and
     the caller's own skip/fallback logic takes over.
     """
-    return (
-        _find_workspace_root(Path.cwd())
-        or _find_workspace_root(Path(__file__).resolve().parent)
-        or Path.cwd()
-    )
+    return _find_workspace_root(Path.cwd()) or _find_workspace_root(Path(__file__).resolve().parent) or Path.cwd()
 
 
 @cache

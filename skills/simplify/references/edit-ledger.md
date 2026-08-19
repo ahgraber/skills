@@ -21,8 +21,7 @@ No skill is obligated to read an old ledger, entries have no status lifecycle, a
 
 - **Rationale lives here, not in the code.**
   When an edit needs explaining, the explanation goes in the ledger, never in a source comment narrating the pass.
-- **Ledger IDs are ephemeral.**
-  `A3`, `D2`, `T1` address entries within one file.
+- **Ledger IDs are ephemeral.** `A3`, `D2`, `T1` address entries within one file.
   They never appear in source, comments, commit messages, or PR descriptions.
 - **Deferred entries are proposals.**
   Nothing in that section has been applied or approved.

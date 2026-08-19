@@ -28,31 +28,13 @@
       "minLength": 1
     },
     "mode": {
-      "enum": [
-        "repository",
-        "scoped_path",
-        "diff",
-        "commit",
-        "branch_diff",
-        "working_tree",
-        "deep_repository"
-      ]
+      "enum": ["repository", "scoped_path", "diff", "commit", "branch_diff", "working_tree", "deep_repository"]
     },
     "completeness": {
-      "enum": [
-        "complete",
-        "partial",
-        "unknown"
-      ]
+      "enum": ["complete", "partial", "unknown"]
     },
     "inventoryStrategy": {
-      "enum": [
-        "repository",
-        "scoped_path",
-        "diff",
-        "directory",
-        "custom"
-      ]
+      "enum": ["repository", "scoped_path", "diff", "directory", "custom"]
     },
     "includePaths": {
       "type": "array",
@@ -70,12 +52,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": [
-          "id",
-          "label",
-          "disposition",
-          "receiptRefs"
-        ],
+        "required": ["id", "label", "disposition", "receiptRefs"],
         "properties": {
           "id": {
             "type": "string",
@@ -86,13 +63,7 @@
             "minLength": 1
           },
           "disposition": {
-            "enum": [
-              "reported",
-              "no_issue_found",
-              "rejected",
-              "not_applicable",
-              "needs_follow_up"
-            ]
+            "enum": ["reported", "no_issue_found", "rejected", "not_applicable", "needs_follow_up"]
           },
           "receiptRefs": {
             "type": "array",
@@ -117,10 +88,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": [
-          "pattern",
-          "reason"
-        ],
+        "required": ["pattern", "reason"],
         "properties": {
           "pattern": {
             "type": "string",
@@ -137,10 +105,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": [
-          "id",
-          "reason"
-        ],
+        "required": ["id", "reason"],
         "properties": {
           "id": {
             "type": "string",
@@ -171,9 +136,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": [
-          "question"
-        ],
+        "required": ["question"],
         "properties": {
           "question": {
             "type": "string",
@@ -195,9 +158,7 @@
             "const": "complete"
           }
         },
-        "required": [
-          "completeness"
-        ]
+        "required": ["completeness"]
       },
       "then": {
         "properties": {
@@ -209,9 +170,7 @@
           "surfaces": {
             "contains": {
               "type": "object",
-              "required": [
-                "disposition"
-              ],
+              "required": ["disposition"],
               "properties": {
                 "disposition": {
                   "const": "needs_follow_up"

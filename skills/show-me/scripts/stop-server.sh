@@ -21,8 +21,8 @@ if [[ -f "${PID_FILE}" ]]; then
   # Guard against PID reuse: if the PID is alive but is not our server.cjs
   # process, refuse to signal it. A stale PID file after a reboot could
   # otherwise name an unrelated process.
-  if kill -0 "${pid}" 2>/dev/null; then
-    cmd=$(ps -p "${pid}" -o command= 2>/dev/null || true)
+  if kill -0 "${pid}" 2> /dev/null; then
+    cmd=$(ps -p "${pid}" -o command= 2> /dev/null || true)
     if [[ "${cmd}" != *server.cjs* ]]; then
       echo "{\"status\": \"failed\", \"error\": \"PID ${pid} is not the brainstorm server (PID reuse?); refusing to kill\"}"
       exit 1
@@ -30,25 +30,25 @@ if [[ -f "${PID_FILE}" ]]; then
   fi
 
   # Try to stop gracefully, fallback to force if still alive
-  kill "${pid}" 2>/dev/null || true
+  kill "${pid}" 2> /dev/null || true
 
   # Wait for graceful shutdown (up to ~2s)
   for _ in {1..20}; do
-    if ! kill -0 "${pid}" 2>/dev/null; then
+    if ! kill -0 "${pid}" 2> /dev/null; then
       break
     fi
     sleep 0.1
   done
 
   # If still running, escalate to SIGKILL
-  if kill -0 "${pid}" 2>/dev/null; then
-    kill -9 "${pid}" 2>/dev/null || true
+  if kill -0 "${pid}" 2> /dev/null; then
+    kill -9 "${pid}" 2> /dev/null || true
 
     # Give SIGKILL a moment to take effect
     sleep 0.1
   fi
 
-  if kill -0 "${pid}" 2>/dev/null; then
+  if kill -0 "${pid}" 2> /dev/null; then
     echo '{"status": "failed", "error": "process still running"}'
     exit 1
   fi

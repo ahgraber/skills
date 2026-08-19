@@ -53,11 +53,7 @@ def _resolve_workspace_root() -> Path:
     step with ``test_uv_security_audit.py``, or the two scripts could audit
     different roots.
     """
-    return (
-        _find_workspace_root(Path.cwd())
-        or _find_workspace_root(Path(__file__).resolve().parent)
-        or Path.cwd()
-    )
+    return _find_workspace_root(Path.cwd()) or _find_workspace_root(Path(__file__).resolve().parent) or Path.cwd()
 
 
 @cache
@@ -138,9 +134,7 @@ def _summarize_pip_audit_json(raw_output: str) -> str:
     if skipped_dependencies:
         lines.append("")
         lines.append(f"Skipped dependencies: {len(skipped_dependencies)}")
-        lines.extend(
-            f"- {dependency['name']}: {dependency['skip_reason']}" for dependency in skipped_dependencies
-        )
+        lines.extend(f"- {dependency['name']}: {dependency['skip_reason']}" for dependency in skipped_dependencies)
 
     return "\n".join(lines)
 
@@ -206,13 +200,7 @@ def test_pip_audit_no_vulnerabilities():
             )
             return
         # Some other error occurred
-        pytest.fail(
-            f"pip-audit failed to run properly:\n\nReturn code: {result.returncode}\nOutput: {error_output}\n"
-        )
-
-    # Success - no vulnerabilities found
-    if result.returncode != 0:
-        pytest.fail("pip-audit should return 0 when no vulnerabilities are found")
+        pytest.fail(f"pip-audit failed to run properly:\n\nReturn code: {result.returncode}\nOutput: {error_output}\n")
 
 
 def test_pip_audit_runs_successfully():

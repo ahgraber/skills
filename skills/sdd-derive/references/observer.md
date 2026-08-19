@@ -36,14 +36,16 @@ observations:
       - path: <relative path>
         object: <optional — class, function, class.method>
         lines: [<start>, <end>]    # optional
-        relationship: primary_implementation | entry_point | caller | callee | 
+        relationship: >-
+          primary_implementation | entry_point | caller | callee |
           consumer | producer | test | config | schema | bridge | <custom>
     tags: [<from canonical taxonomy or custom>]
     confidence: high | medium | low
     notes: <optional, brief — hint for lifter>
 
 surface_inventory:
-  - kind: env_var | cli_flag | config_key | http_route | grpc_method | 
+  - kind: >-
+      env_var | cli_flag | config_key | http_route | grpc_method |
       cli_command | published_event | exported_symbol | <custom>
     name: <surface identifier>           # e.g., "DATABASE_URL", "--verbose", "POST /users"
     references:

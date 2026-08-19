@@ -265,5 +265,7 @@ def test_parse_flags_unclosed_fence():
 if __name__ == "__main__":
     _here = str(Path(__file__).resolve().parent)
     raise SystemExit(
-        pytest.main([str(Path(__file__).resolve()), "-v", "-p", "no:cacheprovider", "--rootdir", _here, "--confcutdir", _here])
+        pytest.main(
+            [str(Path(__file__).resolve()), "-v", "-p", "no:cacheprovider", "--rootdir", _here, "--confcutdir", _here]
+        )
     )

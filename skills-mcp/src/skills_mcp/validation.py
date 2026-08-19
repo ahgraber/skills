@@ -158,17 +158,17 @@ def _check_name(fm: dict, dir_name: str) -> list[ValidationIssue]:
     if issue := _too_long("name", name, 64):
         issues.append(issue)
     if not _NAME_CHARS_RE.match(name):
-        issues.append(ValidationIssue(
-            "name",
-            f"invalid: only lowercase letters, digits, and hyphens allowed; "
-            f"must not start or end with a hyphen — got {name!r}",
-        ))
+        issues.append(
+            ValidationIssue(
+                "name",
+                f"invalid: only lowercase letters, digits, and hyphens allowed; "
+                f"must not start or end with a hyphen — got {name!r}",
+            )
+        )
     elif _CONSECUTIVE_HYPHENS_RE.search(name):
         issues.append(ValidationIssue("name", f"consecutive hyphens not allowed in {name!r}"))
     if name != dir_name:
-        issues.append(ValidationIssue(
-            "name", f"name field {name!r} does not match directory name {dir_name!r}"
-        ))
+        issues.append(ValidationIssue("name", f"name field {name!r} does not match directory name {dir_name!r}"))
     return issues
 
 

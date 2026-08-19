@@ -41,8 +41,7 @@ Three default lenses, all domain-agnostic — must be instantiated for the curre
 
 - **Cross-Pollinator** — imagines how an expert from a wildly unrelated field would tackle this.
   Good for borrowing structural patterns across domains.
-- **Analogist** — asks "what is this like in [unrelated domain]?"
-  (nature, cooking, sports, architecture, jazz, games, storytelling).
+- **Analogist** — asks "what is this like in [unrelated domain]?" (nature, cooking, sports, architecture, jazz, games, storytelling).
   Good for structural reframings.
   **Structural, not surface.**
   "Uber for X" is surface analogy (borrowing a brand shape).

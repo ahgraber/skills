@@ -185,7 +185,8 @@ Fix: write real paragraphs with topic sentences, or an honest list if the items 
 
 ### Fragment-stack catalog entries — [rewrite]
 
-A heading or bold label followed by verbless noun-phrase fragments and ad-hoc bullets describing one item: "A self-hosted file-management platform. 13.9k stars.
+A heading or bold label followed by verbless noun-phrase fragments and ad-hoc bullets describing one item: "A self-hosted file-management platform.
+13.9k stars.
 Go backend, vanilla-JS frontend."
 Endemic in tool surveys, landscape docs, and design docs, and routinely rationalized as "reference structure."
 It is neither prose nor reference — a reference entry is N items sharing one fixed field-set, while this is one thing narrated with the verbs deleted.

@@ -123,8 +123,7 @@ enum SortDirection {
 
 ### Five Principles
 
-1. **Specific over generic.**
-   `publishPost` and `archivePost` over `updatePost(field, value)`.
+1. **Specific over generic.** `publishPost` and `archivePost` over `updatePost(field, value)`.
    Specific mutations are easier to optimize, validate, and secure.
 
 2. **Single `input` argument.**

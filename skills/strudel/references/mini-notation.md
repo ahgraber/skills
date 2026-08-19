@@ -32,8 +32,7 @@ Single quotes `'...'` are plain JavaScript — NOT parsed as mini-notation.
 
 ## Key Rules and Mental Models
 
-**Sequences share the cycle.**
-`"bd sd hh cp"` = four equal quarter-note steps.
+**Sequences share the cycle.** `"bd sd hh cp"` = four equal quarter-note steps.
 Adding `"bd sd hh cp oh"` gives five equal steps — each shorter, not the cycle longer.
 
 **`<a b c>` is shorthand for `[a b c]/3`.**

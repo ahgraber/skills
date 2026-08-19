@@ -45,9 +45,7 @@ import yaml
 
 # --- Surface kind classification per references/validate.md -----------------
 
-PUBLIC_CONSUMER_KINDS = frozenset(
-    {"http_route", "grpc_method", "cli_command", "published_event", "exported_symbol"}
-)
+PUBLIC_CONSUMER_KINDS = frozenset({"http_route", "grpc_method", "cli_command", "published_event", "exported_symbol"})
 INTERNAL_KNOB_KINDS = frozenset({"env_var", "config_key", "cli_flag"})
 
 # --- Spec format regexes ----------------------------------------------------
@@ -71,9 +69,7 @@ UNCERTAINTIES_HEADING = re.compile(r"^##\s+Uncertainties\s*$", re.MULTILINE)
 RFC_2119 = re.compile(r"\b(SHALL|MUST|SHOULD|MAY)\b")
 
 # Heuristic patterns indicating a non-canonical requirement heading shape
-NONCANONICAL_REQ = re.compile(
-    r"^###\s+(R\d+|REQ-\d+|Req\s*#?\d+|Requirement\s*\d+)[:\s]", re.MULTILINE
-)
+NONCANONICAL_REQ = re.compile(r"^###\s+(R\d+|REQ-\d+|Req\s*#?\d+|Requirement\s*\d+)[:\s]", re.MULTILINE)
 
 
 # --- Result types -----------------------------------------------------------
@@ -156,32 +152,22 @@ def check_format(spec_path: Path, output_type: str = "baseline") -> FormatResult
         # Each scenario should have at least one GIVEN, one WHEN, one THEN.
         # Allow for compound scenarios (multiple WHEN/THEN clauses).
         if given < scen_count:
-            result.failures.append(
-                f"only {given} bold **GIVEN** markers for {scen_count} scenarios"
-            )
+            result.failures.append(f"only {given} bold **GIVEN** markers for {scen_count} scenarios")
         if when < scen_count:
-            result.failures.append(
-                f"only {when} bold **WHEN** markers for {scen_count} scenarios"
-            )
+            result.failures.append(f"only {when} bold **WHEN** markers for {scen_count} scenarios")
         if then < scen_count:
-            result.failures.append(
-                f"only {then} bold **THEN** markers for {scen_count} scenarios"
-            )
+            result.failures.append(f"only {then} bold **THEN** markers for {scen_count} scenarios")
     result.scenario_count = scen_count
 
     # 5. No delta markers in baseline
     if output_type == "baseline":
         delta_hits = DELTA_MARKER.findall(text)
         if delta_hits:
-            result.failures.append(
-                f"baseline spec contains delta markers: {[m[0] + ' ' + m[1] for m in delta_hits]}"
-            )
+            result.failures.append(f"baseline spec contains delta markers: {[m[0] + ' ' + m[1] for m in delta_hits]}")
 
     # 6. RFC 2119 keyword usage
     if not RFC_2119.search(text):
-        result.failures.append(
-            "no RFC 2119 keywords (SHALL/MUST/SHOULD/MAY) found"
-        )
+        result.failures.append("no RFC 2119 keywords (SHALL/MUST/SHOULD/MAY) found")
 
     # 7. Uncertainties section: present iff non-empty
     if UNCERTAINTIES_HEADING.search(text):
@@ -193,9 +179,7 @@ def check_format(spec_path: Path, output_type: str = "baseline") -> FormatResult
         if next_h2:
             body = body[: next_h2.start()]
         # Top-level bullets start with "- **"
-        uncertainty_entries = re.findall(
-            r"^\s*-\s+\*\*", body, re.MULTILINE
-        )
+        uncertainty_entries = re.findall(r"^\s*-\s+\*\*", body, re.MULTILINE)
         result.uncertainty_present = True
         result.uncertainty_count = len(uncertainty_entries)
         # Detect "None identified" / "No uncertainties" prose stub
@@ -225,9 +209,7 @@ def check_yaml(yaml_path: Path) -> YamlResult:
     try:
         data = yaml.safe_load(yaml_path.read_text())
     except yaml.YAMLError as e:
-        return YamlResult(
-            capability=cap, yaml_path=yaml_path, parsed=False, error=str(e)
-        )
+        return YamlResult(capability=cap, yaml_path=yaml_path, parsed=False, error=str(e))
 
     if not isinstance(data, dict):
         return YamlResult(
@@ -447,9 +429,7 @@ def main() -> int:
     # Format
     print("\n## Format check")
     fmt_failed = [r for r in format_results if not r.passed]
-    print(
-        f"  {len(format_results) - len(fmt_failed)}/{len(format_results)} specs match canonical format"
-    )
+    print(f"  {len(format_results) - len(fmt_failed)}/{len(format_results)} specs match canonical format")
     for r in format_results:
         status = "PASS" if r.passed else "FAIL"
         print(
@@ -465,9 +445,7 @@ def main() -> int:
     total_surfaces = sum(c.surfaces_total for c in coverage_results)
     total_gaps = sum(len(c.gaps) for c in coverage_results)
     total_acked = sum(len(c.acknowledged) for c in coverage_results)
-    print(
-        f"  surfaces={total_surfaces}  gaps={total_gaps}  acknowledged={total_acked}"
-    )
+    print(f"  surfaces={total_surfaces}  gaps={total_gaps}  acknowledged={total_acked}")
     for c in coverage_results:
         if c.gaps:
             print(f"  {c.capability}: {len(c.gaps)} gap(s)")
@@ -478,18 +456,10 @@ def main() -> int:
 
     # Summary
     print("\n## Summary")
-    print(
-        f"  YAML parse failures:  {len(yaml_failed)} of {len(yaml_results)}"
-    )
-    print(
-        f"  Format failures:      {len(fmt_failed)} of {len(format_results)}"
-    )
-    print(
-        f"  Surface gaps:         {total_gaps} (informational; not blocking)"
-    )
-    print(
-        f"  Acknowledged:         {total_acked} (informational; internal knobs OK)"
-    )
+    print(f"  YAML parse failures:  {len(yaml_failed)} of {len(yaml_results)}")
+    print(f"  Format failures:      {len(fmt_failed)} of {len(format_results)}")
+    print(f"  Surface gaps:         {total_gaps} (informational; not blocking)")
+    print(f"  Acknowledged:         {total_acked} (informational; internal knobs OK)")
 
     # JSON output for machine consumption (last line)
     summary = {

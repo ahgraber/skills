@@ -134,13 +134,15 @@ explorer: <name>
 status: ran | not_applicable | failed
 status_reason: <one-line, only when not ran>
 findings:
-  - kind: capability_candidate | overlap | external_surface_candidate | 
+  - kind: >-
+      capability_candidate | overlap | external_surface_candidate |
       algorithmic_region | infrastructure | anomaly | <custom string>
     references:
       - path: <relative path>
         object: <optional — class, function, class.method>
         lines: [<start>, <end>]    # optional
-        relationship: primary_implementation | entry_point | caller | callee | 
+        relationship: >-
+          primary_implementation | entry_point | caller | callee |
           consumer | producer | test | config | schema | bridge | <custom>
         rationale: <optional, brief — why this specific reference>
     rationale: <required, brief — overall reasoning>

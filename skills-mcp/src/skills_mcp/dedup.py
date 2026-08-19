@@ -132,6 +132,8 @@ def dedup_skills(
 
     logger.debug(
         "Dedup: resolved %d skills (collapsed %d symlinked, %d byte-identical)",
-        len(resolved), collapsed_symlinks, collapsed_hash,
+        len(resolved),
+        collapsed_symlinks,
+        collapsed_hash,
     )
     return resolved

@@ -211,18 +211,14 @@ def _diff_requirement(
         )
     delta_present = set(delta_req.scenarios)
     allowed_norm = {normalize(a) for a in delta_req.allow_drops}
-    dropped = [
-        s for s in baseline_req.scenarios if s not in delta_present and normalize(s) not in allowed_norm
-    ]
+    dropped = [s for s in baseline_req.scenarios if s not in delta_present and normalize(s) not in allowed_norm]
     dropped = list(dict.fromkeys(dropped))  # de-dupe, preserve order
     if dropped:
         return Finding(capability, delta_req.name, dropped), notes
     return None, notes
 
 
-def check_change(
-    specs_root: Path, change_dir: Path
-) -> tuple[list[Finding], list[str], list[str]]:
+def check_change(specs_root: Path, change_dir: Path) -> tuple[list[Finding], list[str], list[str]]:
     """Check one change's delta specs against the baseline.
 
     Returns (failures, notes, errors). failures are dropped-scenario cases only.
@@ -254,9 +250,7 @@ def check_change(
         if not modified:
             continue
         if MODIFIED_LOOSE.search(delta_text) and not MODIFIED_CANONICAL.search(delta_text):
-            notes.append(
-                f"{capability}: non-canonical MODIFIED heading — expected '## MODIFIED Requirements'"
-            )
+            notes.append(f"{capability}: non-canonical MODIFIED heading — expected '## MODIFIED Requirements'")
         notes.extend(
             f"{capability}: duplicate MODIFIED requirement '{dup}' — only the last is checked"
             for dup in parsed.duplicate_names

@@ -3,11 +3,7 @@
   "$id": "urn:agentskills:security-scan:scan-manifest",
   "title": "Completed security scan manifest",
   "type": "object",
-  "required": [
-    "documentType",
-    "schemaVersion",
-    "scan"
-  ],
+  "required": ["documentType", "schemaVersion", "scan"],
   "properties": {
     "documentType": {
       "const": "security-scan.scan-manifest"
@@ -37,10 +33,7 @@
         },
         "producer": {
           "type": "object",
-          "required": [
-            "name",
-            "version"
-          ],
+          "required": ["name", "version"],
           "properties": {
             "name": {
               "type": "string",
@@ -69,19 +62,10 @@
         },
         "target": {
           "type": "object",
-          "required": [
-            "kind",
-            "targetId",
-            "displayName"
-          ],
+          "required": ["kind", "targetId", "displayName"],
           "properties": {
             "kind": {
-              "enum": [
-                "git_revision",
-                "git_worktree",
-                "git_diff",
-                "directory_snapshot"
-              ]
+              "enum": ["git_revision", "git_worktree", "git_diff", "directory_snapshot"]
             },
             "targetId": {
               "type": "string",
@@ -119,37 +103,26 @@
                 }
               },
               "then": {
-                "required": [
-                  "revision"
-                ]
+                "required": ["revision"]
               }
             },
             {
               "if": {
                 "properties": {
                   "kind": {
-                    "enum": [
-                      "git_worktree",
-                      "git_diff",
-                      "directory_snapshot"
-                    ]
+                    "enum": ["git_worktree", "git_diff", "directory_snapshot"]
                   }
                 }
               },
               "then": {
-                "required": [
-                  "snapshotDigest"
-                ]
+                "required": ["snapshotDigest"]
               }
             }
           ]
         },
         "scope": {
           "type": "object",
-          "required": [
-            "includePaths",
-            "excludePaths"
-          ],
+          "required": ["includePaths", "excludePaths"],
           "properties": {
             "includePaths": {
               "type": "array",
@@ -197,9 +170,7 @@
         },
         "threatModel": {
           "type": "object",
-          "required": [
-            "summary"
-          ],
+          "required": ["summary"],
           "properties": {
             "summary": {
               "type": "string",
@@ -253,11 +224,7 @@
           "minItems": 1,
           "items": {
             "type": "object",
-            "required": [
-              "path",
-              "sha256",
-              "mediaType"
-            ],
+            "required": ["path", "sha256", "mediaType"],
             "properties": {
               "path": {
                 "type": "string",
@@ -282,9 +249,7 @@
             "artifacts": {
               "contains": {
                 "type": "object",
-                "required": [
-                  "path"
-                ],
+                "required": ["path"],
                 "properties": {
                   "path": {
                     "const": "findings.json"
@@ -301,9 +266,7 @@
             "artifacts": {
               "contains": {
                 "type": "object",
-                "required": [
-                  "path"
-                ],
+                "required": ["path"],
                 "properties": {
                   "path": {
                     "const": "coverage.json"

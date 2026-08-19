@@ -97,7 +97,12 @@ def diff_range(repo: Path, scope: str, base: str | None) -> tuple[list[str], dic
         merge_base = git(repo, "merge-base", base, "HEAD").stdout.strip()
         return (
             ["diff", f"{merge_base}...HEAD"],
-            {"scope": "branch", "base": base or "", "merge_base": merge_base, "range": f"{base} ({merge_base})...HEAD"},
+            {
+                "scope": "branch",
+                "base": base or "",
+                "merge_base": merge_base,
+                "range": f"{base} ({merge_base})...HEAD",
+            },
         )
     return ["diff", "--cached"], {"scope": "empty", "range": "no changes detected"}
 
@@ -185,7 +190,9 @@ def build_packet(args: argparse.Namespace) -> dict[str, object]:
         + "\n"
     )
 
-    out_path = Path(args.out) if args.out else Path(tempfile.gettempdir()) / f"review-packet-{(head or 'work')[:12]}.md"
+    out_path = (
+        Path(args.out) if args.out else Path(tempfile.gettempdir()) / f"review-packet-{(head or 'work')[:12]}.md"
+    )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(packet, encoding="utf-8")
 
@@ -208,13 +215,23 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     scope.add_argument("--staged", action="store_true", help="review staged changes (index vs HEAD)")
     scope.add_argument("--worktree", action="store_true", help="review all uncommitted changes (working tree vs HEAD)")
     scope.add_argument("--base", metavar="REF", help="review this branch against base REF (merge-base...HEAD)")
-    parser.add_argument("--include", action="append", default=[], metavar="PATH",
-                        help="inline a source-of-truth file (spec, plan, PR description); repeatable")
+    parser.add_argument(
+        "--include",
+        action="append",
+        default=[],
+        metavar="PATH",
+        help="inline a source-of-truth file (spec, plan, PR description); repeatable",
+    )
     parser.add_argument("--intent", metavar="TEXT", help="short statement of what the change is meant to do")
     parser.add_argument("--out", metavar="PATH", help="packet output path (default: a file under TMPDIR)")
     parser.add_argument("--repo", default=".", metavar="DIR", help="repository directory (default: cwd)")
-    parser.add_argument("--max-diff-bytes", type=int, default=DEFAULT_MAX_DIFF_BYTES, dest="max_diff_bytes",
-                        help=f"truncate the diff past this many bytes (default: {DEFAULT_MAX_DIFF_BYTES})")
+    parser.add_argument(
+        "--max-diff-bytes",
+        type=int,
+        default=DEFAULT_MAX_DIFF_BYTES,
+        dest="max_diff_bytes",
+        help=f"truncate the diff past this many bytes (default: {DEFAULT_MAX_DIFF_BYTES})",
+    )
     ns = parser.parse_args(argv)
     ns.auto_needs_base = lambda: not (ns.staged or ns.worktree)
     return ns

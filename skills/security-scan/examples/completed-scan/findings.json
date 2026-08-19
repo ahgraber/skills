@@ -38,9 +38,7 @@
       "summary": "An attacker-controlled path reaches a filesystem write without containment validation.",
       "taxonomy": {
         "category": "path-traversal",
-        "cwe": [
-          "CWE-22"
-        ]
+        "cwe": ["CWE-22"]
       },
       "title": "Unsafe archive extraction can escape the output directory",
       "validation": null

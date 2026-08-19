@@ -334,5 +334,7 @@ def test_run_single_missing_file_returns_2(tmp_path):
 if __name__ == "__main__":
     _here = str(Path(__file__).resolve().parent)
     raise SystemExit(
-        pytest.main([str(Path(__file__).resolve()), "-v", "-p", "no:cacheprovider", "--rootdir", _here, "--confcutdir", _here])
+        pytest.main(
+            [str(Path(__file__).resolve()), "-v", "-p", "no:cacheprovider", "--rootdir", _here, "--confcutdir", _here]
+        )
     )
