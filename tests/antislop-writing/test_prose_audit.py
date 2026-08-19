@@ -1,6 +1,6 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.11,<3.13"
+# requires-python = ">=3.12,<3.15"
 # dependencies = [
 #   "pytest>=8.0",
 # ]
