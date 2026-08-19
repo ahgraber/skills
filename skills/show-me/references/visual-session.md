@@ -1,8 +1,52 @@
-# Visual Companion Guide
+# Visual Session Guide
 
-Browser-based visual brainstorming companion for showing mockups, diagrams, and options.
+A browser-based session for showing mockups, wireframes, diagrams, and side-by-side options the user can click.
+This is a tool, not a mode: starting a session means the browser is available for questions that benefit from visual treatment, not that every question goes through it.
 
-Routing rules (browser vs terminal) are in `SKILL.md` — consult those before picking a medium.
+## Offering a Session
+
+When you anticipate that upcoming questions will involve visual content the user should pick between (mockups, layouts, design directions), offer the session once for user consent:
+
+> "Some of what we're working on might be easier to explain if I can show it to you in a web browser. I can put together mockups, diagrams, comparisons, and other visuals as we go. This feature is still new and can be token-intensive. Want to try it? (Requires opening a local URL)"
+
+**This offer MUST be its own message.**
+Do not combine it with clarifying questions, context summaries, or any other content.
+Wait for the user's response before continuing.
+If they decline, stay with in-conversation sketches from the `show-me` palette.
+
+After consent, ask one question before starting the server:
+
+> "Do you want to save the wireframes from this session? If yes, where should I save them? (Otherwise they'll be cleaned up automatically when we're done.)"
+
+If they want to save: pass `--project-dir <path>` to `start-server.sh`.
+If not: start without `--project-dir` and the session cleans up on stop.
+
+## Browser vs Terminal, Per Question
+
+Decide per-question, not per-session.
+The test: **would the user understand this better by seeing it than reading it?**
+
+**Use the browser** when the content itself is visual:
+
+- UI mockups — wireframes, layouts, navigation structures, component designs
+- Architecture diagrams — system components, data flow, relationship maps
+- Side-by-side visual comparisons — two layouts, two color schemes, two design directions
+- Design polish — questions about look and feel, spacing, visual hierarchy
+- Spatial relationships — state machines, flowcharts, entity relationships rendered as diagrams
+
+**Use the terminal** when the content is text or tabular:
+
+- Requirements and scope questions — "what does X mean?", "which features are in scope?"
+- Conceptual A/B/C choices — picking between approaches described in words
+- Tradeoff lists — pros/cons, comparison tables
+- Technical decisions — API design, data modeling, architectural approach selection
+- Clarifying questions — anything where the answer is words, not a visual preference
+
+A question _about_ a UI topic is not automatically a visual question.
+"What kind of wizard do you want?"
+is conceptual — use the terminal.
+"Which of these wizard layouts feels right?"
+is visual — use the browser.
 
 ## How It Works
 
@@ -17,14 +61,14 @@ Only write full documents when you need complete control over the page.
 
 ## Starting a Session
 
-The SKILL.md startup question determines which command to run:
+The save question above determines which command to run:
 
 ```bash
 # Ephemeral (default — user said no or didn't care)
-skills/visual-brainstorming/scripts/start-server.sh
+skills/show-me/scripts/start-server.sh
 
 # Persistent (user wants wireframes saved)
-skills/visual-brainstorming/scripts/start-server.sh --project-dir /path/they/specified
+skills/show-me/scripts/start-server.sh --project-dir /path/they/specified
 
 # Returns: {"type":"server-started","port":52341,"url":"http://localhost:52341",
 #           "screen_dir":"<session>/content",
@@ -63,7 +107,7 @@ Pass `--owner-monitor` only if you are certain the grandparent PID of this scrip
 If the URL is unreachable from your browser (common in remote/containerized setups), bind a non-loopback host:
 
 ```bash
-skills/visual-brainstorming/scripts/start-server.sh \
+skills/show-me/scripts/start-server.sh \
   --project-dir /path/to/project \
   --host 0.0.0.0 \
   --url-host localhost
@@ -274,7 +318,7 @@ If `$STATE_DIR/events` doesn't exist, the user didn't interact with the browser 
 ## Cleaning Up
 
 ```bash
-skills/visual-brainstorming/scripts/stop-server.sh $SESSION_DIR
+skills/show-me/scripts/stop-server.sh $SESSION_DIR
 ```
 
 Ephemeral sessions (`$TMPDIR`) are deleted on stop.
@@ -282,5 +326,5 @@ Persistent sessions (`--project-dir`) keep the content directory so the user can
 
 ## Reference
 
-- Frame template (CSS reference): `skills/visual-brainstorming/scripts/frame-template.html`
-- Helper script (client-side): `skills/visual-brainstorming/scripts/helper.js`
+- Frame template (CSS reference): `skills/show-me/scripts/frame-template.html`
+- Helper script (client-side): `skills/show-me/scripts/helper.js`

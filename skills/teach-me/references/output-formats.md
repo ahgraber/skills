@@ -12,14 +12,14 @@ Choose Markdown when the user asks or the context calls for it.
 ## Shared conventions (both formats)
 
 - **Dated filename, in a gitignored directory.**
-  Name the file starting with today's date, `YYYY-MM-DD-explanation-<slug>.<ext>`, for time-sorting.
-  Ask the user where to save it; default to `.explain/` at the repo root (or `docs/.explain/` if the project already organizes generated docs under `docs/`).
+  Name the file starting with today's date, `YYYY-MM-DD-lesson-<slug>.<ext>`, for time-sorting.
+  Ask the user where to save it; default to `.teach/` at the repo root (or `docs/.teach/` if the project already organizes generated docs under `docs/`).
   Keep the directory out of version control — add it to the repo's root `.gitignore`, or drop a `*` `.gitignore` inside the directory itself — so artifacts stay untracked without cluttering the root ignore file with individual filenames.
-- **Four sections in order:** Background → Intuition → Code → Quiz.
+- **Sections in order:** Background → Intuition → Walkthrough → Quiz — the full-intensity shape; a lighter artifact may deliver a subset.
 - **Kleppmann-style prose:** engaging, classic style, smooth transitions between sections.
 - **Diagram families:** pick a small number of reusable diagram types and reuse them.
   Two that recur usefully:
-  - a _simplified UI view_ — a stripped-down picture of what the user sees, for explaining UI-facing changes;
+  - a _simplified UI view_ — a stripped-down picture of what the user sees, for explaining UI-facing subjects;
   - a _system / data-flow diagram_ — components and the data moving between them, **with concrete example data shown on the wires**.
     Never use ASCII-art diagrams — embed them per each format's contract below.
 - **Callouts** for key concepts, definitions, and important edge cases.
@@ -37,10 +37,10 @@ Choose Markdown when the user asks or the context calls for it.
 - **Diagrams:** Build the diagram in whatever tool renders it best for the change at hand — CSS boxes-and-arrows, an exported Graphviz/Mermaid figure, etc. — the technique is yours to choose.
   Embed the result inline so the finished file displays with zero network fetches at view time: paste the SVG or markup directly, never link a CDN, font, or asset a reader would have to load.
   Skip ASCII art.
-  Label every node and edge, size text to stay readable at normal zoom, and stamp concrete example values on the wires and nodes (a real request body, an actual id, a sample payload) so the reader traces the change with data rather than placeholders.
+  Label every node and edge, size text to stay readable at normal zoom, and stamp concrete example values on the wires and nodes (a real request body, an actual id, a sample payload) so the reader traces the flow with data rather than placeholders.
   Settle on a small vocabulary of diagram types and reuse them throughout the artifact instead of drawing each figure in a new style.
   When two approaches would render the same, take the lighter embedded one; reserve a live JS renderer for figures that genuinely need interaction.
-- **Interactive data-flow / contracts** (when the change has a pipeline or transformation sequence): render the flow diagram (per the diagram guidance above), then add a small interactive stepper — clicking a stage reveals the **real input and output** at that boundary and its **shape/contract** (type, schema, or example payload).
+- **Interactive data-flow / contracts** (when the subject has a pipeline or transformation sequence): render the flow diagram (per the diagram guidance above), then add a small interactive stepper — clicking a stage reveals the **real input and output** at that boundary and its **shape/contract** (type, schema, or example payload).
   Vanilla JS toggling pre-rendered panels; the reader steps through the transformation and sees each shape, rather than reading that it changes.
 - **Interactive quiz:** clicking an option reveals correct/incorrect state and the per-option explanation (a few lines of vanilla JS; no framework).
   Keep the correct-answer key out of trivially-scrapable inline text where reasonable, but do not over-engineer.
@@ -60,6 +60,7 @@ Choose Markdown when the user asks or the context calls for it.
   <details><summary>Option B</summary>✅ Why B is correct</details>
   ```
 
-- Diagrams: prefer a fenced Mermaid block (compose with the `mermaid` skill) over ASCII; include example data in the diagram.
+- Diagrams: prefer a fenced Mermaid block over ASCII; include example data in the diagram.
+  To verify parsing or render an image locally, `show-me`'s `scripts/validate_mermaid.py` and `scripts/render_mermaid.py` are available.
 
 - Data-flow / contracts: pair the Mermaid flow diagram with a before/after table or per-stage `<details>` blocks showing each stage's real input, real output, and shape/contract — Markdown cannot animate, so make the shapes visible statically.

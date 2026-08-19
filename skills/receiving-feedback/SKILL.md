@@ -1,7 +1,7 @@
 ---
 name: receiving-feedback
 description: |-
-  You MUST use this when receiving review feedback that evaluates a text-based work artifact — code, specs, design docs, PRDs, proposals, plans, or prose — by asserting a defect, questioning a decision, supplying reasoning, or proposing a change for assessment. Also use when asked to implement external review comments that must first be assessed. Not for an unambiguous parameter choice, approval, confirmation, typo or formatting fix, or direct revision instruction that supplies no claim or rationale to evaluate.
+  You MUST use this when receiving feedback that evaluates a text-based work artifact you produced or are responsible for — code, specs, design docs, PRDs, proposals, plans, or prose — by asserting a defect, questioning a decision, supplying reasoning, or proposing a change for assessment. Also use when asked to implement external review comments that must first be assessed. Not for an unambiguous parameter choice, approval, confirmation, typo or formatting fix, or direct revision instruction that supplies no claim or rationale to evaluate.
 ---
 
 # Receiving Feedback

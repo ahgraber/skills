@@ -53,7 +53,7 @@ Do not manually add linebreaks, trust linters and formatters for this.
 
 - Prefer running tests and scripts inside the devshell.
 - Example (mermaid validation/render):
-  - `nix develop -c skills/mermaid/scripts/validate_mermaid.py --install-chromium <<'EOF'`
+  - `nix develop -c skills/show-me/scripts/validate_mermaid.py --install-chromium <<'EOF'`
   - `nix develop -c scripts/render-dot.py skills/optimize-skills/references/skill-workflow.dot`
 
 ### Tests for skill scripts

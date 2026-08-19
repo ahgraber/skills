@@ -9,17 +9,17 @@ These rules exist to prevent that.
 Five interactive multiple-choice questions.
 Each question:
 
-- Tests understanding of _this change_ — its purpose, mechanism, or behavior on new input — not trivia about the surrounding code.
+- Tests understanding of _the subject_ — its purpose, mechanism, or behavior on new input — not trivia about the surrounding context.
 - Has one clearly correct option and 3 plausible distractors.
 - On selection, reveals whether the choice was correct **and an explanation for every option** — why the right one is right, why each wrong one is wrong.
   Bare "correct/incorrect" is not enough (Hattie & Timperley, 2007).
 
 ## Difficulty calibration
 
-- Aim for **medium** difficulty: the reader should need to actually understand the substance of the change to answer, but the answer should be reachable from the artifact — not a gotcha, edge-case trivia, or a memory test (Bjork & Bjork, 2011).
-- Target the _understand_ and _apply_ levels of Bloom's revised taxonomy (Krathwohl, 2002): "why does this change fix X?", "what would this code now do given input Y?"
+- Aim for **medium** difficulty: the reader should need to actually understand the substance of the subject to answer, but the answer should be reachable from the artifact — not a gotcha, edge-case trivia, or a memory test (Bjork & Bjork, 2011).
+- Target the _understand_ and _apply_ levels of Bloom's revised taxonomy (Krathwohl, 2002): "why does this design fix X?", "what would this code now do given input Y?"
   — not "what is the name of the variable on line 12?"
-- Good source of distractors: **common misconceptions** about the change — the wrong mental model a reader might plausibly hold before reading carefully.
+- Good source of distractors: **common misconceptions** about the subject — the wrong mental model a reader might plausibly hold before reading carefully.
 
 ## Item-writing flaws to avoid
 
@@ -52,9 +52,9 @@ Each is a way a savvy reader guesses the answer _without knowing the material_ �
 
 Run this pass over all five questions before saving:
 
-1. Could someone answer this correctly _without_ having understood the change (length, grammar, elimination)?
+1. Could someone answer this correctly _without_ having understood the subject (length, grammar, elimination)?
    If yes, rewrite.
 2. Is each item at understand/apply level, not recall?
-3. Does every option — correct and incorrect — have an explanation tied to the change?
+3. Does every option — correct and incorrect — have an explanation tied to the subject?
 4. Are correct-answer positions varied across the five questions?
 5. Are all options in each item comparable in length and specificity?

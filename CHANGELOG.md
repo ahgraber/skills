@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- Remove `explain-diff`, `mermaid`, and `visual-brainstorming`; their jobs move into the new skills below. Migrate installs: "explain this diff/PR" asks now trigger `teach-me` (same phrases; artifacts default to `.teach/` instead of `.explain/`); the Mermaid validate/render scripts ship inside `show-me` (`skills/show-me/scripts/`); the browser-based visual companion is `show-me`'s consent-gated session (`references/visual-session.md`).
+
+### Added
+
+- `show-me` — one skill for "I need to see this": pseudocode, call/component/file trees, Mermaid, sketch-level diffs, focused HTML, and charts of the data at hand, plus a consent-gated interactive browser session for design discussions. Visuals are ephemeral by default and saved only on request; dashboards and other durable deliverables are out of scope.
+- `teach-me` — turn any subject — a historical period, music theory, a legal concept, a library, a code change — into a sized lesson: light in-chat by default, up to a saved, dated artifact with an interactive quiz. Lessons are grounded in real sources, never coin terminology, and accrete in `.teach/` into a curriculum across invocations.
+- `grill-me` — an elicitative interview in question rounds that draws out the user's decisions, unstated opinions, and silent assumptions until alignment is confirmed. Recommendations are placed or withheld per question so the user is not led; the settled understanding carries forward via `handoff` on request.
+
+### Changed
+
+- `brainstorming` — the description now advertises its adversarial lenses for stress-testing a plan already on the table, and a new Seams section draws `show-me` visuals inline and offers `grill-me` when the user holds something to elicit rather than shape.
+- `handoff` — accepting another skill's offer to save now counts as the file request; the skill writes the file without asking again.
+- `code-review` — no longer triggers for building understanding of a change; those asks route to `teach-me`.
+- `receiving-feedback` — triggers on any feedback that evaluates an artifact the agent produced or is responsible for, not only review feedback.
+
 ## [2.4.0] - 2026-08-17
 
 ### Changed

@@ -1,14 +1,10 @@
 ---
 name: brainstorming
 description: |-
-  Use when turning a fuzzy idea into a refined design through dialogue — across software, writing, talks, events, naming, activities, or any creative/design task. Triggers: 'brainstorm', 'help me think about/through', 'figure out', 'work through', 'I have this idea', 'let's design', 'flesh this out'. Domain-agnostic. Not for: open-ended ideation with no anchor ('what should I build?'), implementing from a finalized spec, narrow binary decisions ('X or Y?'), retrospective review, mechanical refactors, or reframing whether the presenting question is the "real" one.
+  Use when turning a fuzzy idea into a refined design through dialogue — across software, writing, talks, events, naming, activities, or any creative/design task. Its adversarial lenses also stress-test a plan or proposal already on the table. Triggers: 'brainstorm', 'help me think about/through', 'figure out', 'work through', 'I have this idea', 'let's design', 'flesh this out'. Domain-agnostic. Not for: open-ended ideation with no anchor ('what should I build?'), implementing from a finalized spec, narrow binary decisions ('X or Y?'), retrospective review, mechanical refactors, or reframing whether the presenting question is the "real" one.
 ---
 
 # Brainstorming
-
-## Invocation Notice
-
-Inform the user when this skill is being invoked by name: `brainstorming`.
 
 ## When to Use
 
@@ -25,6 +21,10 @@ Inform the user when this skill is being invoked by name: `brainstorming`.
 - Reframing whether the presenting question is the "real" question
 - Implementing code from a finalized design — use the appropriate implementation skill
 - Narrow bug fixes, mechanical refactors, formatting passes
+
+## Invocation Notice
+
+Inform the user when this skill is being invoked by name: `brainstorming`.
 
 ## Core Discipline
 
@@ -120,6 +120,17 @@ These counter the assistant's default reflexes.
   Persona dispatch alone doesn't fix that.
   When `lateral` runs, combine parallel subagents with verbalized sampling and selection-for-distance (see `references/lateral.md`).
 
+## Seams with Neighboring Skills
+
+Mid-session, another skill's material can serve the brainstorm without ending it:
+
+- **A question turns visual** — a layout, a mockup, a shape to compare.
+  Draw from `show-me`'s palette inline; like `lateral` and `steelman`, this returns material to the conversation and is not gated.
+  A browser session (clickable mockups across turns) is different: it carries user-visible cost and requires `show-me`'s consent gate.
+- **The user holds something to elicit** — a settled plan, strong opinions, a precise idea, or instincts they can't yet put into words — and wants it drawn out rather than options proposed.
+  That is `grill-me`'s elicitative interview: offer it at any point it would serve — mid-session, or at `close` for assumptions still open.
+  Offering is free; invoking it requires the user's yes, per the HARD-GATE.
+
 ## What This Skill Excludes
 
 - Phase names and announced transitions
@@ -127,7 +138,8 @@ These counter the assistant's default reflexes.
 - Mode selection (full vs lightweight) at entry
 - Mandatory spec files, commit steps, self-review, or user-review gates
 - Implementation-skill handoff (`writing-plans`, `sdd-propose`, etc.) — the user chooses what (if anything) comes next
-- Visual companion / browser-based mockups
+- Visual companion / browser-based mockups — lives in `show-me`
+- Elicitative interviewing in question rounds — lives in `grill-me`
 - Narrow binary decisions, retroactive sense-making, presenting-vs-real-question reframing
 - "Trade fours" or any move whose only job is to perform divergence — `lateral` (parallel subagents) is the divergence mechanism
 

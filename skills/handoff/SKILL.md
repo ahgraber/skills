@@ -22,7 +22,7 @@ Keep identifiers, commands, paths, and file names exact.
 
 - Assume the recipient will see only the handoff document and nothing else.
 - Output one fully filled handoff payload in chat.
-- Do not create a handoff file unless explicitly requested.
+- Write it to a file only when the user asks for one; a request already made — including accepting another skill's offer to save — counts, so do not ask again.
 - Do not rely on references like "above" or "earlier in this thread"; carry the substance of conversation-only information into the handoff itself.
 - Record, do not decide: every statement must trace to the user's words, the session's actions, or an artifact.
   Do not infer next actions, select new work, or extend scope.

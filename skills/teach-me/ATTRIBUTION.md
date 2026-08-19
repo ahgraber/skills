@@ -1,6 +1,6 @@
 # Attributions and Citations
 
-Adapted from Geoffrey Litt's [`explain-diff` prompts](https://gist.github.com/geoffreylitt/a29df1b5f9865506e8952488eac3d524), which define the Background / Intuition / Code / Quiz structure, the self-contained dated HTML output, and the Martin-Kleppmann-clarity style directive.
+Adapted from Geoffrey Litt's [`explain-diff` prompts](https://gist.github.com/geoffreylitt/a29df1b5f9865506e8952488eac3d524), which define the Background / Intuition / Code / Quiz structure (generalized here to Background / Intuition / Walkthrough / Quiz), the self-contained dated HTML output, and the Martin-Kleppmann-clarity style directive.
 The gist's comment thread (Butanium) flagged that correct quiz answers were guessable for being the longest option — generalized here into the item-writing rules in `references/quiz-design.md`.
 
 ## Research informing the design
