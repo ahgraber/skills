@@ -158,7 +158,12 @@ class Finding:
 def git(*args: str) -> subprocess.CompletedProcess[str]:
     """Run a git command and capture its output."""
     return subprocess.run(  # noqa: S603
-        ["git", *args], capture_output=True, text=True, encoding="utf-8", errors="replace", check=False
+        ["git", *args],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
     )
 
 
@@ -407,7 +412,12 @@ def compare_renders(path: str, old: Render, new: Render) -> Finding:
         finding.document_diff = [
             line
             for line in difflib.unified_diff(
-                old.document, new.document, "before", "after", n=DIFF_CONTEXT, lineterm=""
+                old.document,
+                new.document,
+                "before",
+                "after",
+                n=DIFF_CONTEXT,
+                lineterm="",
             )
             if not line.startswith(("---", "+++"))
         ]
@@ -483,7 +493,12 @@ def mirror_tree(root: Path, workdir: Path) -> None:
         shutil.copy2(source, destination)
 
     for args in (("init", "-q"), ("add", "-A")):
-        staged = subprocess.run(["git", "-C", str(workdir), *args], capture_output=True, text=True, check=False)  # noqa: S603
+        staged = subprocess.run(  # noqa: S603
+            ["git", "-C", str(workdir), *args],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
         if staged.returncode != 0:
             logger.error("git %s failed in the mirror: %s", args[0], staged.stderr.strip())
             sys.exit(2)
@@ -504,7 +519,14 @@ def run_hooks(runner: str, hooks: list[str], files: list[str], workdir: Path) ->
         before = corpus_digest(files, workdir)
         # The hook id is positional and has to precede `--files`, whose trailing
         # list would otherwise swallow it as a path and run every hook instead.
-        argv = [runner, "run", *([hook] if hook else []), "--color=never", "--files", *files]
+        argv = [
+            runner,
+            "run",
+            *([hook] if hook else []),
+            "--color=never",
+            "--files",
+            *files,
+        ]
         result = subprocess.run(argv, cwd=workdir, capture_output=True, text=True, check=False)  # noqa: S603
         output = (result.stdout + result.stderr).strip()
         logger.debug("%s\n%s", shlex.join(argv), output)
@@ -515,7 +537,12 @@ def run_hooks(runner: str, hooks: list[str], files: list[str], workdir: Path) ->
             # A nonzero exit is the normal outcome of a hook that rewrote
             # something -- both runners report that as a failure -- so only a
             # nonzero run that changed nothing means the hook is itself broken.
-            logger.warning("%s exited %d and rewrote nothing:\n%s", label, result.returncode, indent(output, "    "))
+            logger.warning(
+                "%s exited %d and rewrote nothing:\n%s",
+                label,
+                result.returncode,
+                indent(output, "    "),
+            )
 
 
 def compare_hooked(files: list[str], runner: str, hooks: list[str], root: Path) -> list[Finding]:
@@ -566,8 +593,16 @@ def report(findings: list[Finding], total: int) -> None:
 
     sections = [
         ("COULD NOT BE CHECKED", lambda f: f.unrenderable, lambda f: [f.unrenderable]),
-        ("FRONTMATTER CHANGED", lambda f: f.frontmatter_diff, lambda f: f.frontmatter_diff),
-        ("LINK TARGETS BROKEN", lambda f: f.targets_broken, lambda f: [f"broken {t}" for t in f.targets_broken]),
+        (
+            "FRONTMATTER CHANGED",
+            lambda f: f.frontmatter_diff,
+            lambda f: f.frontmatter_diff,
+        ),
+        (
+            "LINK TARGETS BROKEN",
+            lambda f: f.targets_broken,
+            lambda f: [f"broken {t}" for t in f.targets_broken],
+        ),
         (
             "LINKS CHANGED",
             lambda f: f.links_lost or f.links_gained,
@@ -614,11 +649,19 @@ def doctor() -> int:
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("paths", nargs="*", help="limit comparison to these paths (default: all markdown)")
+    parser.add_argument(
+        "paths",
+        nargs="*",
+        help="limit comparison to these paths (default: all markdown)",
+    )
     # No default for the revisions: whether they were given is what distinguishes
     # the two modes, which a default would hide.  `base` is resolved below.
     parser.add_argument("--base", default=None, help="revision to compare from (default: HEAD)")
-    parser.add_argument("--head", default=None, help="revision to compare to (default: the working tree)")
+    parser.add_argument(
+        "--head",
+        default=None,
+        help="revision to compare to (default: the working tree)",
+    )
     parser.add_argument(
         "--run-hooks",
         action="store_true",
@@ -633,10 +676,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="restrict --run-hooks to this hook id; repeat to chain hooks in order. "
         "Implies --run-hooks; omit to run every hook that applies to the corpus.",
     )
-    parser.add_argument("--runner", choices=RUNNERS, help="hook runner to drive (default: the first on PATH)")
+    parser.add_argument(
+        "--runner",
+        choices=RUNNERS,
+        help="hook runner to drive (default: the first on PATH)",
+    )
     parser.add_argument("-v", "--verbose", action="store_true", help="log skipped files and hook output")
     parser.add_argument(
-        "--doctor", action="store_true", help="report which of the script's dependencies are present, then exit"
+        "--doctor",
+        action="store_true",
+        help="report which of the script's dependencies are present, then exit",
     )
 
     args = parser.parse_args(argv)

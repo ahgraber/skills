@@ -1,13 +1,18 @@
 # Changes here will be overwritten by Copier
-_commit: 2026.1.0-18-gc6dff60
+_commit: 2026.8.1
 _src_path: gh:ninerealmlabs/precommit-template
+ai: true
 conventional_commits: true
-copilot: false
 docker: false
-editorconfig: false
+editorconfig: true
+github_actions: true
 markdown: true
-prettier: false
+markdown_render_check: true
+markdown_render_check_dir: scripts
 python: true
 shell: true
 typos: true
+web_format: true
+web_format_tool: biome
 yaml: true
+

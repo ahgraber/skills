@@ -2,7 +2,7 @@
 required-version = ">=0.16"  # rule names and defaults below assume 0.16
 preview = false  # do not use unstable rules/fixes
 # # Assumed Python version
-# target-version = "py313" # inferred from [project]requires-python in pyproject.toml
+# target-version = "py311" # inferred from [project]requires-python in pyproject.toml
 
 # file selection
 extend-exclude = [
