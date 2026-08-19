@@ -43,10 +43,8 @@ The test: **would the user understand this better by seeing it than reading it?*
 - Clarifying questions — anything where the answer is words, not a visual preference
 
 A question _about_ a UI topic is not automatically a visual question.
-"What kind of wizard do you want?"
-is conceptual — use the terminal.
-"Which of these wizard layouts feels right?"
-is visual — use the browser.
+"What kind of wizard do you want?" is conceptual — use the terminal.
+"Which of these wizard layouts feels right?" is visual — use the browser.
 
 ## How It Works
 

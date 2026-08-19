@@ -235,10 +235,10 @@ def check_change(
         return failures, notes, errors
 
     flat = set(specs_dir.glob("*/spec.md"))
-    for stray in sorted(set(specs_dir.glob("**/spec.md")) - flat):
-        notes.append(
-            f"{stray.relative_to(specs_dir)}: spec.md below the expected <capability>/spec.md depth — not checked"
-        )
+    notes.extend(
+        f"{stray.relative_to(specs_dir)}: spec.md below the expected <capability>/spec.md depth — not checked"
+        for stray in sorted(set(specs_dir.glob("**/spec.md")) - flat)
+    )
 
     for delta_path in sorted(flat):
         capability = delta_path.parent.name
@@ -257,8 +257,10 @@ def check_change(
             notes.append(
                 f"{capability}: non-canonical MODIFIED heading — expected '## MODIFIED Requirements'"
             )
-        for dup in parsed.duplicate_names:
-            notes.append(f"{capability}: duplicate MODIFIED requirement '{dup}' — only the last is checked")
+        notes.extend(
+            f"{capability}: duplicate MODIFIED requirement '{dup}' — only the last is checked"
+            for dup in parsed.duplicate_names
+        )
         baseline_path = specs_root / "specs" / capability / "spec.md"
         if not baseline_path.exists():
             notes.append(
@@ -275,10 +277,10 @@ def check_change(
             errors.append(f"{baseline_path}: unclosed code fence — cannot reliably parse")
             continue
         baseline = baseline_parsed.requirements
-        for dup in baseline_parsed.duplicate_names:
-            notes.append(
-                f"{capability}: duplicate baseline requirement '{dup}' — only the last is checked against"
-            )
+        notes.extend(
+            f"{capability}: duplicate baseline requirement '{dup}' — only the last is checked against"
+            for dup in baseline_parsed.duplicate_names
+        )
         for delta_req in modified.values():
             finding, req_notes = _diff_requirement(capability, delta_req, baseline)
             notes.extend(req_notes)

@@ -24,7 +24,8 @@ import pytest
 
 _MODULE_PATH = Path(__file__).resolve().parents[2] / "skills" / "sdd" / "scripts" / "check_modified_completeness.py"
 _spec = importlib.util.spec_from_file_location("check_modified_completeness", _MODULE_PATH)
-assert _spec is not None and _spec.loader is not None
+assert _spec is not None
+assert _spec.loader is not None
 cmc = importlib.util.module_from_spec(_spec)
 sys.modules[_spec.name] = cmc
 _spec.loader.exec_module(cmc)

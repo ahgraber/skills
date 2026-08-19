@@ -8,7 +8,6 @@
 """Tests for the antislop-writing prose_audit.py tripwire scanner."""
 
 import importlib.util
-import json
 from pathlib import Path
 import sys
 
@@ -124,7 +123,7 @@ def test_uniform_length_run_flags_metronome():
     )
     stats = pa.rhythm_stats(pa.split_sentences(uniform))
     assert any("near-identical" in flag for flag in stats["flags"])
-    varied = " ".join(
+    varied = " ".join(  # noqa: FLY002 - the sentence list stays readable as a list
         [
             "Alpha beta gamma delta epsilon zeta eta theta iota kappa.",
             "Short one lands.",

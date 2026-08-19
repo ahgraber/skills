@@ -594,7 +594,7 @@ def select_deep_review_input(args: argparse.Namespace) -> None:
     require_unique_paths(rows, "Rank output")
 
     included = [row for row in rows if row["include"]]
-    base_rows = included if included else rows
+    base_rows = included or rows
     base_rows.sort(key=lambda row: (-int(row["score"]), str(row["path"])))
     keep = max(1, int(len(base_rows) * (args.top_percent / 100.0))) if base_rows else 0
     selected = [{"path": row["path"], "area": row["area"]} for row in base_rows[:keep]]

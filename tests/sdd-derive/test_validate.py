@@ -26,7 +26,8 @@ import pytest
 
 _MODULE_PATH = Path(__file__).resolve().parents[2] / "skills" / "sdd-derive" / "references" / "validate.py"
 _spec = importlib.util.spec_from_file_location("sdd_derive_validate", _MODULE_PATH)
-assert _spec is not None and _spec.loader is not None
+assert _spec is not None
+assert _spec.loader is not None
 validate = importlib.util.module_from_spec(_spec)
 sys.modules[_spec.name] = validate
 _spec.loader.exec_module(validate)

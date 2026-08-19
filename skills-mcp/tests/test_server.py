@@ -71,7 +71,8 @@ async def test_expose_both_keeps_resources_and_tools(populated_root: RootSpec):
 async def test_instructions_carry_skill_index(populated_root: RootSpec):
     mcp = _build(populated_root, "tools")
     text = mcp.instructions or ""
-    assert "alpha" in text and "beta" in text
+    assert "alpha" in text
+    assert "beta" in text
     assert "skill://" in text
     assert "read_resource" in text
 

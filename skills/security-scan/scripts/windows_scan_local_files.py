@@ -447,7 +447,8 @@ def open_read_fd(scan_dir: Path, relative_path: str, context: str) -> int:
                 disposition=_OPEN_EXISTING,
                 flags=_FILE_FLAG_OPEN_REPARSE_POINT,
             )
-            assert handle is not None and handle.value is not None  # noqa: S101
+            assert handle is not None  # noqa: S101
+            assert handle.value is not None  # noqa: S101
             try:
                 _verify_regular_file(handle.value, path)
                 raw_handle = handle.detach()

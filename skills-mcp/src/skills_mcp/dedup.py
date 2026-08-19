@@ -6,8 +6,10 @@ from dataclasses import dataclass
 import hashlib
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from skills_mcp.discovery import RootSpec
+if TYPE_CHECKING:
+    from skills_mcp.discovery import RootSpec
 
 logger = logging.getLogger("skills_mcp.dedup")
 

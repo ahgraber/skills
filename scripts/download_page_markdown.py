@@ -150,8 +150,8 @@ def pick_heading_by_url_hint(headings: list[str], url: str) -> str | None:
     """Pick the heading that best matches URL path tokens."""
     parsed = urlparse(url)
     tokens: list[str] = []
-    for segment in parsed.path.split("/"):
-        segment = segment.strip()
+    for raw_segment in parsed.path.split("/"):
+        segment = raw_segment.strip()
         if not segment:
             continue
         tokens.extend(re.split(r"[^a-zA-Z0-9]+", segment))
@@ -186,8 +186,7 @@ def build_base_name(title: str, domain: str, counter: int, max_len: int) -> str:
     counter_suffix = f"-{counter}" if counter > 1 else ""
     tag = f"[{safe_domain}]"
     available = max_len - len(counter_suffix) - len(tag) - 1
-    if available < 1:
-        available = 1
+    available = max(available, 1)
     trimmed_title = safe_title[:available]
     trimmed_title = trimmed_title.rstrip("-") or "page"
     return f"{trimmed_title}{counter_suffix}-{tag}"

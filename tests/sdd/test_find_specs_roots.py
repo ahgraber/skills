@@ -27,7 +27,8 @@ import pytest
 
 _MODULE_PATH = Path(__file__).resolve().parents[2] / "skills" / "sdd" / "scripts" / "find_specs_roots.py"
 _spec = importlib.util.spec_from_file_location("find_specs_roots", _MODULE_PATH)
-assert _spec is not None and _spec.loader is not None
+assert _spec is not None
+assert _spec.loader is not None
 fsr = importlib.util.module_from_spec(_spec)
 sys.modules[_spec.name] = fsr
 _spec.loader.exec_module(fsr)
@@ -35,7 +36,7 @@ _spec.loader.exec_module(fsr)
 
 def _git_init(repo: Path) -> None:
     repo.mkdir(parents=True, exist_ok=True)
-    subprocess.run(["git", "init", "-q"], cwd=str(repo), check=True, capture_output=True, text=True)  # noqa: S603, S607
+    subprocess.run(["git", "init", "-q"], cwd=str(repo), check=True, capture_output=True, text=True)
 
 
 # --- is_inside ---------------------------------------------------------------
@@ -167,7 +168,8 @@ def test_analyze_pointer_targets_inside_and_outside(tmp_path):
     info = fsr.analyze_pointer(marker, anchor)
 
     by_raw = {t.raw: t for t in info.targets}
-    assert by_raw["inside"].exists and by_raw["inside"].is_dir
+    assert by_raw["inside"].exists
+    assert by_raw["inside"].is_dir
     assert by_raw["inside"].outside_workspace is False
     assert by_raw[str(outside)].outside_workspace is True
 

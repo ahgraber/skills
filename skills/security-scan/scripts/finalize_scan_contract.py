@@ -12,6 +12,7 @@ from collections.abc import Iterator
 import copy
 from datetime import datetime
 import errno
+import functools
 import hashlib
 import importlib.util
 import json
@@ -206,21 +207,16 @@ def _descriptor_relative_writes_available() -> bool:
     return hasattr(os, "O_NOFOLLOW") and all(operation in os.supports_dir_fd for operation in required_operations)
 
 
-_WINDOWS_SCAN_LOCAL_FILES: Any | None = None
-
-
+@functools.cache
 def _windows_scan_local_files() -> Any:
     """Load the Win32 backend only on runtimes that need it."""
-    global _WINDOWS_SCAN_LOCAL_FILES
-    if _WINDOWS_SCAN_LOCAL_FILES is None:
-        script = Path(__file__).resolve().with_name("windows_scan_local_files.py")
-        spec = importlib.util.spec_from_file_location("security_scan_windows_scan_files", script)
-        if spec is None or spec.loader is None:
-            raise ContractError(f"could not load Windows scan-local file helper: {script}")
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        _WINDOWS_SCAN_LOCAL_FILES = module
-    return _WINDOWS_SCAN_LOCAL_FILES
+    script = Path(__file__).resolve().with_name("windows_scan_local_files.py")
+    spec = importlib.util.spec_from_file_location("security_scan_windows_scan_files", script)
+    if spec is None or spec.loader is None:
+        raise ContractError(f"could not load Windows scan-local file helper: {script}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def _open_verified_scan_directory(scan_dir: Path) -> int:
@@ -471,7 +467,7 @@ def _validate_target(target: dict[str, Any]) -> None:
         _validate_remote(remote, "scan.target.remote")
     if kind == "git_revision":
         _require_str(target, "revision", "scan.target")
-    elif kind == "git_worktree" or kind == "git_diff" or kind == "directory_snapshot":
+    elif kind in {"git_worktree", "git_diff", "directory_snapshot"}:
         _require_str(target, "snapshotDigest", "scan.target")
 
 
@@ -488,7 +484,10 @@ def _fingerprint(target_id: str, finding: dict[str, Any]) -> str:
     rule_id = _require_str(finding, "ruleId", "finding")
     if not SLUG_RE.fullmatch(rule_id):
         raise ContractError("finding.ruleId: expected a stable lowercase rule slug")
-    material = "\0".join((FINGERPRINT_ALGORITHM, target_id, rule_id, anchor, instance))
+    # One NUL separator applied uniformly is harder to get wrong than four
+    # hand-written ones in an f-string, and a dropped separator would silently
+    # collide fingerprints across fields.
+    material = "\0".join((FINGERPRINT_ALGORITHM, target_id, rule_id, anchor, instance))  # noqa: FLY002
     return f"{FINGERPRINT_ALGORITHM}:sha256:{_sha256_text(material)}"
 
 
@@ -777,9 +776,11 @@ def _validate_schema_node(value: Any, schema: dict[str, Any], context: str) -> N
         if isinstance(contains, dict):
             matches = 0
             for item in value:
+                # Per-item try/except is the algorithm here, not overhead: JSON Schema
+                # `contains` counts how many items validate, so a raise is a normal outcome.
                 try:
                     _validate_schema_node(item, contains, context)
-                except ContractError:
+                except ContractError:  # noqa: PERF203
                     pass
                 else:
                     matches += 1

@@ -38,6 +38,11 @@ docstring-code-format = true
 [lint]
 exclude = ["*.pyi"]
 
+# Typographic characters this repo uses on purpose in prose, comments, and the
+# strings skills print back to the user. Listing them keeps RUF001-003 available
+# for genuine homoglyph smuggling instead of firing on intentional punctuation.
+allowed-confusables = ["–", "—", "×"]
+
 # Listed explicitly rather than via `extend-select` so a ruff upgrade cannot
 # widen the enabled set without a change here.
 select = [

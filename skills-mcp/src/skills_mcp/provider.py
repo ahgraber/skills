@@ -3,13 +3,16 @@ from __future__ import annotations
 from collections.abc import Sequence
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from fastmcp.server.providers.skills.directory_provider import SkillsDirectoryProvider
 from fastmcp.server.providers.skills.skill_provider import SkillProvider
 
 from skills_mcp.dedup import ResolvedSkill, dedup_skills
-from skills_mcp.discovery import RootSpec
 from skills_mcp.validation import SAFE_SKILL_NAME_RE, ValidationResult, validate_skill
+
+if TYPE_CHECKING:
+    from skills_mcp.discovery import RootSpec
 
 logger = logging.getLogger("skills_mcp.provider")
 

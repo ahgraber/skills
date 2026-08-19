@@ -58,10 +58,12 @@ def _parse_frontmatter(text: str) -> tuple[dict, None] | tuple[None, str]:
 # Sanitization — strip prompt-injection vectors before index inclusion
 # ---------------------------------------------------------------------------
 
-# Unicode invisible characters: Tag Block (U+E0000–U+E007F), zero-width chars
-# (U+200B–U+200D, U+2060, U+FEFF), and variation selectors (U+FE00–U+FE0F).
+# Unicode invisible characters: zero-width chars (U+200B-U+200D, U+2060, U+FEFF),
+# variation selectors (U+FE00-U+FE0F), and the Tag Block (U+E0000-U+E007F).
 # These pass visually as empty space but LLMs may decode and act on them.
-_UNICODE_INVISIBLE_RE = re.compile(r"[​-‍⁠﻿︀-️\U000e0000-\U000e007f]")
+# Written as escapes, never as literals: the characters are invisible in source,
+# so a literal class cannot be reviewed or safely edited.
+_UNICODE_INVISIBLE_RE = re.compile(r"[\u200b-\u200d\u2060\ufeff\ufe00-\ufe0f\U000e0000-\U000e007f]")
 # ChatML / Llama-3 special tokens: <|...|>, <|begin_of_text|>, <|eot_id|>, etc.
 # Must be stripped before the angle-bracket pass so the full pattern is matched.
 _SPECIAL_TOKEN_RE = re.compile(r"<\|[^|>\n]{0,40}\|>")
@@ -91,8 +93,7 @@ def sanitize_description(text: str) -> str:
     text = _SPECIAL_TOKEN_RE.sub("", text)
     text = _BRACKET_TOKEN_RE.sub("", text)
     text = _MARKDOWN_LINK_CHARS_RE.sub("", text)
-    text = text.replace("**", "").strip().replace("\n", " ")
-    return text
+    return text.replace("**", "").strip().replace("\n", " ")
 
 
 # ---------------------------------------------------------------------------
@@ -138,8 +139,7 @@ class ValidationResult:
     def __str__(self) -> str:
         status = "OK" if self.valid else "FAIL"
         lines = [f"{status}  {self.skill_dir}"]
-        for issue in self.issues:
-            lines.append(f"       {issue}")
+        lines.extend(f"       {issue}" for issue in self.issues)
         return "\n".join(lines)
 
 

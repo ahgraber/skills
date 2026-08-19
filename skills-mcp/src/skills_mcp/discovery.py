@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 import logging
 import os
 from pathlib import Path
-from typing import Iterable
 
 logger = logging.getLogger("skills_mcp.discovery")
 
@@ -107,7 +107,7 @@ def discover_roots(
         exclude_set = set(exclude_labels)
         # project root is evaluated at call time so it reflects the cwd when the
         # server starts, not when the module was imported.
-        known = (RootSpec("project", Path.cwd() / ".claude" / "skills"),) + KNOWN_ROOTS
+        known = (RootSpec("project", Path.cwd() / ".claude" / "skills"), *KNOWN_ROOTS)
         for spec in known:
             if include_set is not None and spec.label not in include_set:
                 continue
