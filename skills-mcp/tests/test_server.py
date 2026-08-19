@@ -68,6 +68,29 @@ async def test_expose_both_keeps_resources_and_tools(populated_root: RootSpec):
         assert any(str(r.uri) == "skill://alpha/SKILL.md" for r in resources)
 
 
+@pytest.mark.parametrize("mode", ["auto", "legacy"])
+async def test_both_protocol_eras_reach_skills(populated_root: RootSpec, mode: str):
+    mcp = _build(populated_root, "both")
+    async with Client(mcp, mode=mode) as c:
+        assert {"list_resources", "read_resource"} <= {t.name for t in await c.list_tools()}
+        resources = await c.list_resources()
+        assert any(str(r.uri) == "skill://alpha/SKILL.md" for r in resources)
+
+        result = await c.call_tool("read_resource", {"uri": "skill://alpha/SKILL.md"})
+        assert "Alpha body." in result.content[0].text
+
+
+async def test_auto_mode_negotiates_past_the_handshake_era(populated_root: RootSpec):
+    # Guards against `auto` silently falling back: without this the era test above
+    # would still pass if both modes landed on the session-based handshake.
+    mcp = _build(populated_root, "both")
+    async with Client(mcp, mode="auto") as c:
+        modern = str(c.protocol_version)
+    async with Client(mcp, mode="legacy") as c:
+        handshake = str(c.protocol_version)
+    assert modern > handshake
+
+
 async def test_instructions_carry_skill_index(populated_root: RootSpec):
     mcp = _build(populated_root, "tools")
     text = mcp.instructions or ""

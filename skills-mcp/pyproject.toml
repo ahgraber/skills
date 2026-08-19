@@ -1,5 +1,5 @@
 [build-system]
-requires = ["uv_build>=0.11,<0.12"]
+requires = ["uv_build>=0.12,<0.13"]
 build-backend = "uv_build"
 
 [project]
@@ -17,7 +17,7 @@ classifiers = [
   "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-  "fastmcp>=3.2.0",
+  "fastmcp>=4.0.0b3,<5",
 ]
 
 [project.scripts]

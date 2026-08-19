@@ -8,6 +8,12 @@ Releases are cut with [uv-ship](https://floraths.github.io/uv-ship/) — see [RE
 
 ## [Unreleased]
 
+### Changed
+
+- Move to FastMCP 4 (`fastmcp>=4.0.0b3,<5`).
+  The server now negotiates a protocol era per connection: clients on MCP's sessionless `2026-07-28` protocol and clients on the `2025-11-25` handshake era both reach the same skills, from one server.
+  FastMCP 4 is still a prerelease, so an install resolves to a beta; pin `skills-mcp` itself if that is not acceptable.
+
 ## [0.1.0] - 2026-07-12
 
 ### Added
