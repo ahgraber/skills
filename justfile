@@ -9,6 +9,46 @@
 default:
     @just --list
 
+# --- tests -----------------------------------------------------------------
+# Every file under tests/ is a self-contained uv script that runs its own pytest, so
+# each resolves the PEP 723 dependencies of the script it exercises. The repo root is
+# not a package, so plain `uv run pytest` has no environment to resolve them from.
+
+# Run the skill-script tests; pass an interpreter to pin it, e.g. `just test 3.13`
+test python="":
+    #!/usr/bin/env bash
+    set -uo pipefail
+    failed=""
+    for t in tests/*/test_*.py; do
+        printf '\n== %s\n' "${t}"
+        if [ -n "{{ python }}" ]; then
+            uv run --python "{{ python }}" "${t}" || failed="${failed} ${t}"
+        else
+            uv run "${t}" || failed="${failed} ${t}"
+        fi
+    done
+    if [ -n "${failed}" ]; then
+        printf '\nfailed:%s\n' "${failed}" >&2
+        exit 1
+    fi
+    printf '\nall test files passed\n'
+
+# Run the skills-mcp package tests, e.g. `just test-mcp -k discovery`
+test-mcp *args:
+    cd skills-mcp && uv run pytest {{ args }}
+
+# Run both components' tests
+test-all: test test-mcp
+
+# Run the skill-script tests on every interpreter the script headers allow
+test-matrix:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    for v in 3.12 3.13 3.14; do
+        printf '\n### python %s\n' "${v}"
+        {{ just_executable() }} test "${v}" || exit 1
+    done
+
 # --- markdown render safety ------------------------------------------------
 # The formatters rewrite markdown source; these recipes check that the rendered
 # output is unchanged. Requires pandoc, plus a hook runner for the -hooks recipe;
