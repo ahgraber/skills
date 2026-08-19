@@ -30,6 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `interactive-notebook-demo` — gains the notebook event-loop reference shared from `python-notebooks-async`.
 - Fast-moving references (ruff coverage, the nox matrix, notebook async) now open with a `Last verified:` date naming what to re-check.
 
+### Fixed
+
+- `sdd-apply` and `sdd-translate` — ship the `references/sdd-change-formats.md` file both skills tell the reader to consult; following their task-ordering and change-directory steps previously landed on a file that was never installed with the skill.
+
 ## [2.4.0] - 2026-08-17
 
 ### Changed

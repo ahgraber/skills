@@ -62,7 +62,7 @@ Skip skill invocation ONLY when:
 4. Follow the loaded instructions.
    If the skill includes a checklist, create TodoWrite items for each step.
 5. Announce which skill you are using and why \
-(e.g., "Using `python-testing` to write these test cases.").
+(e.g., "Using `writing-tests` to write these test cases.").
 
 ### Instruction priority
 
@@ -106,10 +106,12 @@ def _format_skill_index(provider: DedupSkillsDirectoryProvider, expose: ExposeMo
         "",
         "---",
         "",
-        "Aggregates agent skills from well-known locations (~/.claude/skills, "
-        "~/.agents/skills, vendor-specific dirs). Duplicates are collapsed by "
-        "symlink and content hash; true name collisions are exposed under "
-        "namespaced URIs (e.g. skill://claude--foo).",
+        (
+            "Aggregates agent skills from well-known locations (~/.claude/skills, "
+            "~/.agents/skills, vendor-specific dirs). Duplicates are collapsed by "
+            "symlink and content hash; true name collisions are exposed under "
+            "namespaced URIs (e.g. skill://claude--foo)."
+        ),
         "",
         "## URI scheme",
         "",
