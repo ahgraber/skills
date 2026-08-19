@@ -153,13 +153,20 @@ When the user wants to keep a visual, save it where they choose; date HTML filen
 
 ## Mermaid Tooling (optional)
 
-Two scripts are available when a Mermaid diagram must be verified or rendered to a file; neither is a required step:
+A fenced Mermaid block is the deliverable in most cases, and it needs no tooling at all.
+Reach for these two scripts only when the diagram must be checked before the user sees it, or when they asked for an image file:
 
-- `scripts/validate_mermaid.py` — check that Mermaid parses, via the local Mermaid CLI (`mmdc`).
-- `scripts/render_mermaid.py` — render Mermaid to SVG/PNG/PDF locally; prefer SVG for Markdown embedding.
+- `scripts/validate_mermaid.py` — confirm the Mermaid parses.
+  Reads stdin or `--input`, and exits non-zero with the parser's message.
+- `scripts/render_mermaid.py` — write the diagram to `--output`, format taken from the extension (`.svg`, `.png`, `.pdf`).
+  Prefer SVG for Markdown embedding.
 
-Both expect `mmdc` on PATH; dependencies are managed via inline `uv` script metadata.
-If `mmdc` is missing, tell the user how to install it locally; do not use the Mermaid web service.
+Both run on `uv` alone and render locally — no Node, no browser, and nothing sent to the Mermaid web service.
+Assume they work rather than checking first; the inline `uv` metadata installs what they need on first run.
+
+If either script fails, read the message before reacting.
+A parse error is a defect in the diagram — fix the Mermaid and re-run.
+Any other failure means rendering is unavailable on this machine: say so plainly, offer the fenced block as-is, and pick another view from the list above rather than pressing the user to install anything.
 
 ## Interactive Browser Sessions
 

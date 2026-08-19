@@ -2,101 +2,65 @@
 # /// script
 # requires-python = ">=3.11,<3.13"
 # dependencies = [
-#   "pyppeteer>=1.0.2",
+#   "mermaidx[rust]>=0.9",
 # ]
 # ///
+"""Check that Mermaid source parses, using a local renderer with no network access."""
+
 import argparse
-import os
 from pathlib import Path
-import shutil
-import subprocess
 import sys
-import tempfile
-from typing import Optional
+
+import mermaidx
+
+# merman is a Rust reimplementation that parses in milliseconds; quickjs runs the
+# real mermaid.js and is the authority on what counts as valid. merman is the
+# stricter of the two, so its rejection is never the final answer.
+FAST_BACKEND = "merman"
+REFERENCE_BACKEND = "quickjs"
 
 
-def _read_input(path: Optional[str]) -> str:
+def _read_input(path: str | None) -> str:
     if path:
         return Path(path).read_text(encoding="utf-8")
     return sys.stdin.read()
 
 
-def _ensure_chromium(install: bool) -> Optional[str]:
+def _parses(source: str, backend: str) -> Exception | None:
+    """Return the failure from rendering `source`, or None when it parses.
+
+    Rendering is lazy, so the SVG has to be forced for a parse error to surface.
+    """
     try:
-        from pyppeteer import chromium_downloader
-    except Exception:
-        return None
-
-    chrome_path = chromium_downloader.chromium_executable()
-    if chrome_path and Path(chrome_path).exists():
-        return chrome_path
-
-    if not install:
-        return None
-
-    try:
-        chromium_downloader.download_chromium()
-    except Exception:
-        return None
-
-    chrome_path = chromium_downloader.chromium_executable()
-    if chrome_path and Path(chrome_path).exists():
-        return chrome_path
-
+        mermaidx.render(source, backend=backend).svg()
+    except Exception as exc:  # noqa: BLE001 - any failure means this backend rejected it
+        return exc
     return None
 
 
-def _maybe_set_puppeteer_executable(env: dict, install: bool) -> None:
-    # If pyppeteer is installed (via uv), use its Chromium binary for mmdc.
-    chrome_path = _ensure_chromium(install)
-    if chrome_path:
-        env.setdefault("PUPPETEER_EXECUTABLE_PATH", chrome_path)
-
-
 def main() -> int:
-    """CLI entrypoint for validating Mermaid diagrams with mmdc."""
-    parser = argparse.ArgumentParser(description="Validate Mermaid code using mmdc.")
+    """CLI entrypoint for validating Mermaid source."""
+    parser = argparse.ArgumentParser(description="Validate Mermaid source locally.")
     parser.add_argument("--input", "-i", help="Path to a .mmd/.md file. Reads stdin if omitted.")
-    parser.add_argument(
-        "--install-chromium",
-        action="store_true",
-        help="Download Chromium via pyppeteer if missing.",
-    )
     args = parser.parse_args()
 
-    mmdc = shutil.which("mmdc")
-    if not mmdc:
-        print("mmdc not found on PATH. Install Mermaid CLI locally to validate.", file=sys.stderr)
-        return 2
-
-    mermaid_src = _read_input(args.input)
-    if not mermaid_src.strip():
+    source = _read_input(args.input)
+    if not source.strip():
         print("No Mermaid content provided.", file=sys.stderr)
         return 2
 
-    with tempfile.TemporaryDirectory() as tmpdir:
-        in_path = Path(tmpdir) / "input.mmd"
-        out_path = Path(tmpdir) / "out.svg"
-        in_path.write_text(mermaid_src, encoding="utf-8")
+    if _parses(source, FAST_BACKEND) is None:
+        print("Mermaid validation OK.")
+        return 0
 
-        try:
-            env = os.environ.copy()
-            _maybe_set_puppeteer_executable(env, args.install_chromium)
-            subprocess.run(  # noqa: S603
-                [mmdc, "-i", str(in_path), "-o", str(out_path)],
-                check=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                env=env,
-            )
-        except subprocess.CalledProcessError as exc:
-            err = exc.stderr.strip() or "Mermaid validation failed."
-            print(err, file=sys.stderr)
-            return 1
+    # The fast backend rejected it; only mermaid.js itself can settle the question.
+    failure = _parses(source, REFERENCE_BACKEND)
+    if failure is None:
+        print("Mermaid validation OK.")
+        return 0
 
-    print("Mermaid validation OK.")
-    return 0
+    print(str(failure).strip() or "Mermaid validation failed.", file=sys.stderr)
+    return 1
 
 
 if __name__ == "__main__":

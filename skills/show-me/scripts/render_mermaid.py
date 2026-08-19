@@ -2,101 +2,79 @@
 # /// script
 # requires-python = ">=3.11,<3.13"
 # dependencies = [
-#   "pyppeteer>=1.0.2",
+#   "mermaidx[rust]>=0.9",
 # ]
 # ///
+"""Render Mermaid to SVG/PNG/PDF locally, with no network access."""
+
 import argparse
-import os
 from pathlib import Path
-import shutil
-import subprocess
 import sys
-import tempfile
-from typing import Optional
+
+import mermaidx
+
+# merman is a Rust reimplementation that renders in milliseconds; quickjs runs the
+# real mermaid.js and covers the syntax merman's stricter parser turns away.
+FAST_BACKEND = "merman"
+REFERENCE_BACKEND = "quickjs"
 
 
-def _read_input(path: Optional[str]) -> str:
+def _read_input(path: str | None) -> str:
     if path:
         return Path(path).read_text(encoding="utf-8")
     return sys.stdin.read()
 
 
-def _ensure_chromium(install: bool) -> Optional[str]:
+def _render(source: str):
+    """Return a rendered diagram, preferring the fast backend.
+
+    Rendering is lazy, so the SVG is forced here to settle which backend can parse
+    the source before anything is written to disk. The result is cached on the
+    diagram, so the later save does not render a second time.
+    """
     try:
-        from pyppeteer import chromium_downloader
-    except Exception:
-        return None
-
-    chrome_path = chromium_downloader.chromium_executable()
-    if chrome_path and Path(chrome_path).exists():
-        return chrome_path
-
-    if not install:
-        return None
-
-    try:
-        chromium_downloader.download_chromium()
-    except Exception:
-        return None
-
-    chrome_path = chromium_downloader.chromium_executable()
-    if chrome_path and Path(chrome_path).exists():
-        return chrome_path
-
-    return None
-
-
-def _maybe_set_puppeteer_executable(env: dict, install: bool) -> None:
-    # If pyppeteer is installed (via uv), use its Chromium binary for mmdc.
-    chrome_path = _ensure_chromium(install)
-    if chrome_path:
-        env.setdefault("PUPPETEER_EXECUTABLE_PATH", chrome_path)
+        diagram = mermaidx.render(source, backend=FAST_BACKEND)
+        diagram.svg()
+    except Exception:  # noqa: BLE001 - the fast backend is stricter; defer to mermaid.js
+        diagram = mermaidx.render(source, backend=REFERENCE_BACKEND)
+        diagram.svg()
+    return diagram
 
 
 def main() -> int:
-    """CLI entrypoint for rendering Mermaid diagrams with mmdc."""
-    parser = argparse.ArgumentParser(description="Render Mermaid diagrams locally using mmdc.")
+    """CLI entrypoint for rendering Mermaid diagrams."""
+    parser = argparse.ArgumentParser(description="Render Mermaid diagrams locally.")
     parser.add_argument("--input", "-i", help="Path to a .mmd/.md file. Reads stdin if omitted.")
     parser.add_argument("--output", "-o", required=True, help="Output file path (.svg/.png/.pdf).")
-    parser.add_argument(
-        "--install-chromium",
-        action="store_true",
-        help="Download Chromium via pyppeteer if missing.",
-    )
+    parser.add_argument("--background", help="Background colour, e.g. 'white' or '#fff'. Transparent by default.")
+    parser.add_argument("--scale", type=float, help="Scale factor for raster output.")
     args = parser.parse_args()
 
-    mmdc = shutil.which("mmdc")
-    if not mmdc:
-        print("mmdc not found on PATH. Install Mermaid CLI locally to render.", file=sys.stderr)
-        return 2
-
-    mermaid_src = _read_input(args.input)
-    if not mermaid_src.strip():
+    source = _read_input(args.input)
+    if not source.strip():
         print("No Mermaid content provided.", file=sys.stderr)
         return 2
+
+    try:
+        diagram = _render(source)
+    except Exception as exc:  # noqa: BLE001 - report the renderer's own message
+        print(str(exc).strip() or "Mermaid render failed.", file=sys.stderr)
+        return 1
 
     out_path = Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with tempfile.TemporaryDirectory() as tmpdir:
-        in_path = Path(tmpdir) / "input.mmd"
-        in_path.write_text(mermaid_src, encoding="utf-8")
+    options = {}
+    if args.background:
+        options["background"] = args.background
+    if args.scale:
+        options["scale"] = args.scale
 
-        try:
-            env = os.environ.copy()
-            _maybe_set_puppeteer_executable(env, args.install_chromium)
-            subprocess.run(  # noqa: S603
-                [mmdc, "-i", str(in_path), "-o", str(out_path)],
-                check=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                env=env,
-            )
-        except subprocess.CalledProcessError as exc:
-            err = exc.stderr.strip() or "Mermaid render failed."
-            print(err, file=sys.stderr)
-            return 1
+    try:
+        diagram.save(str(out_path), **options)
+    except Exception as exc:  # noqa: BLE001 - unsupported extension or unwritable path
+        print(str(exc).strip() or f"Could not write {out_path}.", file=sys.stderr)
+        return 1
 
     print(f"Rendered: {out_path}")
     return 0

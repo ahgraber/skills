@@ -60,7 +60,6 @@
           # a list of packages to add to the shell environment
           packages = with pkgs; [
             graphviz
-            mermaid-cli
           ];
           # imports = [ (devshell.importTOML ./devshell.toml) ];
         };

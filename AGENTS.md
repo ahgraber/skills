@@ -20,11 +20,11 @@ Do not manually add linebreaks, trust linters and formatters for this.
 
 - These practices describe how we develop and test skills in this repo.
 - **IMPORTANT**: Do not assume end users who install skills have the same tools available; only `uv` is a required runtime dependency (per the README).
-- When documenting or scripting behavior, distinguish between developer-only tooling (devshell, `mmdc`, `dot`, `nix`) and what a user can be expected to have.
+- When documenting or scripting behavior, distinguish between developer-only tooling (devshell, `dot`, `nix`) and what a user can be expected to have.
 
 ## Dev environment
 
-- Prefer working inside the Nix devshell for tool availability (e.g., `mmdc`, `dot`).
+- Prefer working inside the Nix devshell for tool availability (e.g., `dot`).
 - Enter the shell with:
   - `nix develop`
 - `flake.nix` is the source of truth for devshell packages.
@@ -52,9 +52,11 @@ Do not manually add linebreaks, trust linters and formatters for this.
 ## Testing
 
 - Prefer running tests and scripts inside the devshell.
-- Example (mermaid validation/render):
-  - `nix develop -c skills/show-me/scripts/validate_mermaid.py --install-chromium <<'EOF'`
-  - `nix develop -c scripts/render-dot.py skills/optimize-skills/references/skill-workflow.dot`
+- The Mermaid scripts are the exception — they render locally on `uv` alone, so run them directly:
+  - `skills/show-me/scripts/validate_mermaid.py <<'EOF'`
+  - `skills/show-me/scripts/render_mermaid.py -o /tmp/diagram.svg <<'EOF'`
+- Example (graphviz render, needs the devshell):
+  - `nix develop -c scripts/render_dot.py skills/optimize-skills/references/skill-workflow.dot`
 
 ### Tests for skill scripts
 
