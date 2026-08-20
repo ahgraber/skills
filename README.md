@@ -54,7 +54,7 @@ See [docs/serving-skills-via-mcp.md](docs/serving-skills-via-mcp.md) for how to 
 
 ### Using Skills with Claude Code on the Web
 
-See [docs/claude-code-on-web.md](docs/claude-code-on-web.md) for the startup script and `SessionStart` hook needed to surface this repo's skills inside Claude Code on the web.
+See [docs/claude-code-on-web.md](docs/claude-code-on-web.md) for the ways to get this repo's skills into a cloud session, including the environment setup script and the `SessionStart` hook that verifies they loaded.
 
 ## Repository Notes
 
