@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-08-20
+
 ### Breaking Changes
 
 - Remove `explain-diff`, `mermaid`, and `visual-brainstorming`; their jobs move into the new skills below. Migrate installs: "explain this diff/PR" asks now trigger `teach-me` (same phrases; artifacts default to `.teach/` instead of `.explain/`); the Mermaid validate/render scripts ship inside `show-me` (`skills/show-me/scripts/`) and now render on `uv` alone, so an `mmdc` (Mermaid CLI), Node, or Chromium install kept only for them can go — their `--install-chromium` flag goes with it; the browser-based visual companion is `show-me`'s consent-gated session (`references/visual-session.md`).
@@ -458,4 +460,5 @@ MINOR, fixes bump PATCH.
 [2.3.1]: https://github.com/ahgraber/skills/compare/skills-v2.3.0...skills-v2.3.1
 [2.3.2]: https://github.com/ahgraber/skills/compare/skills-v2.3.1...skills-v2.3.2
 [2.4.0]: https://github.com/ahgraber/skills/compare/skills-v2.3.2...skills-v2.4.0
-[unreleased]: https://github.com/ahgraber/skills/compare/skills-v2.4.0...HEAD
+[3.0.0]: https://github.com/ahgraber/skills/compare/skills-v2.4.0...skills-v3.0.0
+[unreleased]: https://github.com/ahgraber/skills/compare/skills-v3.0.0...HEAD
