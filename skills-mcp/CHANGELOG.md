@@ -8,6 +8,8 @@ Releases are cut with [uv-ship](https://floraths.github.io/uv-ship/) — see [RE
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-20
+
 ### Changed
 
 - Move to FastMCP 4 (`fastmcp>=4.0.0b3,<5`).
@@ -29,3 +31,7 @@ Releases are cut with [uv-ship](https://floraths.github.io/uv-ship/) — see [RE
   `instructions` field, `SKILL.md` on demand, and `_manifest` plus supporting files.
 - Tools-only surface (`--expose`) for clients that do not implement the resources
   protocol, exposing `list_resources` and `read_resource`.
+
+[0.1.0]: https://github.com/ahgraber/skills/releases/tag/skills-mcp-v0.1.0
+[0.2.0]: https://github.com/ahgraber/skills/compare/skills-mcp-v0.1.0...skills-mcp-v0.2.0
+[unreleased]: https://github.com/ahgraber/skills/compare/skills-mcp-v0.2.0...HEAD
