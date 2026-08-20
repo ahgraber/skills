@@ -1,0 +1,18 @@
+# Configuration for the gitleaks pre-commit hook
+# https://github.com/gitleaks/gitleaks/blob/master/README.md#configuration
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Documented example headers"
+
+# Example request headers in API documentation, such as the Idempotency-Key
+# sample in skills/api-design/references/rest-design.md. The values are
+# illustrative; the generic-api-key rule reads their entropy as a credential.
+#
+# regexTarget must be "line": the default target is the matched value alone, so
+# a pattern naming the header never matches and the allowlist silently does
+# nothing.
+regexTarget = "line"
+regexes = ['''(?i)Idempotency-Key:\s*\S+''']
