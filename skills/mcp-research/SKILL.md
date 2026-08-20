@@ -26,19 +26,28 @@ Use MCP-provided tools to retrieve current, verifiable information instead of re
 
 ## Tool Selection
 
-1. Use `mcp__context7__resolve-library-id` and `mcp__context7__query-docs` for official library documentation and API usage.
-2. Use `mcp__exa__get_code_context_exa` for code-centric examples across docs, GitHub, and Stack Overflow.
-3. Use `mcp__exa__web_search_exa` for broader current web context (announcements, release notes, ecosystem updates).
-4. Use `mcp__jina__search_web` to discover relevant pages, then `mcp__jina__read_url` for clean page extraction.
-5. Use `mcp__jina__search_arxiv` and `mcp__jina__extract_pdf` only when the task needs paper-level or PDF-structured research.
+Inventory the docs and research tools present at runtime and match on capability, not on an exact tool name.
+The same server is named differently depending on how it is installed — user scope gives `mcp__jina__read_url`, a plugin-bundled copy gives `mcp__plugin_<plugin>_jina__read_url`, and other harnesses namespace differently again.
+If tools are deferred or hidden, discover and load them first.
+
+| Capability need           | What to look for (examples, not an exhaustive list)                                          |
+| ------------------------- | -------------------------------------------------------------------------------------------- |
+| Library / API docs        | a docs tool with library-id resolution (e.g. Context7 resolve-library-id, then query-docs)   |
+| Code-centric examples     | a code-context search tool (e.g. Exa get-code-context) across docs, GitHub, and Q&A sites    |
+| Broad current web context | a web-search tool (e.g. Exa web-search, Jina search-web) for announcements and release notes |
+| Clean page extraction     | a reader that returns full page text (e.g. Jina read-url)                                    |
+| Papers / PDFs             | academic search or PDF extraction (e.g. Jina search-arxiv, extract-pdf)                      |
+
+Use the papers/PDF row only when the task needs paper-level or PDF-structured research.
+When none of these is available, fall back to native web search and fetch, and say so in the answer.
 
 ## Default Workflow
 
 1. Classify the request: official API docs, implementation examples, or broad web research.
 2. Start with the narrowest reliable source:
-   - Official docs first (`Context7`) for API correctness.
-   - Add `Exa`/`Jina` only when you need cross-source confirmation or broader context.
-3. For Context7 docs, always resolve the library id before querying docs unless the exact `/org/project` id is already provided.
+   - Official docs first (the library/API docs tool) for API correctness.
+   - Add code-context and web search only when you need cross-source confirmation or broader context.
+3. When the docs tool resolves library ids, resolve the id before querying docs unless the exact id (Context7's `/org/project` form, or the equivalent) is already provided.
 4. Keep queries specific (library + feature + version/error) to reduce noisy results.
 5. Synthesize findings and clearly separate sourced facts from inferences.
 

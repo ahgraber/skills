@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `sdd-apply` and `sdd-translate` — ship the `references/sdd-change-formats.md` file both skills tell the reader to consult; following their task-ordering and change-directory steps previously landed on a file that was never installed with the skill.
+- `mcp-research` — select docs and research tools by capability rather than by exact tool identifier. The hard-coded `mcp__context7__*`, `mcp__exa__*`, and `mcp__jina__*` names match only a user-scope install; the same servers are namespaced differently when bundled in a plugin or supplied by another harness, so the skill directed the agent at tools that may not exist.
 
 ## [2.4.0] - 2026-08-17
 
