@@ -11,6 +11,8 @@ Many agents also allow forcibly invoking the skill by invoking as a `/-command`.
 
 ## Installation
 
+See [docs/install-paths.md](docs/install-paths.md) for which directories each agent reads, when to serve skills over MCP instead of copying them, and how an installed skill's name interacts with your agent's built-ins.
+
 Install skills using the [skills.sh](https://skills.sh) CLI:
 
 ```bash
