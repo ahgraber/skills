@@ -35,7 +35,7 @@ No skill is obligated to read an old ledger, entries have no status lifecycle, a
 
 - Mode: <audit or fix>
 - Scope: <what was passed in: change set, file, dir, or repo>
-- Lenses: <ids run>
+- Lenses: <names run>
 - Verification: <check and command> — baseline <result>, final <result>
 - Net: <n> files touched, <n> lines removed, <n> added
 

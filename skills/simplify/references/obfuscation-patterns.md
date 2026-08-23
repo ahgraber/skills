@@ -74,10 +74,11 @@ Prefer the codebase's established term over the one introduced by the change.
 
 ### Data shapes that hide structure
 
-- Dicts of dicts, or tuples indexed positionally, where a dataclass or named type fits
-- Stringly-typed dispatch where an enum or literal union already exists
-- Parallel lists that must stay index-aligned
-- Optional fields that are always set, or never set, in practice
+Nested dictionaries and positionally indexed tuples where a named type fits belong to this lens.
+Dispatch on raw strings where an enum or literal union already exists belongs here too.
+The test is comprehension cost: the reader cannot tell what fields exist without tracing the code that writes them.
+Route a finding to the data-representation lens when the cost is correctness: the shape can represent invalid states, replicates information, or requires unenumerated edits to extend.
+That lens applies different edit-tier rules and requires different evidence, so do not report correctness-cost shapes here.
 
 ### Defensive noise
 

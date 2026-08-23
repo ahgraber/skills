@@ -157,20 +157,29 @@ For a file, directory, or repo scope, the file list is the packet; note that bro
 
 **Lenses** are independent, and a user may only want one.
 
-| ID  | Lens                   | Covers                                                                                                     | Reference                            |
-| --- | ---------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------ |
-| L1  | Duplication & reuse    | Code that re-implements something the codebase already has; near-duplicate blocks                          | —                                    |
-| L2  | Obfuscative complexity | Indirection without abstraction, premature generalization, action at a distance, defensive noise, ceremony | `references/obfuscation-patterns.md` |
-| L3  | Removal                | Dead code, orphans, shims whose other side is gone, branches on now-constant flags                         | Removal Rule above                   |
-| L4  | Comments               | Narration, restatement, staleness, point-in-time rot                                                       | `references/comment-audit.md`        |
-| L5  | Semantic naming        | Misleading names, one concept under several names, semantically duplicated constants                       | —                                    |
+| Lens                   | Covers                                                                                                              | Reference                            |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| Duplication & reuse    | Code that re-implements something the codebase already has; near-duplicate blocks                                   | —                                    |
+| Obfuscative complexity | Indirection without abstraction, premature generalization, action at a distance, defensive noise, ceremony          | `references/obfuscation-patterns.md` |
+| Removal                | Dead code, orphans, shims whose other side is gone, branches on now-constant flags                                  | Removal Rule above                   |
+| Comments               | Narration, restatement, staleness, point-in-time rot                                                                | `references/comment-audit.md`        |
+| Semantic naming        | Misleading names, one concept under several names, semantically duplicated constants                                | —                                    |
+| Data representation    | Structures that can represent invalid states, replicate information, or leave every consumer to enforce their rules | `references/data-representation.md`  |
 
-L5 covers only what a linter cannot: a `get*` that mutates, the same value named three ways across layers, the same constant defined twice with different spellings.
+Refer to lenses by name everywhere: in dispatch, in the ledger, and in anything the user reads.
+
+Semantic naming covers only what a linter cannot: a `get*` that mutates, the same value named three ways across layers, the same constant defined twice with different spellings.
 Stylistic naming and formatting stay with the linter.
 
+Data-representation findings are Tier 2 by default.
+Changing a data structure changes an exported signature, a stored format, or both, so the check cannot confirm preservation on the spot.
+Record the proposal and let `refactor` execute it.
+The exception is a type used nowhere outside the scope and never stored or sent anywhere, which is rare enough to justify each time.
+The data-representation lens also differs from the others in what it must return: a finding needs its test results, not a description of the shape.
+
 If the request already names a concern, run the matching lenses and say which you selected.
-Otherwise ask which to run, offering all five as the default.
-Do not fan out five agents on a request the user meant narrowly.
+Otherwise ask which to run, offering all six as the default.
+Do not fan out six agents on a request the user meant narrowly.
 
 State the mode and the lenses back before Phase 1 starts.
 Never switch modes mid-pass: an audit that turns up an obvious fix stays an audit, and the user can ask for the fix pass next.
@@ -197,7 +206,7 @@ Intent matters: code that looks over-built can be implementing a requirement the
 Dispatch one agent per selected lens, all in a single message.
 
 Give each agent the packet path (or file list), its lens reference, the Edit Tiers rules, and the Removal Rule.
-Tell each agent the scope is a floor and not a ceiling: L1's search for existing utilities is inherently outside it, and L3 must check consumers across the whole repo.
+Tell each agent the scope is a floor and not a ceiling: the duplication lens's search for existing utilities is inherently outside it, and the removal lens must check consumers across the whole repo.
 
 **Agents report; they do not edit.**
 This constraint holds regardless of audit/fix mode: parallel edits conflict, and verification has to run against one coherent state.
@@ -257,5 +266,6 @@ Do not start that work here.
 ## References
 
 - `references/edit-ledger.md` — the persisted report: location, sections, and the deletion-proof format.
-- `references/obfuscation-patterns.md` — L2 pattern catalog with the disconfirming test for each.
-- `references/comment-audit.md` — L4 keep/delete/fix criteria and the docstring boundary.
+- `references/obfuscation-patterns.md` — obfuscative-complexity pattern catalog with the disconfirming test for each.
+- `references/comment-audit.md` — comment keep/delete/fix criteria and the docstring boundary.
+- `references/data-representation.md` — data-representation tests, where to look, and the evidence each finding must carry (shared with `code-review`).

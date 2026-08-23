@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [3.1.0] - 2026-08-23
+
+### Added
+
+- `code-review` and `simplify` — a data-representation audit for designs that invite unforced errors, run as three tests: whether a structure can represent a state the domain disallows, whether it stores the same information in more than one place, and whether extending it with a new case leaves edit sites discoverable only by text search. Structures that cross a boundary are audited first, and a finding must carry the evidence its test produces or go unreported. The audit is a review area in `code-review` and a sixth lens in `simplify`, which share one reference.
+
+### Changed
+
+- `code-review` — the architecture subagent now dispatches whenever a change adds a state, variant, field, or case to a data structure that crosses a boundary, overriding the exemption that previously skipped it for localized pre-commit reviews. Data structures are also reviewed ahead of the logic that uses them.
+- `simplify` — lenses are identified by name rather than by number. Dispatch, the ledger header, and anything else the user reads now name the lens instead of using `L1`–`L5`.
+- `refactor` — the structural-move catalog gains two moves for correcting a data structure: collapsing mutually exclusive fields into one choice, and removing replicated information.
 
 ## [3.0.0] - 2026-08-20
 
@@ -461,4 +471,4 @@ MINOR, fixes bump PATCH.
 [2.3.2]: https://github.com/ahgraber/skills/compare/skills-v2.3.1...skills-v2.3.2
 [2.4.0]: https://github.com/ahgraber/skills/compare/skills-v2.3.2...skills-v2.4.0
 [3.0.0]: https://github.com/ahgraber/skills/compare/skills-v2.4.0...skills-v3.0.0
-[unreleased]: https://github.com/ahgraber/skills/compare/skills-v3.0.0...HEAD
+[3.1.0]: https://github.com/ahgraber/skills/compare/skills-v3.0.0...skills-v3.1.0

@@ -19,6 +19,9 @@ Include it when any of these apply:
 - **User explicitly requests** architectural review, design feedback, or similar.
 - **Main agent judgment** — the change crosses module boundaries, introduces new abstractions, modifies public APIs, or otherwise has architectural surface.
   In this case, **confirm with the user before dispatching** the architecture agent.
+- **The change adds a state, variant, field, or case to a data structure that crosses a boundary** — a module's public interface, an API payload, a stored record, a queued message.
+  This one overrides the pre-commit exemption below.
+  A data structure is cheapest to correct in the change that first gets it wrong, and the change that gets it wrong is usually small and local.
 
 Skip the architecture agent for pre-commit reviews of localized changes, bug fixes within a single module, or when the user has asked for a quick correctness pass.
 
@@ -96,7 +99,9 @@ Use the prompt templates in the next section.
 
 ### Agent 1 — Architectural Critique
 
-**Focus:** module boundaries, coupling, layering, separation of concerns, abstraction quality, API shape, hidden dependencies, blast radius, consistency with surrounding architecture, premature abstraction vs. missing abstraction.
+**Focus:** module boundaries, coupling, layering, separation of concerns, abstraction quality, API shape, hidden dependencies, blast radius, consistency with surrounding architecture, premature abstraction vs. missing abstraction, and the shape of the data that crosses boundaries.
+
+Subagents cannot invoke skills, so **you** (the orchestrator) must expand the prompt before dispatch: copy the three tests from `references/data-representation.md` into the `## Data representation` placeholder in the template.
 
 ### Agent 2 — Code Quality & Correctness
 
@@ -209,10 +214,18 @@ Critique this change on architectural grounds only. Do NOT rewrite code; produce
 - Consistency with the surrounding architecture
 - Blast radius of the change
 
+## Data representation
+Check the data structures that cross a boundary first: a module's public interface, an API payload, a stored record, a queued message.
+For every field this change adds, ask whether it belongs to a type that already exists — a new field placed beside a type instead of inside it is how this problem usually enters.
+
+<orchestrator: paste the tests from references/data-representation.md here>
+
 ## Constraints
 - Do NOT edit code.
 - Do NOT comment on style nits or formatting.
 - If intent is unclear, state what you assumed.
+- For data representation findings, supply the evidence the test calls for.
+  A finding without it is an impression — leave it out.
 
 ## Output format
 A markdown list of findings. For each finding:

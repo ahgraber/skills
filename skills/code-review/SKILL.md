@@ -48,6 +48,7 @@ Act as a senior engineer: thorough, pragmatic, impact-first.
 | Bugs & Edge Cases           | Nil/null paths, boundary values, error propagation                                                                           |
 | Code Quality & Style        | Naming, readability, idiomatic usage                                                                                         |
 | Structure & Maintainability | Coupling, duplication, separation of concerns                                                                                |
+| Data Representation         | Structures that can hold invalid states, replicate information, or make every consumer enforce their rules                   |
 | Best Practices              | Language/framework conventions, SOLID, DRY                                                                                   |
 | Test Adequacy               | Missing tests for behavior changes, regression gaps                                                                          |
 | Performance                 | N+1 queries, unbounded loops/fan-out, missing pagination, sync calls in hot paths, large allocations, missed async           |
@@ -182,6 +183,11 @@ Skip the single-agent steps below — the reference doc drives this path end-to-
 For each changed file or module, summarize what changed and why.
 Review tests before implementation: do tests exist for the changed behavior, do they assert behavior (not internals), do they cover edge cases and regressions?
 Test gaps shape what to scrutinize in the implementation pass.
+
+Review the data structures before the logic.
+A structure that can hold invalid states leaves each consumer to guard against them or assume them away, and both choices generate findings elsewhere in this review; correcting the shape retires them at the source.
+Tests may pass either way, so make this a deliberate pass — `references/data-representation.md` has where to look, the three tests, and the evidence each finding must carry.
+
 Then evaluate each area in the Quick Reference table above.
 
 Rules:
@@ -234,6 +240,7 @@ When a default conflicts with project constraints, suggest a better-fit alternat
 ## References
 
 - `assets/issue-template.md` — issue type/priority legends and suggestion format.
+- `references/data-representation.md` — the data-shape lens: where to look, three tests, and the evidence each finding must carry.
 - `references/review-best-practices-links.md` — external review best-practice links used by this skill.
 - `references/git-diagnostics-before-review.md` — git commands for assessing codebase health before reviewing.
 - `references/code-review-graph-integration.md` — tool dispatch playbook for `code-review-graph` MCP plugin (required + optional tools per phase, decision guide).
