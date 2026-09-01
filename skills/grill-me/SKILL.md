@@ -29,14 +29,29 @@ The **frontier** is every decision whose prerequisites are already settled — t
 
 Each round:
 
-1. Ask the whole frontier: number each question, and place or withhold a recommended answer per Recommended Answers below.
-2. Wait for the user's answers.
-3. Recompute: settled decisions push the frontier outward and unblock the questions that depended on them.
+1. Ask **one question** — the highest-consequence decision on the frontier.
+   Place or withhold a recommended answer per Recommended Answers below.
+2. Wait for the user's answer.
+3. Recompute: the settled decision pushes the frontier outward and unblocks the questions that depended on it.
 
-A question whose answer depends on another question still open in this round belongs to a _later_ round, not this one.
+One question per round is the default, and it holds even when the frontier is wide and every question on it is ready.
+The rest wait.
+A wall of questions outpaces comprehension and invites reflexive answers, which defeats the elicitation the interview exists for.
 
-Keep each round small enough for the user to actually evaluate — a wall of questions outpaces comprehension and invites reflexive answers.
-If the frontier is large, split it across consecutive rounds, highest-consequence decisions first.
+### The one exception
+
+Some questions cannot be answered one at a time: they are facets of a single decision, and an answer given without seeing the others is given blind and gets revised once they appear.
+Ask those together, numbered, up to three — never more.
+
+Test before you group.
+If the questions can be answered in any order and the answers come out the same, they are not one decision: ask the first and hold the rest.
+Being ready is not being interrelated — two independent questions, both unblocked, belong to consecutive rounds.
+
+Interrelated is also not the same as dependent.
+A question whose answer _depends_ on another question still open belongs to a _later_ round, not this one.
+
+A question that asks the user for their own position — their priorities, their taste, their risk tolerance, what they meant — stands alone, always.
+Composing a position costs far more than reacting to a recommendation, and those answers are the ones the interview exists to collect; grouping them buys a skimmed reply.
 
 Format each question:
 

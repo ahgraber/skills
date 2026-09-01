@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.1] - 2026-09-01
+
+### Changed
+
+- `grill-me` — question rounds default to one question instead of the whole frontier at once. Up to three questions share a round only when they are facets of a single decision, tested by whether answering them in a different order would change the answers; questions that are merely both ready go in consecutive rounds. A question that asks for the user's own position — their priorities, taste, or risk tolerance — always stands alone.
+
 ## [3.1.0] - 2026-08-23
 
 ### Added
@@ -472,3 +478,4 @@ MINOR, fixes bump PATCH.
 [2.4.0]: https://github.com/ahgraber/skills/compare/skills-v2.3.2...skills-v2.4.0
 [3.0.0]: https://github.com/ahgraber/skills/compare/skills-v2.4.0...skills-v3.0.0
 [3.1.0]: https://github.com/ahgraber/skills/compare/skills-v3.0.0...skills-v3.1.0
+[3.1.1]: https://github.com/ahgraber/skills/compare/skills-v3.1.0...skills-v3.1.1
