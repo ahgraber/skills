@@ -7,6 +7,7 @@ Sections marked `(only-if-established)` record only what the session actually pr
 Markers like `(repo-only)` and `(only-if-established)` are template annotations — do not include them in the output.
 Write `None` in a section that has no items; write `Unknown` only when the information is missing.
 Keep command results on one line with inline code; do not nest fenced code blocks inside the outer fence.
+Quote Session Constraints entries verbatim and attribute each one; they record what this session operated under, and the recipient decides whether they still apply.
 
 ```md
 ## Handoff: [Short topic]
@@ -23,6 +24,10 @@ Keep command results on one line with inline code; do not nest fenced code block
   - [concrete completed item]
 - Pending:
   - [concrete pending item]
+
+### Session Constraints (only-if-established)
+
+- "[exact wording of the rule]" — [source: user, `path/to/doc`, or prior handoff of YYYY-MM-DD]
 
 ### Decisions and Rationale
 

@@ -14,6 +14,31 @@ Write the handoff in the voice of a professional technical writer.
 Prefer ASD-STE100 Simplified Technical English: short sentences, one instruction per sentence, active voice, and one term per concept.
 Keep identifiers, commands, paths, and file names exact.
 
+## Fidelity by Type
+
+Compress by item type, not at one uniform rate.
+Summarize a rule and it may no longer state the rule.
+Summarize a narrative and nothing important is lost.
+
+- Constraints and procedures: record verbatim, and name the source.
+- Decisions, rationale, preferences, and open questions: compress to the substance and the reason.
+- Session narrative: drop it and record the end state instead.
+
+A constraint is any rule that limits or directs the work: a prohibition, a required tool or command, a fixed format or output shape, a threshold, an ordering requirement.
+Imperative wording is easy to find: "never edit the lockfile".
+Declarative wording is harder and is lost more often: "this repo signs commits with the agent key", "the endpoint rejects payloads over 4 MB".
+Record both.
+
+The Session Constraints section of the handoff is a record of what this session operated under.
+It does not instruct the recipient, who may be reading for context and not continuing the work.
+Attribute each constraint so the recipient can tell a live user instruction from one the session inherited.
+
+When this session started from an earlier handoff, copy that handoff's constraints forward word for word and mark them as coming from it.
+Do not re-summarize a constraint an earlier handoff already recorded verbatim.
+Each round of paraphrase drops more of the wording, and handoffs chain.
+
+When one body of work is split across several handoffs, repeat each constraint in every handoff whose work it covers.
+
 ## Critical Constraints
 
 - Assume the recipient will see only the handoff document and nothing else.
@@ -35,6 +60,8 @@ Keep identifiers, commands, paths, and file names exact.
   Record the end state: artifacts, decisions, unresolved items.
 - Slot-filling: inventing next steps or open questions because the template has a heading for them.
   An omitted section can be a correct answer.
+- Uniform compression: paraphrasing a constraint at the same rate as narrative.
+  The paraphrase reads well and no longer states the rule.
 
 ## When to Use
 
@@ -65,16 +92,22 @@ Keep identifiers, commands, paths, and file names exact.
    - Derive the Changes Made list from the diff itself (`git diff --stat`, plus `--cached` for staged work) and reconcile every changed file and notable hunk against it; conversation memory under-reports.
    - Report validation results only for checks run in this session; mark everything else as not run.
    - When the handoff content is conversational (ideation, decisions, drafts), the conversation itself is the source; skip repo verification.
-3. Synthesize conversation-only content — decisions with rationale, user guidance, constraints, direction on drafts — so the recipient understands intent and tradeoffs.
+3. Collect the constraints the session operated under and record each one verbatim.
+   - Cover instructions from the user, rules from repository or project documents the session followed, and constraints from an earlier handoff this session started from.
+   - Read for declarative wording as well as imperative wording; see Fidelity by Type.
+4. Synthesize the remaining conversation-only content — decisions with rationale, direction on drafts — so the recipient understands intent and tradeoffs.
    - Write it as a briefing for a new colleague: distill substance and intent; do not transcribe the conversation.
-   - Quote exact wording only when the wording itself carries the value (user-authored text, names, error messages).
-4. Determine continuation strictly:
+   - Quote exact wording when the wording itself carries the value (user-authored text, names, error messages).
+5. Determine continuation strictly:
    - Include only direction the user gave and the incomplete remainder of requested work.
    - If no continuation was established, ideate with the user what the next session should do before writing the handoff.
    - If the user gives no direction, omit the Continuation section; the startup prompt then tells the recipient to confirm direction with the user.
-5. Fill every applicable section of `assets/handoff-template.md`; omit sections that do not apply per the template's markers.
-6. When a Continuation section exists, order its items and make item 1 immediately executable.
-7. Return the completed template in chat for copy/paste.
+6. Fill every applicable section of `assets/handoff-template.md`; omit sections that do not apply per the template's markers.
+7. When a Continuation section exists, order its items and make item 1 immediately executable.
+8. Check the constraints from step 3 one by one against the finished Session Constraints section.
+   Restore any that the draft dropped or paraphrased.
+   If one cannot be recorded, say so in the document; do not drop it silently.
+9. Return the completed template in chat for copy/paste.
 
 ## Quality Checklist
 
@@ -85,6 +118,8 @@ Keep identifiers, commands, paths, and file names exact.
 - Every open obligation appears in Pending or Continuation, not in a note or footnote.
 - Every Continuation item traces to user direction or the remainder of requested work; no invented work.
 - Changes Made covers every file in the diff; no change is omitted because it was forgotten.
+- Session Constraints holds every rule the session operated under, quoted, each with its source.
+- Constraints taken from an earlier handoff are copied word for word, not re-summarized.
 - References list only sources actually consulted, each with why it matters; no padding with plausible links.
 - Statements are specific and verifiable; no vague summaries.
 - Validation status includes what passed, failed, or was not run (when checks apply).

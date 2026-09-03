@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.2] - 2026-09-03
+
+### Changed
+
+- `handoff` — compression now varies by item type instead of running at one uniform rate. Constraints and procedures are recorded verbatim with their source in a new Session Constraints section; decisions, rationale, and preferences are compressed to substance and reason; session narrative is dropped in favor of the end state. A constraint is any rule that limits or directs the work, including one written as a statement of fact rather than an instruction — the wording most often lost. When a session started from an earlier handoff, that handoff's constraints are copied forward word for word rather than summarized again, so a chain of handoffs does not erode them a round at a time, and a body of work split across several handoffs repeats each constraint in every handoff it covers. The section records what the session operated under and does not instruct the recipient, who may be reading for context rather than continuing the work. Before returning the document, the skill checks each constraint it identified against the finished section and restores any the draft dropped or paraphrased.
+
 ## [3.1.1] - 2026-09-01
 
 ### Changed
@@ -479,3 +485,4 @@ MINOR, fixes bump PATCH.
 [3.0.0]: https://github.com/ahgraber/skills/compare/skills-v2.4.0...skills-v3.0.0
 [3.1.0]: https://github.com/ahgraber/skills/compare/skills-v3.0.0...skills-v3.1.0
 [3.1.1]: https://github.com/ahgraber/skills/compare/skills-v3.1.0...skills-v3.1.1
+[3.1.2]: https://github.com/ahgraber/skills/compare/skills-v3.1.1...skills-v3.1.2

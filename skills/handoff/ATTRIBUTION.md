@@ -8,3 +8,4 @@ This file records external sources referenced while building or maintaining thes
 - [agentops/skills/handoff/SKILL.md at main · boshu2/agentops](https://github.com/boshu2/agentops/blob/main/skills/handoff/SKILL.md)
 - [BoelenJ/copilot-studio-handoff-skill](https://github.com/BoelenJ/copilot-studio-handoff-skill)
 - [The /handoff Skill - AI Hero](https://www.aihero.dev/skills-handoff)
+- [The Compaction Cliff in Long-Running AI Agent Memory (arXiv:2608.22752)](https://arxiv.org/abs/2608.22752) - source of the per-type fidelity rules and the carry-forward rule for chained handoffs
