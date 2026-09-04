@@ -1,22 +1,19 @@
 # Comment Audit
 
-Comments are the part of a change that rots fastest, because nothing fails when they go wrong.
-This lens keeps the ones carrying information the code cannot, fixes the ones that now lie, and deletes the rest.
+This lens keeps comments that carry non-derivable facts, rewrites stale comments that still carry them, and removes the rest.
 
 ## Scope: comments, not docstrings
 
 **Docstrings are not comments.**
-They are API surface, and the repo's linter and conventions govern their form.
-A docstring restating parameter types can be required by the configured rules.
-Read the repo's lint configuration before you touch one.
-
-Docstrings are in scope for exactly one thing: **staleness**.
-A docstring describing behavior the function no longer has is a defect, and it gets fixed the same way a stale comment does.
-Their style, presence, and structure are the linter's business.
+They have a separate content test.
+Audit them with [docstring-audit.md](docstring-audit.md) and leave them alone here.
 
 ## The keep test
 
 A comment earns its place when a competent reader of this codebase, reading the code carefully, would still get it wrong.
+
+For every proposed edit, quote the comment and cite the code or external constraint that makes it redundant or stale.
+If that evidence is unavailable, record a Tier 2 proposal.
 
 | Keep                                | What it covers                                                                            |
 | ----------------------------------- | ----------------------------------------------------------------------------------------- |
@@ -26,33 +23,43 @@ A comment earns its place when a competent reader of this codebase, reading the 
 | Rationale for a non-obvious cost    | Why this is a loop instead of a comprehension, why this allocates                         |
 | Citations                           | Algorithm sources, RFC or spec sections, issue links that explain the shape               |
 
+Before retaining a workaround, check that its platform, supported version, or upstream issue still applies.
+If that evidence is unavailable, record a Tier 2 proposal.
+
 ## Delete
 
 | Delete                      | Why                                                                            |
 | --------------------------- | ------------------------------------------------------------------------------ |
 | What-restatement            | A well-named identifier already carries it                                     |
 | Change narration            | "Now we also handle X", "moved this up". True for one commit, misleading after |
-| Point-in-time references    | The task, ticket, plan step, or conversation belongs in the commit message     |
-| Commented-out code          | Version control already holds it                                               |
-| Section banners             | ASCII dividers in a file that is already too long. The length is the finding   |
+| Point-in-time references    | A task, plan, or change-history reference belongs in the commit message        |
+| Commented-out code          | An obsolete source copy belongs in version control                             |
+| Section banners             | Decorative dividers that do not label a code region                            |
 | Restatements of the obvious | "Increment the counter", "return the result"                                   |
 
-The repo rule in [CLAUDE.md](../../../CLAUDE.md) states this for the code in this repository: comments describe what exists now, or why it is that way, and never what it used to be.
-No "previously…", "no longer…", "changed from…", "renamed from…".
-Delete stale historical asides on sight.
+Follow the target repository's convention for historical comments.
+When it prohibits them, delete stale historical asides after confirming they do not document a live migration or workaround.
+Confirm that commented-out code is not a template, migration procedure, or documentation example before deleting it.
+Do not delete a section banner because a file is long.
+Record an overlong file as a separate Tier 2 refactor observation; it does not resolve or justify a banner-deletion finding.
 
-## Fix, do not delete
+## Fix when content remains
 
 A comment that contradicts the code is worse than no comment, because a reader believes it.
-Deleting it loses information; making it true keeps that information.
+Rewrite it only when it carries a fact that the reader still needs.
 
-- If a comment describes behavior that changed, rewrite it to describe current behavior.
-- If an example no longer runs or no longer produces the stated output, correct the example.
-- If a comment references a renamed symbol, moved file, or deleted flag, update the reference.
-- If a comment describes a constraint the code now enforces, delete it.
-  The code says it.
+- Rewrite a stale behavior description, example, or reference only when the revised comment states a non-derivable current fact.
+  Otherwise, delete it.
+- Delete a constraint comment only when the code or an authoritative source makes both the constraint and its rationale clear.
+- Keep a live issue link when it establishes a current workaround or removal condition.
 
-If you cannot determine what the comment was trying to say, record that in the ledger instead of guessing or dropping it silently.
+If you cannot determine what the comment was trying to say, record a Tier 2 proposal instead of guessing or dropping it silently.
+
+## Before editing, find who reads it
+
+Check comments that contain examples, documentation markers, or text a tool can render or execute.
+Doctests, documentation generators, and language-specific API documentation comments can consume them.
+If a tool or test consumes the target comment, treat the edit as Tier 2 unless the configured check proves preservation.
 
 ## Never touch
 
@@ -61,8 +68,8 @@ If you cannot determine what the comment was trying to say, record that in the l
 - Generated-file markers (`@generated`, "do not edit")
 - Directives the toolchain reads: type-checker pragmas, linter suppressions, encoding declarations, editor config comments
 
-A linter suppression that looks unnecessary is a separate finding.
-Raise it; do not delete it as a comment.
+Do not assess toolchain directives in this lens.
+Use configured tool output for unused suppressions.
 
 ## Defer to repo convention
 
@@ -71,15 +78,11 @@ Follow what the repository already does instead of importing a rule:
 
 - **TODO, FIXME, HACK, XXX.**
   Whether these need an owner, a date, or an issue link is the repo's call, so match the surrounding convention.
-  Flag a TODO whose stated condition has already been met.
-- **Docstring style.**
-  The linter decides.
+  Flag a TODO only when code or an authoritative source proves its stated condition has been met.
 - **Comment density.**
   Match the neighboring files.
 
 ## Signals this lens produces
 
-A comment explaining a gotcha that no test covers is a **missing-test finding**, not a comment finding.
-The comment is doing a test's job, warning a future reader about a failure mode that nothing will catch.
-Keep the comment and record the gap in the ledger's Deferred section.
-Writing that test is out of scope for a simplify pass.
+When a comment describes a behaviorally testable invariant and evidence establishes an uncovered gap, keep the comment and record a missing-test observation in the ledger for `code-review`.
+Do not infer absent coverage from a quick search.

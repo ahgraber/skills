@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.3] - 2026-09-03
+
+### Added
+
+- `simplify` — a docstring lens, for docstrings that narrate the function body instead of stating the contract. Cut a sentence that would go false under a body rewrite preserving the caller contract; promote narration that wraps a real guarantee. Presence, convention, and parameter coverage stay with the linter. Tier turns on the consumer: doctests, snapshot tests, and CLI help built from `__doc__` are Tier 2; `help()`, hover, and generated reference pages are not.
+
+### Changed
+
+- `simplify` — docstrings leave the comments lens, which had covered them for staleness. That lens gains an evidence standard and a consumer check for comments a tool renders or executes, defers historical-comment rules to the target repository, and separates section-banner deletion from the overlong file that prompts it.
+
 ## [3.1.2] - 2026-09-03
 
 ### Changed
@@ -486,3 +496,4 @@ MINOR, fixes bump PATCH.
 [3.1.0]: https://github.com/ahgraber/skills/compare/skills-v3.0.0...skills-v3.1.0
 [3.1.1]: https://github.com/ahgraber/skills/compare/skills-v3.1.0...skills-v3.1.1
 [3.1.2]: https://github.com/ahgraber/skills/compare/skills-v3.1.1...skills-v3.1.2
+[3.1.3]: https://github.com/ahgraber/skills/compare/skills-v3.1.2...skills-v3.1.3

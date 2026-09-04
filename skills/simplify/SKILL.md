@@ -30,7 +30,7 @@ Run the tool instead, and review only what those tools cannot check.
 - Code is written, tests pass, and it needs cleaning before anyone reads it.
 - A change works but feels padded: wrappers on wrappers, checks that cannot fire, flags with one caller.
 - A feature was deleted, and the code that only served it needs to go too.
-- The comments in a change are noise and need auditing.
+- The comments in a change are noise and need auditing, or its docstrings narrate the function bodies instead of stating the contract.
 - Someone wants to know how much slop is in a file, a package, or the repo before deciding whether to touch it.
 
 ## When Not to Use
@@ -163,6 +163,7 @@ For a file, directory, or repo scope, the file list is the packet; note that bro
 | Obfuscative complexity | Indirection without abstraction, premature generalization, action at a distance, defensive noise, ceremony          | `references/obfuscation-patterns.md` |
 | Removal                | Dead code, orphans, shims whose other side is gone, branches on now-constant flags                                  | Removal Rule above                   |
 | Comments               | Narration, restatement, staleness, point-in-time rot                                                                | `references/comment-audit.md`        |
+| Docstrings             | Implementation narration where the contract belongs, restated signatures, staleness                                 | `references/docstring-audit.md`      |
 | Semantic naming        | Misleading names, one concept under several names, semantically duplicated constants                                | —                                    |
 | Data representation    | Structures that can represent invalid states, replicate information, or leave every consumer to enforce their rules | `references/data-representation.md`  |
 
@@ -178,8 +179,8 @@ The exception is a type used nowhere outside the scope and never stored or sent 
 The data-representation lens also differs from the others in what it must return: a finding needs its test results, not a description of the shape.
 
 If the request already names a concern, run the matching lenses and say which you selected.
-Otherwise ask which to run, offering all six as the default.
-Do not fan out six agents on a request the user meant narrowly.
+Otherwise ask which to run, offering all seven as the default.
+Do not fan out seven agents on a request the user meant narrowly.
 
 State the mode and the lenses back before Phase 1 starts.
 Never switch modes mid-pass: an audit that turns up an obvious fix stays an audit, and the user can ask for the fix pass next.
@@ -268,4 +269,5 @@ Do not start that work here.
 - `references/edit-ledger.md` — the persisted report: location, sections, and the deletion-proof format.
 - `references/obfuscation-patterns.md` — obfuscative-complexity pattern catalog with the disconfirming test for each.
 - `references/comment-audit.md` — comment keep/delete/fix criteria and the docstring boundary.
+- `references/docstring-audit.md` — the caller test for docstrings: contract vs. implementation narration, and what consumes a docstring before you edit it.
 - `references/data-representation.md` — data-representation tests, where to look, and the evidence each finding must carry (shared with `code-review`).

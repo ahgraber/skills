@@ -2,7 +2,7 @@
 
 This repo holds [Agent Skills](https://agentskills.io/home), folders of instructions, scripts, and resources - typically encoding procedural knowledge - that agents can discover and use to do things more accurately and efficiently.
 
-See `skills/ai-skills` for best practices on designing skills.
+See `skills/optimize-skills` for best practices on designing skills.
 
 Avoid adding extra documentation files inside skills unless explicitly required.
 Do not manually add linebreaks, trust linters and formatters for this.
