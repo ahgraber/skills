@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-09-06
+
+### Added
+
+- `agent-bridge` — drive agents in another harness as windows of a tmux session the user starts and watches, with adapters for `codex`, `claude`, `copilot`, `gemini`, `cursor-agent`, and `pi`. `agent_bridge.py` spawns, steers, reads, and kills them, with JSON output throughout. The user starts the session, because tmux forks every agent from the server process and a server started from a tool call would give each agent that process's sandbox. A spawn adds no sandbox or approval flags and refuses arguments that would disable the CLI's approval gate. Windows record their owner, so several controllers can share one session.
+
 ## [3.1.3] - 2026-09-03
 
 ### Added
@@ -497,3 +503,4 @@ MINOR, fixes bump PATCH.
 [3.1.1]: https://github.com/ahgraber/skills/compare/skills-v3.1.0...skills-v3.1.1
 [3.1.2]: https://github.com/ahgraber/skills/compare/skills-v3.1.1...skills-v3.1.2
 [3.1.3]: https://github.com/ahgraber/skills/compare/skills-v3.1.2...skills-v3.1.3
+[3.2.0]: https://github.com/ahgraber/skills/compare/skills-v3.1.3...skills-v3.2.0
