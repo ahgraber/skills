@@ -70,6 +70,14 @@ Fix: use is/are/has when accurate — "The building is a reminder..."
 "very," "highly," "extremely," "incredibly" propping up a weak adjective.
 Fix: cut the intensifier, or replace the pair with a stronger single word or a fact.
 
+### Stacked qualifiers — [strip]
+
+Hedges piled one on another until every claim sounds uncertain: "it could potentially be argued that the policy might have some effect."
+Watch for: "to be fair," "it's also possible," "could potentially," "might arguably," "in some cases it may."
+Fix: keep the hedges the source supports and cut the rest — "The policy may affect outcomes."
+If cutting them leaves a claim the source does not support, the defect is the overstatement underneath which itself requires a rewrite.
+Editorial register draws the line at flinching from a conclusion already earned (see `register-editorial.md`).
+
 ### Filler transitions — [strip]
 
 Connectives that signal a turn without making one: "it's worth noting," "it bears mentioning," "importantly," "interestingly," "notably."
@@ -210,6 +218,16 @@ Fix: delete; open with the substantive claim instead.
 A nondescript subject plus a setup device: "A backend is not one thing," "X is more than just Y."\
 Fix: lead with the concrete claim and an informative subject — "A backend plays up to three roles, each with its own contract."
 
+### Arguing with no one — [rewrite]
+
+Answering an objection, or rejecting an alternative, that appears nowhere else in the piece.
+The pre-emptive defense answers a critic the text never names; the fake alternative raises an option only so it can be dismissed.
+Both are usually leftovers from an earlier draft, and several unrelated rejections in a stretch is a stronger signal than one.
+Avoid: "I'm not saying X." / "Don't get me wrong."
+Fix: delete the defense and state the claim it was guarding.
+Where a reader would genuinely weigh the alternative, keep it and give the real reason it loses; where the piece attributes an objection to a named source and answers it in full, that is argument, not this tell.
+Editorial register runs on answered counterarguments, so judge by whether anyone holds the position (see `register-editorial.md`).
+
 ### Fractal summaries — [rewrite]
 
 "Tell them what you'll say; say it; tell them what you said" applied at every level — every subsection, section, and the document each get a summary.
@@ -323,6 +341,15 @@ Fix: one specific, relevant example, or cut it.
 Claims pinned to unnamed authorities — "experts say," "observers note," "industry reports," "some critics argue" — often inflating one source into many.
 If you can't name the source, you don't have one.
 Fix: name a source or remove the claim.
+
+### Vague connection — [rewrite]
+
+Asserting that two things are related without naming the relation: "associated with," "in association with," "connected to," "in connection with," "linked to," "tied to."
+"He was associated with the leadership of ExampleCorp" hides whether he ran the company, sat on its board, or consulted for it.
+The sibling of vague attribution above: that entry covers an unnamed source, this one an unnamed relation.
+Avoid: "The concerts were organised in connection with the anniversary celebrations."
+Fix: name the relationship the source gives — "The concerts were part of the anniversary celebrations."
+Where the source does not state the relation, leave the vague wording; inventing a specific one to satisfy this entry is a worse failure than the tell.
 
 ### Fabricated or broken citations — [rewrite]
 
