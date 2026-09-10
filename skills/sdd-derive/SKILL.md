@@ -341,6 +341,7 @@ Report after generation: capabilities covered, requirement count, uncertainties 
 - `references/observer.md` — observation entry shape, surface inventory, observer prompt
 - `references/lifter.md` — lift rules per tag, verification discipline, lifter prompt
 - `references/validate.md` — surface coverage diff, Phase 7 checklist
+- `scripts/check_spec_format.py` — checks a spec's heading structure; called by `validate.py`
 - `references/derive-spec-additions.md` — `## Uncertainties` and as-of anchor (derive-specific)
 - `references/sdd-spec-formats.md` — baseline, delta, scenario formats (shared)
 - `references/sdd-change-formats.md` — proposal, design, tasks formats (shared)

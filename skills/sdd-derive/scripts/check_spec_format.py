@@ -1,0 +1,1 @@
+../../sdd/scripts/check_spec_format.py

@@ -226,3 +226,4 @@ Unlike baseline specs, it carries product intent, not contracts — keep it shor
 - `references/sdd-router.dot` — canonical DOT source for the routing flowchart above
 - `references/find-specs-roots.md` — output schema for the discovery script used in **Locate Specs Root**
 - `scripts/find_specs_roots.py` — discovery script that resolves `.specs/`, fallback `specs/`, and `SPECS_ROOT` pointer files
+- `scripts/check_spec_format.py` — checks a spec's heading structure against `sdd-spec-formats.md` § 3 and § 4; symlinked into `sdd-propose`, `sdd-derive`, `sdd-sync`, and `sdd-translate`

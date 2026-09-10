@@ -160,17 +160,17 @@ Source docs frequently capture only the happy-path acceptance criterion; if the 
 
 **Common to both output types:**
 
-- [ ] Every `### Requirement:` uses RFC 2119 keywords (SHALL/MUST/SHOULD/MAY)
-- [ ] Every scenario uses **GIVEN**/**WHEN**/**THEN** with bold labels
+- [ ] `scripts/check_spec_format.py` passes on every translated spec — heading levels, the `## Requirements` container, delta sections, bold GIVEN/WHEN/THEN, and RFC 2119 keywords:
+
+  ```text
+  uv run --quiet <skill_root>/scripts/check_spec_format.py <specs-dir>
+  ```
+
 - [ ] Each requirement is a contract statement in one of the shapes from `references/sdd-spec-formats.md` § 1.1 — a property about observable state that stands on its own without its scenarios
+
 - [ ] Universal SHALL claims have partition coverage per the heuristic in `references/sdd-spec-formats.md` § 1.6 — when a positive signal fires, scenarios cover each partition (or the gap is recorded as an Uncertainty)
-- [ ] Scenarios use `####` heading level (not `###` or `#####`)
+
 - [ ] Implementation details and named strategies from source were routed to `## Technical Notes` (baseline) or `design.md` (change directory), not left in the requirement text
-
-**Baseline output only:**
-
-- [ ] `## Purpose` section present in each spec
-- [ ] No delta markers (ADDED/MODIFIED/REMOVED)
 
 **Change directory output only:**
 
@@ -179,7 +179,6 @@ Source docs frequently capture only the happy-path acceptance criterion; if the 
 - [ ] Each user story keeps its "so that {value}" clause and ladders to `NORTH-STAR.md`
 - [ ] Each delta requirement carries a `Serves:` backlink to a proposal story
 - [ ] `proposal.md` Scope and `tasks.md` preserve build-dependency order when the translation produced implementer-facing change artifacts
-- [ ] No `## Purpose` or `## Technical Notes` in delta specs
 
 ### Phase 5: Schema Snapshot (if schemas configured)
 
@@ -225,3 +224,4 @@ Summary: capabilities created, requirement count per capability, translation not
 
 - `references/sdd-spec-formats.md` — baseline spec and scenario formats
 - `references/sdd-schema.md` — schema config format and lifecycle policy
+- `scripts/check_spec_format.py` — checks each translated spec's heading structure; exits non-zero on a malformed spec

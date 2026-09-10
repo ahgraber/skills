@@ -118,6 +118,9 @@ Delta-format rules:
 - Read the existing baseline spec before writing the delta
 - Only include capabilities that actually change
 - Use only ADDED/MODIFIED/REMOVED/RENAMED sections that apply — omit empty sections
+- Write the marker once as a `##` section heading, then the requirements under it: `## ADDED Requirements`, `### Requirement: {Name}`, `#### Scenario: {Name}`.
+  Do not fuse the marker to a requirement heading (`## ADDED Requirement: {Name}`).
+  `sdd-sync` strips the marker and keeps the level you gave it, producing a baseline requirement no later change can match by name (`references/sdd-spec-formats.md` § 4).
 - MODIFIED: copy the full baseline requirement (text + every still-applicable scenario), then edit in place — the block must be the complete post-change requirement, because `sdd-sync` replaces it wholesale (`references/sdd-spec-formats.md` § 4).
   Note prior behavior in a `> Previously: …` line.
 - Add a `Serves: {story-slug}` backlink to each requirement, naming the proposal user stories it advances (M:N; `references/sdd-change-formats.md` § 1.1).
@@ -168,18 +171,37 @@ Rules:
 ### Phase 7: Validate
 
 - [ ] Change directory exists: `.specs/changes/<name>/`
+
 - [ ] `proposal.md` has Intent, User Stories, Scope (in/out), Approach
+
 - [ ] Each user story uses _As a/I want/so that_ (value clause kept) and ladders to `NORTH-STAR.md`
-- [ ] Delta specs use only ADDED/MODIFIED/REMOVED/RENAMED sections (no baseline format)
+
+- [ ] Delta specs use only ADDED/MODIFIED/REMOVED/RENAMED sections (no baseline format), each written once as a `##` heading holding `### Requirement:` entries
+
+- [ ] `scripts/check_spec_format.py` passes on every delta spec:
+
+  ```text
+  uv run --quiet <skill_root>/scripts/check_spec_format.py .specs/changes/<name>/specs/
+  ```
+
 - [ ] Each requirement is a contract statement — a property about observable state that stands on its own without its scenarios (see `references/sdd-spec-formats.md` § 1)
+
 - [ ] Universal SHALL claims have partition coverage per the heuristic in `references/sdd-spec-formats.md` § 1.6 — when a positive signal fires, scenarios cover each partition
+
 - [ ] Mechanism (algorithms, thresholds, strategies, retry policies) appears in `design.md` or the proposal's Approach, not in spec text
+
 - [ ] Each delta requirement carries a `Serves:` backlink to a proposal story, or is deliberately left unserved and surfaced as such
+
 - [ ] `design.md` has at least one Decision with rationale
+
 - [ ] `tasks.md` has atomic tasks, and tasks/groups are ordered by build dependency per `references/sdd-change-formats.md` § 4 — no task depends on a capability not yet built by an earlier task
+
 - [ ] Affected capabilities appear in the same build-dependency order across `proposal.md` Scope, `design.md`, and `tasks.md` groups
+
 - [ ] Every SHALL requirement maps to at least one evidence-producing task (test, schema check, or captured output) OR appears in `design.md` § Verification Waivers with a manual evidence reference
+
 - [ ] Every foreseeable write-site implied by `design.md` (canonical path plus any alternative paths the design names — shortcuts, retries, merges) is paired with its own evidence-producing test task
+
 - [ ] No delta markers in `.specs/specs/` (baseline specs untouched)
 
 ## Output
@@ -195,6 +217,7 @@ Summary: change name, capabilities affected, task count.
 
 - Not reading existing baseline specs before writing deltas
 - Writing baseline format in change specs (missing ADDED/MODIFIED/REMOVED markers)
+- Writing `## ADDED Requirement: {Name}` once per requirement, instead of one `## ADDED Requirements` section holding `### Requirement:` entries
 - Writing scenarios that carry the contract instead of illustrating it — if deleting the scenarios leaves the requirement untestable, the requirement text is under-specified (see `references/sdd-spec-formats.md` § 1.5)
 - Writing one scenario for a universal claim whose input space partitions along signals from `references/sdd-spec-formats.md` § 1.6 (lifecycle, identity, multi-source composition, derived-pair) — verify will flag this as partition-incomplete coverage
 - Partitioning along code paths or write-sites in scenarios — that is mechanism; partitions must use spec vocabulary only
@@ -211,3 +234,4 @@ Summary: change name, capabilities affected, task count.
 - `references/sdd-spec-formats.md` — baseline spec, delta spec, scenario formats
 - `references/sdd-change-formats.md` — proposal, design, tasks formats
 - `references/sdd-schema.md` — schema artifacts and lifecycle policy
+- `scripts/check_spec_format.py` — checks each delta spec's heading structure; exits non-zero on a malformed spec

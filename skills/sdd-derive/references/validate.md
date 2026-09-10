@@ -3,6 +3,8 @@
 Check generated specs against three signals: surface coverage, uncertainty count, Phase 7 quality (format compliance).
 **Deterministic** — runs as a Python script, not a subagent.
 
+`validate.py` calls `scripts/check_spec_format.py` for the structural checks, then adds the derive-only ones: generation note, requirement naming, and `## Uncertainties`.
+
 ## Where validate runs
 
 - **Per-capability** (lifter, Phase 4): each lifter runs `validate.py --single` on its own output, fixes failures in place, re-runs until PASS.
@@ -71,8 +73,9 @@ Zero uncertainties is the typical, healthy outcome. **>5 uncertainties** in one 
 
 ## Phase 7 quality checklist
 
-- [ ] Requirements use RFC 2119 keywords (SHALL/MUST/SHOULD/MAY)
-- [ ] Scenarios use `#### Scenario:` with **GIVEN**/**WHEN**/**THEN** (bold, exact casing)
+`scripts/check_spec_format.py` covers the structural items: section headings, requirement and scenario levels, bold GIVEN/WHEN/THEN, RFC 2119 keywords, and delta markers in a baseline.
+The items below are what it cannot judge.
+
 - [ ] Each requirement is a lifted contract, not a restatement of code structure (see `evidence-class-taxonomy.md` for tag-driven rules)
 - [ ] Algorithm names, thresholds, and hand-tuned constants do NOT appear in contracts unless `algorithmic` strategy was explicitly preserved (with corresponding Uncertainty resolution)
 - [ ] External-surface contracts preserve the external interface verbatim (endpoints, table columns, topic names)
@@ -80,9 +83,6 @@ Zero uncertainties is the typical, healthy outcome. **>5 uncertainties** in one 
 - [ ] Reliability-tagged contracts include explicit failure-path scenarios
 - [ ] Security-tagged contracts use strong specificity (named actor, resource, predicate)
 - [ ] State-coupling contracts name the shared resource with invariants
-- [ ] Delta specs (change directory) use ADDED/MODIFIED/REMOVED sections
-- [ ] Baseline specs have no delta markers
-- [ ] Baseline specs include a `## Purpose` section
 - [ ] Each generated spec has a generation note blockquote with date and as-of commit SHA
 - [ ] Large surface areas were decomposed into multiple capability specs
 - [ ] `## Uncertainties` section is omitted when empty; present and non-empty when uncertainties exist

@@ -186,11 +186,18 @@ The system SHALL/MUST/SHOULD/MAY {observable behavior}.
 
 Rules:
 
+- Heading levels are exact.
+  Every baseline spec has an `#` title, a `## Purpose` section, and a `## Requirements` section.
+  Requirements are `### Requirement: {Name}` under `## Requirements`; scenarios are `#### Scenario: {Name}` under their requirement.
+  `sdd-sync` and `check_modified_completeness.py` find a requirement by matching `### Requirement:`, so a requirement written at another level cannot be matched by a later change.
+- `## Purpose` is prose.
+  Do not write it as `### Requirement: Purpose`.
 - No delta markers (ADDED/MODIFIED/REMOVED/RENAMED) in baseline specs
 - Each requirement uses a single RFC 2119 keyword
-- Scenarios use `####` heading level exactly
 - Scenario labels (GIVEN/WHEN/THEN) are bold: `**GIVEN**`, `**WHEN**`, `**THEN**`
 - `## Technical Notes` is optional but recommended
+
+`scripts/check_spec_format.py` checks the rules in this section and § 4 (see § 7).
 
 ## 4. Delta Spec Format
 
@@ -248,22 +255,35 @@ Reason: {why the capability was renamed}.
 
 Rules:
 
+- A delta marker is a section heading, not a per-requirement prefix.
+  `## ADDED Requirements` is one heading holding as many `### Requirement: {Name}` entries as the change adds.
+  Write the marker once, then list requirements under it in the same shape a baseline uses.
+  `## ADDED Requirement: {Name}` and `### ADDED Requirement: {Name}` are both malformed.
+  `sdd-sync` strips the marker and keeps the level it found, so a fused marker produces a baseline requirement no later change can match by name.
+
 - Only include sections that apply — omit empty ADDED/MODIFIED/REMOVED/RENAMED sections
+
 - **A MODIFIED requirement block MUST be the complete post-change requirement** — full requirement text plus every scenario that still applies, exactly as the baseline should read after sync.
   `sdd-sync` replaces the matched baseline requirement wholesale, so any text or scenario you omit is silently deleted at sync.
   Author it by copying the current baseline requirement and editing in place — never from scratch.
+
 - If a change drops a baseline scenario, delete it deliberately: omit it from the MODIFIED block, mark the removal with a `<!-- modified-removes: {ScenarioName} -->` comment inside that requirement block, and record why in `design.md`.
   Do not drop a scenario by silent omission — `sdd-sync` and `sdd-verify` run a deterministic backstop (`check_modified_completeness.py`) that FAILS on a baseline scenario absent from its MODIFIED block without this marker.
+
   - The marker names the baseline scenario (matched case- and whitespace-insensitively); list several in one marker with comma/semicolon separators (`<!-- modified-removes: A, B -->`), or write one marker each.
   - Because the payload is comma/semicolon-separated, a scenario name must not contain `,` or `;` (see § 5).
     A legacy baseline name that does cannot be expressed by the marker — drop it via a Verification Override (`sdd-change-formats.md` § Verification Overrides) instead.
+
 - State prior behavior in a `> Previously: …` provenance line above the requirement text.
   This line is delta-only — `sdd-sync` strips it when writing the baseline.
+
 - A requirement may carry a `Serves: {story-slug}[, {story-slug}]` line (directly beneath its SHALL statement) naming the `proposal.md` user stories it advances.
   This backlink is delta-only — `sdd-sync` strips it when writing the baseline, like `> Previously:`.
   It is the value backlink that lets `sdd-apply` and `sdd-verify` bound work to user value; see `sdd-change-formats.md` § 1.1.
   A requirement that serves no story is a signal of possible over-engineering — drop it, or add the story that justifies it.
+
 - REMOVED entries must include a reason
+
 - No `## Purpose` or `## Technical Notes` in delta specs
 
 ## 5. Scenario Format
@@ -299,3 +319,20 @@ These are not a checklist to audit against — they are illustrations of the art
 | Below-threshold queries SHALL be assembled from bottom-quartile TF-IDF terms.                 | For any query consisting of corpus-derived terms that score below the relevance threshold, the search SHALL return no relevant documents. | `design.md` (generation strategy) |
 | The recommender SHALL rank items by cosine similarity over embeddings.                        | The recommender SHALL return items ordered by relevance to the user's query, with the most relevant first.                                | `design.md` (similarity metric)   |
 | Fraud detection SHALL flag transactions scoring above 0.8 on the gradient-boosted classifier. | Fraud detection SHALL flag transactions whose risk exceeds the acceptance threshold defined by the fraud policy.                          | `design.md` (model + cutoff)      |
+
+## 7. Checking the Structure
+
+`scripts/check_spec_format.py` checks the heading rules in § 3 (baseline) and § 4 (delta): heading levels, the `## Requirements` container, delta section headings, scenario nesting, bold GIVEN/WHEN/THEN, and RFC 2119 keywords.
+It is a `uv` script with no dependencies, shipped in `sdd` and symlinked into `sdd-propose`, `sdd-derive`, `sdd-sync`, and `sdd-translate`.
+
+```bash
+uv run --quiet <skill_root>/scripts/check_spec_format.py <path>...
+uv run --quiet <skill_root>/scripts/check_spec_format.py --type delta <path>...
+```
+
+Paths may be `spec.md` files or directories, which are searched for `**/spec.md`.
+Baseline or delta is detected per file from its own markers; `--type` forces one.
+Exit code is non-zero when any file fails.
+
+Run it after writing or rewriting a spec.
+It checks structure only — § 1 contract shape is a judgment call and stays with the skill.

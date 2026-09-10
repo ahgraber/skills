@@ -107,8 +107,28 @@ The delta spec is always identified by the _old_ capability name — look it up 
 If a delta spec covers a capability with no corresponding main spec:
 
 1. Create `.specs/specs/<capability>/` directory
-2. Create `spec.md` in baseline format (no delta markers)
-3. Strip the `## ADDED`, `## MODIFIED`, `## REMOVED` section headings and keep the `### Requirement:` entries beneath them as plain requirements
+
+2. Create `spec.md` in baseline format (no delta markers), writing the full skeleton:
+
+   ```markdown
+   # {Capability} Specification
+
+   ## Purpose
+
+   {2-3 sentences, drawn from the proposal's Intent}
+
+   ## Requirements
+
+   ### Requirement: {Name}
+   ```
+
+   A delta spec has no `## Purpose` and no `## Requirements`, so write both here.
+   Purpose is prose, not a requirement.
+
+3. Drop the `## ADDED`, `## MODIFIED`, `## REMOVED` section headings and put every requirement beneath them at `### Requirement: {Name}`, with its scenarios at `#### Scenario: {Name}`.
+   Check the level; do not just strip the marker.
+   If the delta fused the marker to a requirement heading (`## ADDED Requirement: {Name}` — malformed, see `references/sdd-spec-formats.md` § 4), removing the marker leaves the requirement at `##`, where no later change can match it by name.
+   Fix the delta too.
 
 See `references/sdd-spec-formats.md` for the baseline spec format.
 
@@ -140,6 +160,14 @@ If no schema config exists and `.specs/schemas/` is empty or absent, skip silent
 - [ ] All REMOVED requirements are gone from the main spec
 - [ ] No delta markers (ADDED/MODIFIED/REMOVED/RENAMED), `> Previously:` provenance lines, or `Serves:` backlinks remain in main specs
 - [ ] Content not mentioned in deltas is unchanged
+- [ ] `scripts/check_spec_format.py` passes on every synced baseline spec
+
+```bash
+uv run --quiet <skill_root>/scripts/check_spec_format.py .specs/specs/<capability>/spec.md
+```
+
+Fix any failure before reporting.
+Each message names the rule and its section in `references/sdd-spec-formats.md`.
 
 ### Phase 6: Report
 
@@ -162,6 +190,8 @@ Synced under overrides:
 
 - Replacing the entire main spec instead of merging selectively
 - Leaving delta markers (ADDED/MODIFIED/REMOVED) in the main spec after sync
+- Stripping a fused marker in place (`## ADDED Requirement: X` → `## Requirement: X`) instead of writing `### Requirement: X`
+- Creating a new capability's baseline from the delta's requirements alone, with no `## Purpose` and no `## Requirements`
 - Touching content not mentioned in the delta
 - Replacing a MODIFIED requirement without first checking that its delta block preserves the baseline's still-applicable scenarios — the wholesale replace silently deletes any scenario the delta did not restate
 - Carrying the delta-only `> Previously: …` provenance line into the baseline spec
@@ -175,4 +205,5 @@ Synced under overrides:
 - `references/sdd-spec-formats.md` — baseline spec format for new capabilities created during sync
 - `references/sdd-change-formats.md` — change directory artifact formats (proposal, design, tasks)
 - `references/sdd-schema.md` — schema lifecycle policy (§ 4) and `.schema-sources.yaml` format (§ 3)
+- `scripts/check_spec_format.py` — checks each synced baseline spec's heading structure; exits non-zero on a malformed spec
 - `scripts/check_modified_completeness.py` — mechanical dropped-scenario check (scenario names only, not body sub-clauses); exits non-zero on dropped baseline scenarios, wireable as a pre-commit/CI gate

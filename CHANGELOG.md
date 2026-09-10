@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.2] - 2026-09-09
+
+### Added
+
+- `sdd` — `scripts/check_spec_format.py` checks a spec's heading structure: heading levels, the `## Requirements` container, delta section headings, scenario nesting, bold GIVEN/WHEN/THEN, and RFC 2119 keywords. It detects baseline or delta per file and exits non-zero on a malformed spec. Symlinked into `sdd-propose`, `sdd-derive`, `sdd-sync`, and `sdd-translate`, which now run it before reporting.
+
+### Changed
+
+- `sdd` — the spec format reference states heading levels as exact rules rather than showing them only in a template, and says why: `sdd-sync` and `check_modified_completeness.py` find a requirement by matching `### Requirement:`, so one written at another level cannot be matched by a later change. A delta marker is a `##` section heading holding many requirements, not a prefix on a requirement heading. `sdd-propose`, `sdd-sync`, and `sdd-translate` repeat the rule where each writes a spec. `sdd-sync` gains the full baseline skeleton to write for a new capability.
+- `sdd-derive` — `validate.py` calls the shared script for its structural checks instead of keeping its own copy, and keeps the derive-only ones: generation note, requirement naming, and `## Uncertainties`.
+
 ## [3.2.1] - 2026-09-07
 
 ### Added
@@ -512,3 +523,4 @@ MINOR, fixes bump PATCH.
 [3.1.3]: https://github.com/ahgraber/skills/compare/skills-v3.1.2...skills-v3.1.3
 [3.2.0]: https://github.com/ahgraber/skills/compare/skills-v3.1.3...skills-v3.2.0
 [3.2.1]: https://github.com/ahgraber/skills/compare/skills-v3.2.0...skills-v3.2.1
+[3.2.2]: https://github.com/ahgraber/skills/compare/skills-v3.2.1...skills-v3.2.2

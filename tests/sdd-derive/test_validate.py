@@ -122,7 +122,7 @@ def test_delta_marker_in_baseline_fails(tmp_path):
 
     result = validate.check_format(_spec_file(tmp_path, text))
 
-    assert any("delta markers" in f for f in result.failures)
+    assert any("delta marker" in f and "MODIFIED Requirements" in f for f in result.failures)
 
 
 def test_missing_rfc2119_fails(tmp_path):

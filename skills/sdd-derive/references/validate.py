@@ -9,10 +9,10 @@ Deterministic validator for sdd-derive.
 Runs three checks against observation YAMLs and spec markdown files:
 
 1. **YAML parse check** — every observation YAML must yaml.safe_load cleanly.
-2. **Format check** — every spec.md matches the canonical baseline/delta shape from
-   references/sdd-spec-formats.md (generation note, ## Purpose for baseline,
-   ### Requirement: <Name> headings, #### Scenario: blocks with bold GIVEN/WHEN/THEN,
-   no delta markers in baseline, ## Uncertainties only-when-non-empty).
+2. **Format check** — the shared structural check in scripts/check_spec_format.py
+   (heading levels, ## Requirements container, delta sections, bold GIVEN/WHEN/THEN),
+   plus the derive-only checks: generation note, requirement naming, and
+   ## Uncertainties only-when-non-empty.
 3. **Surface coverage diff** — kind-aware: public-consumer surfaces absent from spec
    are gaps; internal-knob surfaces (env_var, config_key, cli_flag) absent default to
    acknowledged-without-scenario per references/validate.md.
@@ -37,11 +37,23 @@ Surface gaps and uncertainties are informational; they do not fail the run.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import importlib.util
 import json
 from pathlib import Path
 import re
 import sys
 import yaml
+
+# --- Shared structural format check -----------------------------------------
+# Owned by the sdd skill, reached through the symlink in this skill's scripts/.
+
+_SHARED = Path(__file__).resolve().parent.parent / "scripts" / "check_spec_format.py"
+_shared_spec = importlib.util.spec_from_file_location("sdd_check_spec_format", _SHARED)
+if _shared_spec is None or _shared_spec.loader is None:  # pragma: no cover - packaging error
+    raise ImportError(f"cannot load shared format check from {_SHARED}")
+check_spec_format = importlib.util.module_from_spec(_shared_spec)
+sys.modules[_shared_spec.name] = check_spec_format
+_shared_spec.loader.exec_module(check_spec_format)
 
 # --- Surface kind classification per references/validate.md -----------------
 
@@ -54,19 +66,7 @@ GENERATION_NOTE = re.compile(
     r"^>\s+Generated from code analysis on \d{4}-\d{2}-\d{2}, as-of commit [0-9a-f]{7,40}\b",
     re.MULTILINE,
 )
-PURPOSE_HEADING = re.compile(r"^##\s+Purpose\s*$", re.MULTILINE)
-REQUIREMENTS_HEADING = re.compile(r"^##\s+Requirements\s*$", re.MULTILINE)
-REQUIREMENT_HEADING = re.compile(r"^###\s+Requirement:\s+\S", re.MULTILINE)
-SCENARIO_HEADING = re.compile(r"^####\s+Scenario:\s+\S", re.MULTILINE)
-GIVEN_BOLD = re.compile(r"\*\*GIVEN\*\*")
-WHEN_BOLD = re.compile(r"\*\*WHEN\*\*")
-THEN_BOLD = re.compile(r"\*\*THEN\*\*")
-DELTA_MARKER = re.compile(
-    r"^##\s+(ADDED|MODIFIED|REMOVED|RENAMED)\s+(Requirements|Capabilities)\s*$",
-    re.MULTILINE,
-)
 UNCERTAINTIES_HEADING = re.compile(r"^##\s+Uncertainties\s*$", re.MULTILINE)
-RFC_2119 = re.compile(r"\b(SHALL|MUST|SHOULD|MAY)\b")
 
 # Heuristic patterns indicating a non-canonical requirement heading shape
 NONCANONICAL_REQ = re.compile(r"^###\s+(R\d+|REQ-\d+|Req\s*#?\d+|Requirement\s*\d+)[:\s]", re.MULTILINE)
@@ -121,55 +121,27 @@ def check_format(spec_path: Path, output_type: str = "baseline") -> FormatResult
     result = FormatResult(capability=cap, spec_path=spec_path)
     text = spec_path.read_text()
 
-    # 1. Generation note
+    # 1. Structure — heading levels, containers, delta sections, GIVEN/WHEN/THEN
+    structural = check_spec_format.check_spec_format(text, spec_path, output_type)
+    result.failures.extend(structural.failures)
+    result.requirement_count = structural.requirement_count
+    result.scenario_count = structural.scenario_count
+
+    # 2. Generation note
     if not GENERATION_NOTE.search(text):
         result.failures.append(
             "missing generation note ('> Generated from code analysis on YYYY-MM-DD, as-of commit <sha>')"
         )
 
-    # 2. Purpose section (baseline only)
-    if output_type == "baseline" and not PURPOSE_HEADING.search(text):
-        result.failures.append("missing '## Purpose' section (required in baseline)")
-
-    # 3. Requirement headings — canonical shape
-    req_count = len(REQUIREMENT_HEADING.findall(text))
+    # 3. Requirement naming — a derived spec names the contract, not an index
     noncanonical_reqs = NONCANONICAL_REQ.findall(text)
     if noncanonical_reqs:
         result.failures.append(
             f"non-canonical requirement headings: found {len(noncanonical_reqs)} entries "
             f"matching '### R<n>:' / '### REQ-<n>:' / '### Req #<n>:'; expected '### Requirement: <Name>'"
         )
-    if req_count == 0 and not noncanonical_reqs:
-        result.failures.append("no requirement headings found")
-    result.requirement_count = req_count
 
-    # 4. Scenario headings + bold GIVEN/WHEN/THEN
-    scen_count = len(SCENARIO_HEADING.findall(text))
-    given = len(GIVEN_BOLD.findall(text))
-    when = len(WHEN_BOLD.findall(text))
-    then = len(THEN_BOLD.findall(text))
-    if scen_count > 0:
-        # Each scenario should have at least one GIVEN, one WHEN, one THEN.
-        # Allow for compound scenarios (multiple WHEN/THEN clauses).
-        if given < scen_count:
-            result.failures.append(f"only {given} bold **GIVEN** markers for {scen_count} scenarios")
-        if when < scen_count:
-            result.failures.append(f"only {when} bold **WHEN** markers for {scen_count} scenarios")
-        if then < scen_count:
-            result.failures.append(f"only {then} bold **THEN** markers for {scen_count} scenarios")
-    result.scenario_count = scen_count
-
-    # 5. No delta markers in baseline
-    if output_type == "baseline":
-        delta_hits = DELTA_MARKER.findall(text)
-        if delta_hits:
-            result.failures.append(f"baseline spec contains delta markers: {[m[0] + ' ' + m[1] for m in delta_hits]}")
-
-    # 6. RFC 2119 keyword usage
-    if not RFC_2119.search(text):
-        result.failures.append("no RFC 2119 keywords (SHALL/MUST/SHOULD/MAY) found")
-
-    # 7. Uncertainties section: present iff non-empty
+    # 4. Uncertainties section: present iff non-empty
     if UNCERTAINTIES_HEADING.search(text):
         # Count uncertainty entries (top-level bullet items under the heading)
         m = UNCERTAINTIES_HEADING.search(text)
