@@ -113,6 +113,11 @@ Mechanism thinking is expected here — algorithms, thresholds, strategies, data
 Park those thoughts in the proposal's `## Approach` section as they surface; they formalize in Phase 5 (`design.md`).
 Do not put mechanism into the spec itself.
 
+Restate a signature (function, method, endpoint, or command) in spec prose only where its shape is the contract.
+The shape is the contract when external consumers depend on its names, types, or order (the published-interface test in `references/sdd-spec-formats.md` § 1.4).
+Otherwise, state the behavior and leave the signature to the code and `design.md`.
+A restated internal signature goes stale on any refactor that keeps the behavior, and the spec then disagrees with code that still meets the contract.
+
 Delta-format rules:
 
 - Read the existing baseline spec before writing the delta
@@ -220,6 +225,7 @@ Summary: change name, capabilities affected, task count.
 - Writing `## ADDED Requirement: {Name}` once per requirement, instead of one `## ADDED Requirements` section holding `### Requirement:` entries
 - Writing scenarios that carry the contract instead of illustrating it — if deleting the scenarios leaves the requirement untestable, the requirement text is under-specified (see `references/sdd-spec-formats.md` § 1.5)
 - Writing one scenario for a universal claim whose input space partitions along signals from `references/sdd-spec-formats.md` § 1.6 (lifecycle, identity, multi-source composition, derived-pair) — verify will flag this as partition-incomplete coverage
+- Restating an internal function or method signature in a requirement when only its behavior is the contract
 - Partitioning along code paths or write-sites in scenarios — that is mechanism; partitions must use spec vocabulary only
 - Generating only canonical-path test tasks when `design.md` names alternative paths (shortcuts, retries, merges) — each foreseeable write-site needs its own paired test task, not just the canonical one
 - Creating tasks that are too coarse (one task = "implement auth" instead of atomic steps)

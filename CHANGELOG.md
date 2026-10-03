@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `sdd-sync` — a soft gate stops before sync when `tasks.md` still has unchecked tasks, lists them, and asks whether to proceed. Sync writes the change's behavior into the baseline specs, so an open task means the baseline would describe behavior that is not yet implemented. A task that a recorded verification override names as its follow-up task does not count, because the override process requires that task to stay open.
+- `sdd-propose` — spec prose restates a signature only where its shape is the contract, meaning external consumers depend on its names, types, or order. Elsewhere the spec states the behavior and leaves the signature to the code and `design.md`, so a refactor that keeps the behavior does not put the spec out of date.
 
 ## [3.2.2] - 2026-09-09
 
