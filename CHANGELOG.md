@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.3] - 2026-10-03
+
+### Changed
+
+- `sdd-sync` — a soft gate stops before sync when `tasks.md` still has unchecked tasks, lists them, and asks whether to proceed. Sync writes the change's behavior into the baseline specs, so an open task means the baseline would describe behavior that is not yet implemented. A task that a recorded verification override names as its follow-up task does not count, because the override process requires that task to stay open.
+
 ## [3.2.2] - 2026-09-09
 
 ### Added
@@ -524,3 +530,4 @@ MINOR, fixes bump PATCH.
 [3.2.0]: https://github.com/ahgraber/skills/compare/skills-v3.1.3...skills-v3.2.0
 [3.2.1]: https://github.com/ahgraber/skills/compare/skills-v3.2.0...skills-v3.2.1
 [3.2.2]: https://github.com/ahgraber/skills/compare/skills-v3.2.1...skills-v3.2.2
+[3.2.3]: https://github.com/ahgraber/skills/compare/skills-v3.2.2...skills-v3.2.3

@@ -165,6 +165,7 @@ digraph sdd_router {
 | sdd-apply   | `SPECS_ROOT/changes/<name>/tasks.md` | **Hard block** — "No tasks to implement. Run sdd-propose first." |
 | sdd-verify  | Some completed tasks in `tasks.md`   | "No completed tasks yet — verify output will be limited."        |
 | sdd-sync    | Delta specs in change directory      | "No delta specs to sync."                                        |
+| sdd-sync    | All tasks complete                   | "Incomplete tasks remain. Sync anyway?" (ask user)               |
 | sdd-archive | All tasks complete                   | "Incomplete tasks remain. Archive anyway?" (ask user)            |
 | design.md   | `proposal.md` exists                 | "Consider writing a proposal first for context."                 |
 

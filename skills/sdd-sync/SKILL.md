@@ -53,6 +53,15 @@ Before syncing, confirm verification status and any recorded override trail:
 4. Any blocker from the current verify result that is not covered by a recorded override remains blocking.
    Stop and tell the user which blockers remain uncovered.
 
+Then check `.specs/changes/<name>/tasks.md` for unchecked tasks.
+Do not count a task that a recorded override names as its follow-up task; the override process requires that task to stay open.
+If other unchecked tasks remain, warn:
+
+> "{N} tasks are still incomplete. Sync will write their behavior into the baseline specs before it is implemented. Sync anyway?"
+
+List the open tasks with the warning.
+Wait for user confirmation before proceeding.
+
 ## Process
 
 ### Phase 1: Identify What to Sync
@@ -198,6 +207,7 @@ Synced under overrides:
 - Carrying a delta-only `Serves:` backlink into the baseline spec — like `> Previously:`, it is change-scoped and must be stripped at sync
 - Reconstructing the verify outcome from `design.md` instead of consuming the latest `sdd-verify` result plus any recorded overrides
 - Syncing before `sdd-verify` clears all blockers, whether by a clean pass or a recorded override
+- Syncing with open tasks in `tasks.md` without asking the user, or counting override follow-up tasks as open
 - Treating a blocker as non-blocking without a recorded `design.md` override and an unchecked remediation task in `tasks.md`
 
 ## References
