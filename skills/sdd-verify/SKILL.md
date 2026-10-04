@@ -109,7 +109,8 @@ The full availability gate, granularity proposal, model resolution, dispatch pro
 Read all available artifacts (graceful degradation — proceed with what exists):
 
 - `.specs/changes/<name>/tasks.md` — task completion status
-- `.specs/changes/<name>/design.md` — design decisions and any `## Verification Waivers` / `## Verification Overrides` (if exists)
+- `.specs/changes/<name>/proposal.md` — user stories, scope, and any `## Resolved Questions`
+- `.specs/changes/<name>/design.md` — design decisions and any `## Spec Changes` / `## Verification Waivers` / `## Verification Overrides` (if exists)
 - `.specs/changes/<name>/specs/` — delta specs (if exist)
 - `.specs/specs/` — baseline specs for full context
 
@@ -319,6 +320,21 @@ Omit `--change` to scan every active change, e.g. as a repo-wide pre-commit/CI g
 It compares scenario names only and exits non-zero when the MODIFIED delta drops a baseline scenario; sub-clause and body-text loss (step 2) still needs a human read.
 Intentional drops are marked with a `<!-- modified-removes: ScenarioName -->` comment in the delta block.
 
+#### Check Spec Changes (spec-drift check)
+
+Specs may change during implementation only with the record `references/sdd-change-formats.md` § 5 requires.
+This check finds spec edits that lack that record.
+It runs at the orchestrator.
+
+Run the spec-drift check in § 5.5: diff the delta specs from the proposal commit to the working tree, and classify each hunk as a scenario change or a requirement change.
+
+- A scenario change with no `design.md` § Spec Changes entry, or with `Approved by user: pending` → **CRITICAL: scenario change `<capability>: <scenario>` has no recorded user approval.**
+- A requirement change with no `design.md` Decision entry or no dated Resolved Questions line → **CRITICAL: requirement change `<capability>: <requirement>` was not approved by the user.**
+- A scenario change that narrows what its requirement guarantees but is recorded only as a scenario change → **CRITICAL: `<capability>: <scenario>` narrows its requirement and needs approval as a requirement change.**
+- A § Spec Changes entry whose rationale is only that the code behaves this way → **WARNING: `<capability>: <scenario>` is supported only by the code it describes.**
+
+If no proposal commit exists, flag **WARNING: no proposal commit; the spec-drift check could not run** and do not report a clean pass.
+
 ### Phase 5: Check Contract Satisfaction
 
 Skip requirements flagged as missing in Phase 4.
@@ -474,6 +490,7 @@ All applicable dimensions verified:
 - [x] Contract
 - [x] Coverage
 - [x] Coherence (if design.md exists)
+- [x] Spec changes — every spec edit since the proposal commit has its recorded user approval
 - [x] Conformance (if schema-config.yaml exists)
 - [x] Evidence — every SHALL at TESTED or VERIFIED (or WAIVED with checkable manual evidence)
 
@@ -496,6 +513,7 @@ State instead that verification found issues the user explicitly chose not to le
 | `schemas/expected.md`             | Skip expected-vs-actual diff within conformance; run drift detection only |
 | No git diff available             | Skip scope check (Phase 4 step), flag as WARNING, note in report          |
 | No user stories / `NORTH-STAR.md` | Skip value-alignment check (Phase 4 step), note in report                 |
+| No proposal commit                | Skip spec-drift check (Phase 4 step), flag as WARNING, no clean pass      |
 
 "Warn before proceeding" means a conversational message to the user.
 "Note in report" means adding a note inside the verification report itself.
@@ -528,6 +546,8 @@ State instead that verification found issues the user explicitly chose not to le
 - Running the scope check only against the delta specs without also checking baseline specs — a change that silently modifies behavior already covered by a baseline requirement is still unspecified for this change.
 - Skipping the MODIFIED delta-integrity check (the orchestrator step within Phase 4) — `sdd-sync` replaces MODIFIED requirements wholesale, so a delta block that drops a baseline scenario causes silent contract deletion at sync; verify is the gate that catches it first.
 - Classifying test file changes or formatting-only edits as meaningful changes in the scope check step — the scope check targets behavioral changes, not every diff hunk.
+- Skipping the spec-drift check (the orchestrator step within Phase 4), or accepting a spec edit because its rationale sounds reasonable when the user approval line is missing.
+- Reporting a clean pass when no proposal commit exists — the spec-drift check did not run, so spec edits made during implementation are unchecked.
 
 ## References
 

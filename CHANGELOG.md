@@ -5,12 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.2.3] - 2026-10-03
+## [3.3.0] - 2026-10-03
 
 ### Changed
 
-- `sdd-sync` — a soft gate stops before sync when `tasks.md` still has unchecked tasks, lists them, and asks whether to proceed. Sync writes the change's behavior into the baseline specs, so an open task means the baseline would describe behavior that is not yet implemented. A task that a recorded verification override names as its follow-up task does not count, because the override process requires that task to stay open.
+- `sdd-apply` — specs are the source of truth during implementation. When code conflicts with a spec, the code changes to match unless the spec change is one of two allowed kinds. The agent may add or revise a scenario without asking first, if the revision does not narrow what its requirement guarantees. It records the rationale and the scenario's source in a new `design.md` § Spec Changes, asks for approval at the end of the turn, and stops to ask after 5 scenarios in one turn that it chose itself. A requirement change needs the user's approval before implementation, recorded in `design.md` and in a new proposal § Resolved Questions. Commits that edit spec text list each spec change in the body. Apply does not start until the change directory is committed; changes already in progress need that commit first.
+- `sdd-propose` — ends by committing the change directory once the user approves it. Every later spec edit is checked against this commit.
 - `sdd-propose` — spec prose restates a signature only where its shape is the contract, meaning external consumers depend on its names, types, or order. Elsewhere the spec states the behavior and leaves the signature to the code and `design.md`, so a refactor that keeps the behavior does not put the spec out of date.
+- `sdd-verify` — a spec-drift check flags as CRITICAL any spec edit made since the proposal commit that lacks its recorded user approval.
+- `sdd-sync` — runs the spec-drift check again before syncing and stops on any unapproved spec edit. Errors in baseline specs found during implementation are recorded in `design.md` § Baseline Errors; sync fixes them after the user confirms, and reports them separately from the change's own edits.
+- `sdd-sync` — a soft gate stops before sync when `tasks.md` still has unchecked tasks, lists them, and asks whether to proceed. Sync writes the change's behavior into the baseline specs, so an open task means the baseline would describe behavior that is not yet implemented. A task that a recorded verification override names as its follow-up task does not count, because the override process requires that task to stay open.
 
 ## [3.2.2] - 2026-09-09
 
@@ -531,4 +535,4 @@ MINOR, fixes bump PATCH.
 [3.2.0]: https://github.com/ahgraber/skills/compare/skills-v3.1.3...skills-v3.2.0
 [3.2.1]: https://github.com/ahgraber/skills/compare/skills-v3.2.0...skills-v3.2.1
 [3.2.2]: https://github.com/ahgraber/skills/compare/skills-v3.2.1...skills-v3.2.2
-[3.2.3]: https://github.com/ahgraber/skills/compare/skills-v3.2.2...skills-v3.2.3
+[3.3.0]: https://github.com/ahgraber/skills/compare/skills-v3.2.2...skills-v3.3.0

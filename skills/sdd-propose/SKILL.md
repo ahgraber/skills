@@ -209,14 +209,25 @@ Rules:
 
 - [ ] No delta markers in `.specs/specs/` (baseline specs untouched)
 
+### Phase 8: Commit the Change Directory
+
+After the user approves the artifacts, commit `.specs/changes/<name>/` and nothing else.
+Ask before committing, and use the project's commit conventions.
+Draft the message with the `commit-message` skill if it is available.
+
+This commit is the proposal commit.
+`sdd-apply` does not start until it exists, and the spec-drift check (`references/sdd-change-formats.md` § 5.5) diffs every later spec edit against it.
+Without it, no one can tell which spec text the user approved and which text changed during implementation.
+
 ## Output
 
 - `.specs/changes/<name>/proposal.md`
 - `.specs/changes/<name>/specs/<capability>/spec.md` per affected capability (delta format)
 - `.specs/changes/<name>/design.md`
 - `.specs/changes/<name>/tasks.md`
+- The proposal commit containing all of the above
 
-Summary: change name, capabilities affected, task count.
+Summary: change name, capabilities affected, task count, proposal commit SHA.
 
 ## Common Mistakes
 
@@ -231,6 +242,7 @@ Summary: change name, capabilities affected, task count.
 - Creating tasks that are too coarse (one task = "implement auth" instead of atomic steps)
 - Ordering capabilities or task groups alphabetically or by order of discussion — ordering must follow build dependency per `references/sdd-change-formats.md` § 4 so the implementer never builds in anticipation of a missing capability
 - Generating all artifacts without pausing for user confirmation between phases
+- Ending without the proposal commit, or committing files outside the change directory with it
 - Using non-kebab-case change names
 - Dropping the "so that {value}" clause from a user story — the value clause is the scope ceiling that bounds implementation effort, not decoration
 - Writing a requirement that serves no user story (gold-plating) — every requirement should advance a story or be cut

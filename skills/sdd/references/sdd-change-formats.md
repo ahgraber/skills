@@ -1,6 +1,6 @@
 ---
 name: sdd-change-formats
-description: SDD change artifact formats — proposal, design, and tasks. Referenced by sdd-propose and sdd-derive.
+description: SDD change artifact formats — proposal, design, and tasks — and the rules for changing specs during implementation. Referenced by sdd-propose, sdd-derive, sdd-apply, sdd-verify, and sdd-sync.
 ---
 
 # SDD Change Formats
@@ -41,6 +41,10 @@ As a {role}, I want {goal}, so that {value}.
 ## Open Questions
 
 - {Unresolved decision or question that must be answered before implementation}
+
+## Resolved Questions
+
+- {YYYY-MM-DD} {question or requirement change}: {decision}. Decided with the user.
 ```
 
 Rules:
@@ -49,6 +53,9 @@ Rules:
 - User Stories name the cross-cutting product value this change delivers — see § 1.1
 - Scope prevents scope creep — be explicit about boundaries
 - Open Questions is optional — omit if there are none
+- Resolved Questions is optional.
+  It records decisions made with the user, including requirement changes approved during implementation (§ 5.2).
+  Each line carries the date of the decision and the words "Decided with the user".
 - **Approach** is the draft sandbox for mechanism thinking during spec authoring.
   Early algorithm, heuristic, or strategy ideas that surface while writing the contract belong here until they are formalized into `design.md`.
   This keeps mechanism out of `spec.md` without losing the thinking.
@@ -125,6 +132,19 @@ Location: `.specs/changes/<name>/design.md`
   **Manual evidence:** {path to captured output, runbook reference, screenshot, or commit where manual verification was recorded}
   **Recorded:** {ISO date or commit SHA when this waiver was first added — used by sdd-verify's provenance check}
 
+## Spec Changes
+
+- **Change:** {capability}: {imperative description, e.g. "add scenario for a token that expires during refresh"}
+  **Source:** {upstream: the story, requirement, or decision it follows from | agent choice}
+  **Rationale:** {why the spec should say this, stated without reference to what the code currently does}
+  **Approved by user:** {ISO date | pending}
+
+## Baseline Errors
+
+- **Spec:** {capability and requirement in `.specs/specs/`}
+  **Error:** {what the baseline states wrongly}
+  **Fix:** {the corrected text or behavior}
+
 ## Verification Overrides
 
 - **Finding:** {exact verify finding or stable identifier}
@@ -139,6 +159,9 @@ Location: `.specs/changes/<name>/design.md`
 The `## Verification Waivers` section is optional and only present when one or more SHALL requirements cannot be covered by runnable evidence (test, schema check, or captured output).
 `sdd-verify` flags any unwaived SHALL without runnable evidence as CRITICAL, and a waiver entry without a checkable manual evidence reference is itself CRITICAL.
 The `Recorded` field is required for the provenance check; if absent, `sdd-verify` falls back to `git blame`.
+
+The `## Spec Changes` and `## Baseline Errors` sections are optional.
+They record spec edits made during implementation; § 5 defines when each is used.
 
 The `## Verification Overrides` section is optional.
 User overrides of otherwise blocking findings or gate outcomes are permitted, but they must be recorded in the change artifacts to preserve an audit trail across design, implementation, verify, and sync.
@@ -231,3 +254,103 @@ Alphabetical order would force the implementer to scaffold middleware against a 
 
 If two items each appear to require the other, the cycle is usually a sign that one needs to split.
 Surface it to the user rather than picking arbitrarily.
+
+## 5. Spec Changes During Implementation
+
+Specs are the source of truth during implementation.
+When implementation or testing conflicts with a spec, change the code to match the spec.
+Change the spec only as § 5.1 or § 5.2 allows.
+
+Change the code, not the spec, when the spec text traces to a user story, the north star, or a recorded user decision.
+Change the code, not the spec, when the only support for the code's behavior is its own tests.
+
+`tasks.md` and `design.md` are working documents.
+Add, reorder, or replace tasks as the work requires.
+Change a design decision when implementation shows a better choice, and update its Decision entry (Chosen, Rationale, Alternatives).
+A design decision that traces to a user decision is the exception: changing it is a requirement change (§ 5.2).
+
+### 5.1 Scenario changes
+
+The implementer may add a scenario, or revise one, without asking the user first.
+A scenario change must meet both of these conditions:
+
+- It does not narrow what its requirement guarantees.
+  A revision that adds an exception, a precondition, or a weaker outcome is a requirement change (§ 5.2).
+- Its rationale is something other than what the code currently does.
+
+Record each scenario change in `design.md` § Spec Changes (§ 2) with `Approved by user: pending`.
+Set **Source** to the story, requirement, or decision the scenario follows from.
+When the spec was silent and the implementer picked the behavior, set **Source** to `agent choice`.
+An agent-choice scenario often describes what the code already does, so the user must read it most closely.
+
+At the end of each turn that changed scenarios, list the changes for the user, grouped by source, and ask for approval.
+When the user approves, replace `pending` with the date.
+
+If one turn produces 5 or more agent-choice scenarios, stop and ask the user before continuing.
+That many silent spots usually means the spec is underspecified, and the user should decide the missing behavior.
+
+### 5.2 Requirement changes
+
+A requirement change is any of these:
+
+- Adding, removing, or rewording a requirement.
+- A scenario revision that narrows what its requirement guarantees.
+- A breaking change.
+- A change that touches the proposal's Out of scope or Resolved Questions.
+- A change to a design decision that traces to a user decision.
+
+Get the user's approval before implementing a requirement change.
+Record it in the same commit as the code:
+
+- A `design.md` Decision entry (Chosen, Rationale, Alternatives).
+- A dated line in the proposal's Resolved Questions that ends "Decided with the user".
+
+If the change raises what every implementation of an extension point must guarantee (every backend, store, or plugin), also add a contract test that runs against each declared implementation.
+
+### 5.3 Baseline errors
+
+An error found in a baseline spec (`.specs/specs/`) during implementation is not part of the change.
+Do not edit the baseline during implementation.
+Record the error in `design.md` § Baseline Errors (§ 2).
+`sdd-sync` fixes recorded baseline errors after the user confirms them, and reports them separately from the change's own edits.
+
+### 5.4 Commits that edit spec text
+
+A commit that edits spec text lists each spec change in its body, one line per change.
+Write each line in the imperative, in plain language, prefixed with the capability:
+
+```text
+auth: add scenario for a token that expires during refresh
+auth: require re-authentication after a password change
+```
+
+The line names what changed.
+The rationale and the user's approval stay in `design.md` and the proposal.
+With this convention, `git log -- .specs/` reads as a log of spec decisions.
+
+### 5.5 Spec-drift check
+
+The spec-drift check finds every spec edit made since the proposal was committed, and confirms that each one has the record it needs.
+
+1. Find the proposal commit: the first commit that added the change's `proposal.md`.
+
+   ```bash
+   git log --diff-filter=A --format=%H -- .specs/changes/<name>/proposal.md | tail -n 1
+   ```
+
+2. Diff the delta specs from that commit to the working tree:
+
+   ```bash
+   git diff <proposal-commit> -- .specs/changes/<name>/specs/
+   ```
+
+3. Classify each hunk as a scenario change (§ 5.1) or a requirement change (§ 5.2).
+
+4. Check each hunk against its record:
+
+   - A scenario change needs a `design.md` § Spec Changes entry with a dated `Approved by user` line.
+   - A requirement change needs a `design.md` Decision entry and a dated Resolved Questions line.
+
+A hunk without its complete record blocks sync.
+If no proposal commit exists, the check cannot run.
+Report that, and do not treat the change as clean.

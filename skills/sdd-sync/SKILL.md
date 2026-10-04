@@ -62,6 +62,12 @@ If other unchecked tasks remain, warn:
 List the open tasks with the warning.
 Wait for user confirmation before proceeding.
 
+Then run the spec-drift check (`references/sdd-change-formats.md` § 5.5), even if verify already ran it.
+Specs can change after verify.
+If any spec edit lacks its recorded user approval, stop and list the edits.
+Sync writes the delta specs into the baseline, so an unapproved edit becomes the project's contract.
+If no proposal commit exists, the check cannot run; tell the user and wait for confirmation before proceeding.
+
 ## Process
 
 ### Phase 1: Identify What to Sync
@@ -110,6 +116,12 @@ For RENAMED: check whether the new directory name already exists before renaming
 
 **RENAMED processing order:** When a delta spec contains RENAMED alongside other markers, process the rename first (directory rename + spec header update), then apply any ADDED/MODIFIED/REMOVED markers against the already-renamed main spec.
 The delta spec is always identified by the _old_ capability name — look it up before renaming.
+
+### Phase 2a: Fix Recorded Baseline Errors
+
+If `design.md` has a `## Baseline Errors` section, list each entry for the user and ask which fixes to apply.
+Apply the confirmed fixes to `.specs/specs/`.
+These fixes are not part of the change's delta, so keep them separate in the report (Phase 6) and in the commit body.
 
 ### Phase 3: Handle New Capabilities
 
@@ -193,7 +205,13 @@ Schema snapshots updated:
 
 Synced under overrides:
 - `pip audit` failure for `litellm` → stage: `verify`; reason: upstream fix unavailable in current environment; constraints: no ignore added; follow-up remains open in `tasks.md`
+
+Baseline errors fixed (not part of this change):
+- auth/          → corrected token lifetime in "Session expiry"
 ```
+
+When committing the sync, list each spec change in the commit body, one line per change, prefixed with the capability (`references/sdd-change-formats.md` § 5.4).
+List the baseline-error fixes after the change's own edits, under their own heading.
 
 ## Common Mistakes
 
@@ -209,11 +227,13 @@ Synced under overrides:
 - Syncing before `sdd-verify` clears all blockers, whether by a clean pass or a recorded override
 - Syncing with open tasks in `tasks.md` without asking the user, or counting override follow-up tasks as open
 - Treating a blocker as non-blocking without a recorded `design.md` override and an unchecked remediation task in `tasks.md`
+- Syncing without running the spec-drift check, or relying on an earlier verify run when specs changed after it
+- Mixing baseline-error fixes into the change's own edits in the report or commit body
 
 ## References
 
 - `references/sdd-spec-formats.md` — baseline spec format for new capabilities created during sync
-- `references/sdd-change-formats.md` — change directory artifact formats (proposal, design, tasks)
+- `references/sdd-change-formats.md` — change directory artifact formats (proposal, design, tasks), spec-drift check (§ 5.5), and spec commit format (§ 5.4)
 - `references/sdd-schema.md` — schema lifecycle policy (§ 4) and `.schema-sources.yaml` format (§ 3)
 - `scripts/check_spec_format.py` — checks each synced baseline spec's heading structure; exits non-zero on a malformed spec
 - `scripts/check_modified_completeness.py` — mechanical dropped-scenario check (scenario names only, not body sub-clauses); exits non-zero on dropped baseline scenarios, wireable as a pre-commit/CI gate

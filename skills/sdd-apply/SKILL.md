@@ -26,6 +26,20 @@ Keep identifiers, commands, paths, and RFC 2119 keywords exact.
 
 Do not proceed without tasks.md.
 
+**If the change directory has no proposal commit: STOP.**
+Check with:
+
+```bash
+git log --diff-filter=A --format=%H -- .specs/changes/<name>/proposal.md
+```
+
+If the output is empty, tell the user:
+
+> "The change artifacts are not committed. Commit `.specs/changes/<name>/` before implementing. Without that commit, the spec-drift check cannot tell which spec text you approved and which text changed during implementation."
+
+Proceed without the commit only if the user explicitly says to.
+In that case, state in every later verify and sync report that the spec-drift check could not run.
+
 ## Critical Constraints
 
 **Never reference ephemeral scaffolding in any persisted artifact.**
@@ -56,6 +70,7 @@ When drafting a commit message during apply:
 - Prefer invoking `commit-message` if it is loadable in this environment.
 - Otherwise, draft a Conventional Commit (`type(scope): subject`) that describes _what changed and why_, and apply the constraints above.
 - Do not paste design or task identifiers into the message even if they appear in the surrounding tasks/design files.
+- If the commit edits spec text, list each spec change in the body, one line per change, prefixed with the capability (`references/sdd-change-formats.md` § 5.4).
 
 ## When to Use
 
@@ -170,13 +185,25 @@ When the gate passes and all tasks are checked off:
 > 2. Run `sdd-sync` to merge delta specs into main specs
 > 3. Run `sdd-archive` to complete the change"
 
-## Fluid Workflow
+## Spec Changes During Implementation
 
-This skill can be invoked at any point after `tasks.md` exists — not only when all artifacts are complete.
+Specs are the source of truth.
+When the code or a test conflicts with a spec, change the code to match the spec.
+Change the spec only as `references/sdd-change-formats.md` § 5 allows.
+Read § 5 before you edit any spec text.
 
-- If implementation reveals a design issue, pause and suggest updating `design.md` or delta specs before continuing.
-- If scope changes mid-implementation, suggest updating `proposal.md` and `tasks.md`.
-- Don't treat the artifact set as frozen — work fluidly, but document changes.
+- **Tasks and design:** change `tasks.md` and `design.md` as the work requires, and keep each Decision entry current.
+  A design decision that traces to a user decision is the exception: changing it is a requirement change.
+- **Scenario changes:** add or revise a scenario without asking first, if the change does not narrow what its requirement guarantees and its rationale is not "the code does this".
+  Record it in `design.md` § Spec Changes, labeled with its source: the upstream story, requirement, or decision, or `agent choice`.
+  At the end of the turn, list the scenario changes for the user and ask for approval.
+  If one turn produces 5 or more agent-choice scenarios, stop and ask the user before continuing.
+- **Requirement changes:** adding, removing, or rewording a requirement, narrowing a scenario, a breaking change, or anything that touches Out of scope or Resolved Questions.
+  Stop and get the user's approval before implementing.
+  Record a Decision entry in `design.md` and a dated Resolved Questions line in the proposal, in the same commit as the code.
+- **Scope changes:** a change to the proposal's scope is a requirement change.
+- **Baseline errors:** do not edit `.specs/specs/` during implementation.
+  Record the error in `design.md` § Baseline Errors; `sdd-sync` fixes it.
 
 ## Common Mistakes
 
@@ -186,7 +213,10 @@ This skill can be invoked at any point after `tasks.md` exists — not only when
 - Implementing tasks out of order when dependencies exist
 - Continuing past a failed task without resolving it
 - Diverging from design decisions without documenting why
-- Treating artifacts as frozen when implementation reveals issues (update them)
+- Editing a spec to match the code when the spec traces to a story, the north star, or a user decision
+- Recording a scenario change without its source label, or labeling an agent choice as following from an upstream source
+- Implementing a requirement change before the user approves it
+- Starting implementation before the change directory has a proposal commit
 - Adding a deduplication shortcut, cache fast-path, retry branch, or composition step for a SHALL-covered value without adding a paired test task that exercises the new write-site (see § Write-site emergence)
 - Checking off the implementation task before the paired test task for a newly-emerged write-site is added and runnable
 - Referencing ephemeral scaffolding — task IDs, group names, design-section IDs (e.g. `D12`) — in code, comments, commit messages, or PR descriptions (see **Critical Constraints**)
@@ -196,4 +226,5 @@ This skill can be invoked at any point after `tasks.md` exists — not only when
 
 ## References
 
+- `references/sdd-change-formats.md` — artifact formats, implementation ordering (§ 4), and the rules for spec changes during implementation (§ 5)
 - `references/sdd-schema.md` — schema config format (§ 3) and lifecycle policy (§ 4)
