@@ -2,7 +2,7 @@
 # Dot-directories: ignore all, allowlist what we track
 # -------------------------------------------------------
 .*/
-!.claude/
+!.claude/settings.json
 !.github/
 !.specs/
 !.renovate/
