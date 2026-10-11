@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.1] - 2026-10-11
+
+### Changed
+
+- `sdd` — the spec format reference adds a refactor test for mechanism: if a change that no caller, third-party implementer, or operator could detect would force a spec sentence to change, the sentence pins mechanism. In a library, the published interface is the public API and the plugin protocols; an internal method, a private symbol, or the route one public method takes through another is mechanism. A public name is contract in the requirement that defines it, and a pin where another requirement cites it as its route. A scenario's THEN line asserts only what its requirement promises: a check of which internal method ran, a mock call count, or a span used to detect a route is a pin, and the same check is evidence when the requirement promises it.
+- `sdd-apply` — when a refactor that no caller could observe forces a spec edit, the agent proposes restating the sentence as the outcome it protects, as a requirement change for the user to approve, instead of swapping the method name in the spec.
+- `sdd-propose` — a baseline requirement copied into a MODIFIED block is checked for call-path pins, and each pin is restated as its outcome so the proposal's approval covers the fix. The validation checklist checks each code name in a requirement and each THEN line.
+- `sdd-verify` — the spec-drift check warns on a spec edit whose only change replaces one internal method, symbol, or span name with another.
+
 ## [3.3.0] - 2026-10-03
 
 ### Changed
@@ -536,3 +545,4 @@ MINOR, fixes bump PATCH.
 [3.2.1]: https://github.com/ahgraber/skills/compare/skills-v3.2.0...skills-v3.2.1
 [3.2.2]: https://github.com/ahgraber/skills/compare/skills-v3.2.1...skills-v3.2.2
 [3.3.0]: https://github.com/ahgraber/skills/compare/skills-v3.2.2...skills-v3.3.0
+[3.3.1]: https://github.com/ahgraber/skills/compare/skills-v3.3.0...skills-v3.3.1

@@ -307,6 +307,10 @@ Record it in the same commit as the code:
 
 If the change raises what every implementation of an extension point must guarantee (every backend, store, or plugin), also add a contract test that runs against each declared implementation.
 
+When an implementation change forces a spec edit but no caller or operator could observe a difference, the spec was pinning mechanism (`sdd-spec-formats.md` § 1.4).
+Do not update the method name the sentence mentions.
+Propose a rewrite that states the outcome the sentence protects; the rewrite is a requirement change, so it goes to the user.
+
 ### 5.3 Baseline errors
 
 An error found in a baseline spec (`.specs/specs/`) during implementation is not part of the change.

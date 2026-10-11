@@ -216,6 +216,7 @@ Read § 5 before you edit any spec text.
 - Editing a spec to match the code when the spec traces to a story, the north star, or a user decision
 - Recording a scenario change without its source label, or labeling an agent choice as following from an upstream source
 - Implementing a requirement change before the user approves it
+- Answering a refactor that forces a spec edit by swapping the method name in the spec, instead of restating the sentence as the outcome it protects (`references/sdd-change-formats.md` § 5.2)
 - Starting implementation before the change directory has a proposal commit
 - Adding a deduplication shortcut, cache fast-path, retry branch, or composition step for a SHALL-covered value without adding a paired test task that exercises the new write-site (see § Write-site emergence)
 - Checking off the implementation task before the paired test task for a newly-emerged write-site is added and runnable

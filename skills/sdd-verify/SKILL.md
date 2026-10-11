@@ -332,6 +332,7 @@ Run the spec-drift check in § 5.5: diff the delta specs from the proposal commi
 - A requirement change with no `design.md` Decision entry or no dated Resolved Questions line → **CRITICAL: requirement change `<capability>: <requirement>` was not approved by the user.**
 - A scenario change that narrows what its requirement guarantees but is recorded only as a scenario change → **CRITICAL: `<capability>: <scenario>` narrows its requirement and needs approval as a requirement change.**
 - A § Spec Changes entry whose rationale is only that the code behaves this way → **WARNING: `<capability>: <scenario>` is supported only by the code it describes.**
+- A hunk whose only change replaces one internal method, symbol, or span name with another → **WARNING: `<capability>: <requirement>` pins a call path; state the outcome instead (`references/sdd-spec-formats.md` § 1.4).**
 
 If no proposal commit exists, flag **WARNING: no proposal commit; the spec-drift check could not run** and do not report a clean pass.
 

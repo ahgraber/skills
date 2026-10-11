@@ -128,6 +128,7 @@ Delta-format rules:
   `sdd-sync` strips the marker and keeps the level you gave it, producing a baseline requirement no later change can match by name (`references/sdd-spec-formats.md` § 4).
 - MODIFIED: copy the full baseline requirement (text + every still-applicable scenario), then edit in place — the block must be the complete post-change requirement, because `sdd-sync` replaces it wholesale (`references/sdd-spec-formats.md` § 4).
   Note prior behavior in a `> Previously: …` line.
+  The copy carries any call-path pin the baseline has; check the copied requirement against `references/sdd-spec-formats.md` § 1.4 and each copied scenario against § 1.5 point 4, and restate a pin as its outcome, so the proposal's approval covers the fix.
 - Add a `Serves: {story-slug}` backlink to each requirement, naming the proposal user stories it advances (M:N; `references/sdd-change-formats.md` § 1.1).
   The backlink is delta-only and stripped at sync.
   A requirement that serves no story is a signal of over-engineering — drop it, or add the story that justifies it.
@@ -194,6 +195,10 @@ Rules:
 - [ ] Universal SHALL claims have partition coverage per the heuristic in `references/sdd-spec-formats.md` § 1.6 — when a positive signal fires, scenarios cover each partition
 
 - [ ] Mechanism (algorithms, thresholds, strategies, retry policies) appears in `design.md` or the proposal's Approach, not in spec text
+
+- [ ] Each code name in a SHALL sentence is public API, a protocol member in the requirement that defines it, or an observable name (span, metric, error class, setting); any other name pins a call path (`references/sdd-spec-formats.md` § 1.4).
+  Each THEN line checks only what its requirement promises (§ 1.5).
+  This reaches named identifiers only; mechanism described in prose (an internal component, an internal object being created) still needs the refactor test.
 
 - [ ] Each delta requirement carries a `Serves:` backlink to a proposal story, or is deliberately left unserved and surfaced as such
 

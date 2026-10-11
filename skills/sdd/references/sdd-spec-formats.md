@@ -74,6 +74,15 @@ The test: _does the detail form part of what external consumers depend on?_
 If yes, it belongs in the spec.
 If it is visible only to internal implementation, it is mechanism and belongs in `design.md`.
 
+Apply it as a refactor test: if a change that no caller, third-party implementer, or operator could detect would force the sentence to change, the sentence pins mechanism.
+
+In a library, the published interface is the public API that callers invoke and the protocols that third-party implementations satisfy.
+An internal method, a private symbol, or the route one public method takes through another is mechanism, even when it is a named, typed method in the same codebase.
+
+A public name is contract in the requirement that defines it.
+Cited in another requirement as the route that requirement's operation takes, the same name is a pin.
+State the outcome the route was meant to protect instead (§ 6 has examples).
+
 ### 1.5 Scenarios are evidence, not definition
 
 Every contract shape admits a space of cases.
@@ -84,10 +93,23 @@ Consequences:
 
 1. **The requirement text must carry the contract.**
    If deleting all scenarios leaves nothing testable, the requirement is under-specified — the scenarios were carrying the contract.
+
 2. **Scenarios should sample the space meaningfully.**
    Happy path alone is weak; include boundaries and cases where the property might plausibly fail.
+
 3. **Universal claims need partition coverage when the input space splits.**
    See § 1.6 for the partition heuristic — when a universal SHALL's input space partitions along semantic lines the spec already names, scenarios must sample each partition; otherwise verification can only observe one arm of a multi-arm claim.
+
+4. **A THEN line asserts only what its requirement guarantees.**
+   For each THEN clause, ask: does a sentence of the requirement promise what this clause checks?
+
+   - If not, the clause is a mechanism pin.
+     Typical pins check that an internal method was called or received certain arguments, count mock calls, or use a trace span to detect which method ran.
+     Drop the clause, or, if the property matters, state it in the requirement.
+   - If so, the clause is evidence, however it is phrased, including when it names a method or a span: a span name in the requirement that defines that span, or the absence of an operation the requirement says does not happen.
+
+   Whether the requirement's own promise is contract is a separate question, answered by the § 1.4 refactor test on the requirement text.
+   GIVEN and WHEN lines may call public methods; they set up the case.
 
 Verification in SDD samples these claims via scenarios and implementation tracing — it does not formally prove them.
 Strong universal claims supported by thin, happy-path-only scenarios are a risk flag, not a fault.
@@ -312,13 +334,15 @@ Rules:
 A short reference of contract-statement rewrites, to calibrate intuition about the § 1 shapes.
 These are not a checklist to audit against — they are illustrations of the artifact separation in § 1.3.
 
-| Draft sentence (belongs elsewhere)                                                            | Contract statement (spec)                                                                                                                 | Where the mechanism goes          |
-| --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| The system SHALL call `auth.verify()` when credentials are submitted.                         | The user SHALL be authenticated when valid credentials are submitted.                                                                     | `design.md` / `tasks.md`          |
-| The system SHALL retry 3 times with exponential backoff.                                      | The system SHALL recover from transient upstream failures without user intervention.                                                      | `design.md` (retry policy)        |
-| Below-threshold queries SHALL be assembled from bottom-quartile TF-IDF terms.                 | For any query consisting of corpus-derived terms that score below the relevance threshold, the search SHALL return no relevant documents. | `design.md` (generation strategy) |
-| The recommender SHALL rank items by cosine similarity over embeddings.                        | The recommender SHALL return items ordered by relevance to the user's query, with the most relevant first.                                | `design.md` (similarity metric)   |
-| Fraud detection SHALL flag transactions scoring above 0.8 on the gradient-boosted classifier. | Fraud detection SHALL flag transactions whose risk exceeds the acceptance threshold defined by the fraud policy.                          | `design.md` (model + cutoff)      |
+| Draft sentence (belongs elsewhere)                                                            | Contract statement (spec)                                                                                                                 | Where the mechanism goes                    |
+| --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| The system SHALL call `auth.verify()` when credentials are submitted.                         | The user SHALL be authenticated when valid credentials are submitted.                                                                     | `design.md` / `tasks.md`                    |
+| The system SHALL retry 3 times with exponential backoff.                                      | The system SHALL recover from transient upstream failures without user intervention.                                                      | `design.md` (retry policy)                  |
+| Below-threshold queries SHALL be assembled from bottom-quartile TF-IDF terms.                 | For any query consisting of corpus-derived terms that score below the relevance threshold, the search SHALL return no relevant documents. | `design.md` (generation strategy)           |
+| The recommender SHALL rank items by cosine similarity over embeddings.                        | The recommender SHALL return items ordered by relevance to the user's query, with the most relevant first.                                | `design.md` (similarity metric)             |
+| Fraud detection SHALL flag transactions scoring above 0.8 on the gradient-boosted classifier. | Fraud detection SHALL flag transactions whose risk exceeds the acceptance threshold defined by the fraud policy.                          | `design.md` (model + cutoff)                |
+| `checkout()` SHALL compute the order total only by calling `cart.subtotal()`.                 | The order total SHALL equal the sum of the cart's line items plus tax.                                                                    | `design.md` (which call computes the total) |
+| THEN `PaymentGateway.charge` is called once with the order total.                             | THEN the customer is charged the order total exactly once.                                                                                | `design.md` (gateway call), or a unit test  |
 
 ## 7. Checking the Structure
 
