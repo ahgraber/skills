@@ -25,6 +25,8 @@ Source access is **bounded**: capability files only, for verification — not ex
 Write one markdown spec file to the output path.
 
 - `baseline` → `sdd-spec-formats.md` § 3.
+  Write `## Purpose` by § 3.1.
+  Code shows mechanism but seldom shows why a capability exists; when the inputs do not show the need, write the scope and emit an Uncertainty anchored `(Purpose)` instead of inventing a need.
 - `delta` → `sdd-spec-formats.md` § 4; add a `Serves:` backlink to each requirement from the provided user stories.
 - Both: § 1 (requirement shape — contracts, not narration), § 5 (scenario format).
 - Derive-specific additions (generation note, `## Uncertainties`) → `derive-spec-additions.md`.
@@ -152,6 +154,7 @@ Emit an Uncertainty when:
 - A criticality-tag rule cannot be satisfied from inputs.
 - An observation has a custom tag you have no rule for.
 - Verification revealed an Observer Gap.
+- A baseline's inputs do not show the need its `## Purpose` must state.
 
 Format (see `derive-spec-additions.md`):
 

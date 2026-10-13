@@ -136,7 +136,7 @@ If a delta spec covers a capability with no corresponding main spec:
 
    ## Purpose
 
-   {2-3 sentences, drawn from the proposal's Intent}
+   {Why this capability exists and what its requirements cover}
 
    ## Requirements
 
@@ -144,7 +144,8 @@ If a delta spec covers a capability with no corresponding main spec:
    ```
 
    A delta spec has no `## Purpose` and no `## Requirements`, so write both here.
-   Purpose is prose, not a requirement.
+   Purpose is prose, not a requirement; write it by `references/sdd-spec-formats.md` § 3.1.
+   The proposal's Intent explains why the change is needed, so use it as a source for the capability's need, but do not copy it: Purpose describes the capability as it stands after the change.
 
 3. Drop the `## ADDED`, `## MODIFIED`, `## REMOVED` section headings and put every requirement beneath them at `### Requirement: {Name}`, with its scenarios at `#### Scenario: {Name}`.
    Check the level; do not just strip the marker.

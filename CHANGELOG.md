@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.2] - 2026-10-12
+
+### Changed
+
+- `sdd` — the spec format reference says how to write a baseline spec's `## Purpose`. It states why the capability exists, in domain terms, and what its requirements cover, in either order. A definition of the capability, a description of how it is used, or a list of what the spec covers does not state the need. Purpose leaves out mechanism, tool and vendor names, restated requirements, and history. The test is what would go unmet if the capability were removed; a Purpose that leaves the reader to infer the answer is missing the need.
+- `sdd-sync` — a new capability's Purpose follows that rule. Sync uses the proposal's Intent as a source for the need but does not copy it, because the Intent explains why the change was needed.
+- `sdd-derive` — when the code does not show why a capability exists, the derived baseline states the scope and records the missing need under `## Uncertainties` instead of inventing one.
+
 ## [3.3.1] - 2026-10-11
 
 ### Changed
@@ -546,3 +554,4 @@ MINOR, fixes bump PATCH.
 [3.2.2]: https://github.com/ahgraber/skills/compare/skills-v3.2.1...skills-v3.2.2
 [3.3.0]: https://github.com/ahgraber/skills/compare/skills-v3.2.2...skills-v3.3.0
 [3.3.1]: https://github.com/ahgraber/skills/compare/skills-v3.3.0...skills-v3.3.1
+[3.3.2]: https://github.com/ahgraber/skills/compare/skills-v3.3.1...skills-v3.3.2

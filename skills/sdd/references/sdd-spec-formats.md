@@ -186,7 +186,7 @@ Location: `.specs/specs/<capability>/spec.md`
 
 ## Purpose
 
-{2-3 sentence description of what this capability does and why it exists.}
+{Why this capability exists and what its requirements cover. See § 3.1.}
 
 ## Requirements
 
@@ -220,6 +220,33 @@ Rules:
 - `## Technical Notes` is optional but recommended
 
 `scripts/check_spec_format.py` checks the rules in this section and § 4 (see § 7).
+
+### 3.1 Writing Purpose
+
+Purpose states why the capability exists and what its requirements cover.
+Write it in two or three sentences of prose.
+The two parts may come in either order, and the need may share a sentence with the scope.
+
+- **Need.**
+  State the reason the capability exists: the need it meets, in domain terms.
+  It may be framed as the problem that would go unaddressed without the capability.
+  A reader who knows the domain but not the code should follow it.
+  State the need directly.
+  A definition of the capability does not state it, and a description of how the capability is used can support the need but does not state it alone.
+- **Scope.**
+  Name the concerns its requirements address.
+  The most common failure is a Purpose made only of scope: every sentence says what the spec defines, covers, or guarantees, and none says why the capability is needed.
+
+Leave out:
+
+- Mechanism: steps, internal components, algorithms, and tool, library, or vendor names.
+  These belong in `design.md` or `## Technical Notes`.
+- Restated requirements: RFC 2119 keywords, thresholds, and specific values.
+- History: the change that introduced the capability, or how it behaved before.
+
+To test a draft, ask what would go unmet if the capability were removed.
+If the Purpose does not state the answer, it is missing the need; an answer the reader must infer from the scope does not count.
+`check_spec_format.py` checks only that `## Purpose` exists, not what it says.
 
 ## 4. Delta Spec Format
 
