@@ -157,17 +157,20 @@ For a file, directory, or repo scope, the file list is the packet; note that bro
 
 **Lenses** are independent, and a user may only want one.
 
-| Lens                   | Covers                                                                                                              | Reference                            |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
-| Duplication & reuse    | Code that re-implements something the codebase already has; near-duplicate blocks                                   | —                                    |
-| Obfuscative complexity | Indirection without abstraction, premature generalization, action at a distance, defensive noise, ceremony          | `references/obfuscation-patterns.md` |
-| Removal                | Dead code, orphans, shims whose other side is gone, branches on now-constant flags                                  | Removal Rule above                   |
-| Comments               | Narration, restatement, staleness, point-in-time rot                                                                | `references/comment-audit.md`        |
-| Docstrings             | Implementation narration where the contract belongs, restated signatures, staleness                                 | `references/docstring-audit.md`      |
-| Semantic naming        | Misleading names, one concept under several names, semantically duplicated constants                                | —                                    |
-| Data representation    | Structures that can represent invalid states, replicate information, or leave every consumer to enforce their rules | `references/data-representation.md`  |
+| Lens                   | Covers                                                                                                                                 | Reference                            |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| Duplication & reuse    | Code that re-implements something the codebase already has; near-duplicate blocks; a value computed or read more than once in one path | —                                    |
+| Obfuscative complexity | Indirection without abstraction, premature generalization, special-casing shared code, action at a distance, defensive noise, ceremony | `references/obfuscation-patterns.md` |
+| Removal                | Dead code, orphans, shims whose other side is gone, branches on now-constant flags                                                     | Removal Rule above                   |
+| Comments               | Narration, restatement, staleness, point-in-time rot                                                                                   | `references/comment-audit.md`        |
+| Docstrings             | Implementation narration where the contract belongs, restated signatures, staleness                                                    | `references/docstring-audit.md`      |
+| Semantic naming        | Misleading names, one concept under several names, semantically duplicated constants                                                   | —                                    |
+| Data representation    | Structures that can represent invalid states, replicate information, or leave every consumer to enforce their rules                    | `references/data-representation.md`  |
 
 Refer to lenses by name everywhere: in dispatch, in the ledger, and in anything the user reads.
+
+When one path computes or reads the same value more than once, the fix reuses the first result.
+Reusing a read is Tier 2 unless the finding shows the data cannot change between the two reads, because reuse changes how fresh the value is.
 
 Semantic naming covers only what a linter cannot: a `get*` that mutates, the same value named three ways across layers, the same constant defined twice with different spellings.
 Stylistic naming and formatting stay with the linter.

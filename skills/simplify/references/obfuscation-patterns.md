@@ -41,6 +41,21 @@ Flexibility built for a caller that does not exist.
 
 _Legitimate when:_ a spec, public API, or documented plugin contract requires the seam.
 
+### Special-casing shared code
+
+The inverse of premature generalization: a shared mechanism grows branches for particular callers.
+
+- A branch in a shared function that tests for one caller, input source, or record type
+- A flag added to shared code so that one caller can bypass or adjust its behavior
+- A wrapper at one call site that corrects the shared function's output for that caller
+
+The reader must know which caller reaches which branch before the shared code makes sense.
+The fix changes the mechanism so that every caller is served without the branch.
+Name the mechanism, the special cases, and the general change.
+That change alters behavior for every caller, so the finding is Tier 2 by default.
+
+_Legitimate when:_ the mechanism cannot serve that caller without the special case, or the caller's requirement is a documented exception.
+
 ### Control-flow obscurity
 
 Behavior that is present but hard to trace.
