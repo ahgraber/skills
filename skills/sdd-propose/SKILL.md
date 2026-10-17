@@ -214,9 +214,24 @@ Rules:
 
 - [ ] No delta markers in `.specs/specs/` (baseline specs untouched)
 
+### Phase 7a: Assess Change Order
+
+Skip this phase if no other active change exists.
+
+Compare the new change with every other active change (`references/sdd-change-formats.md` § 6):
+
+1. **Shared requirements:** list each requirement that the new change's delta specs and another change's delta specs both name (§ 6.2).
+2. **Dependencies:** for each other change, decide whether either change needs the other first, and of which kind and to which gate (§ 6.1).
+   Read the other change's proposal, design, and tasks, not only its delta specs.
+   A capability or rework dependency often shares no requirement.
+
+Present the findings to the user with a recommended order and the reason for it.
+When the user confirms, add the new change to `.specs/changes/ORDER.md`, or create the file from the template in § 6.3 if a dependency or shared requirement exists and the file does not.
+If the file exists and the new change has no dependency and no shared requirement, add it under `## Independent`.
+
 ### Phase 8: Commit the Change Directory
 
-After the user approves the artifacts, commit `.specs/changes/<name>/` and nothing else.
+After the user approves the artifacts, commit `.specs/changes/<name>/`, plus `.specs/changes/ORDER.md` if Phase 7a changed it, and nothing else.
 Ask before committing, and use the project's commit conventions.
 Draft the message with the `commit-message` skill if it is available.
 
@@ -230,6 +245,7 @@ Without it, no one can tell which spec text the user approved and which text cha
 - `.specs/changes/<name>/specs/<capability>/spec.md` per affected capability (delta format)
 - `.specs/changes/<name>/design.md`
 - `.specs/changes/<name>/tasks.md`
+- `.specs/changes/ORDER.md`, created or updated when other active changes exist (Phase 7a)
 - The proposal commit containing all of the above
 
 Summary: change name, capabilities affected, task count, proposal commit SHA.
@@ -247,7 +263,8 @@ Summary: change name, capabilities affected, task count, proposal commit SHA.
 - Creating tasks that are too coarse (one task = "implement auth" instead of atomic steps)
 - Ordering capabilities or task groups alphabetically or by order of discussion — ordering must follow build dependency per `references/sdd-change-formats.md` § 4 so the implementer never builds in anticipation of a missing capability
 - Generating all artifacts without pausing for user confirmation between phases
-- Ending without the proposal commit, or committing files outside the change directory with it
+- Ending without the proposal commit, or committing files other than the change directory and `ORDER.md` with it
+- Proposing a change while other changes are active without checking for dependencies and shared requirements
 - Using non-kebab-case change names
 - Dropping the "so that {value}" clause from a user story — the value clause is the scope ceiling that bounds implementation effort, not decoration
 - Writing a requirement that serves no user story (gold-plating) — every requirement should advance a story or be cut
@@ -255,6 +272,6 @@ Summary: change name, capabilities affected, task count, proposal commit SHA.
 ## References
 
 - `references/sdd-spec-formats.md` — baseline spec, delta spec, scenario formats
-- `references/sdd-change-formats.md` — proposal, design, tasks formats
+- `references/sdd-change-formats.md` — proposal, design, tasks, and `ORDER.md` formats
 - `references/sdd-schema.md` — schema artifacts and lifecycle policy
 - `scripts/check_spec_format.py` — checks each delta spec's heading structure; exits non-zero on a malformed spec

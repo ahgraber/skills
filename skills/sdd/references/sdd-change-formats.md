@@ -1,6 +1,6 @@
 ---
 name: sdd-change-formats
-description: SDD change artifact formats — proposal, design, and tasks — and the rules for changing specs during implementation. Referenced by sdd-propose, sdd-derive, sdd-apply, sdd-verify, and sdd-sync.
+description: SDD change artifact formats — proposal, design, tasks, and the cross-change ORDER.md — and the rules for changing specs during implementation. Referenced by sdd-propose, sdd-derive, sdd-apply, sdd-verify, sdd-sync, and sdd-archive.
 ---
 
 # SDD Change Formats
@@ -135,7 +135,7 @@ Location: `.specs/changes/<name>/design.md`
 ## Spec Changes
 
 - **Change:** {capability}: {imperative description, e.g. "add scenario for a token that expires during refresh"}
-  **Source:** {upstream: the story, requirement, or decision it follows from | agent choice}
+  **Source:** {upstream: the story, requirement, or decision it follows from | agent choice | rebase onto {change-name}}
   **Rationale:** {why the spec should say this, stated without reference to what the code currently does}
   **Approved by user:** {ISO date | pending}
 
@@ -354,7 +354,147 @@ The spec-drift check finds every spec edit made since the proposal was committed
 
    - A scenario change needs a `design.md` § Spec Changes entry with a dated `Approved by user` line.
    - A requirement change needs a `design.md` Decision entry and a dated Resolved Questions line.
+   - A rebase onto another change's synced text (§ 6.2) needs a `design.md` § Spec Changes entry whose **Source** names that change, with a dated `Approved by user` line.
 
 A hunk without its complete record blocks sync.
 If no proposal commit exists, the check cannot run.
 Report that, and do not treat the change as clean.
+
+## 6. Change Order Format
+
+Location: `.specs/changes/ORDER.md`
+
+`ORDER.md` records the order in which active changes apply, and the reason for each constraint.
+It is optional.
+Create it when two or more active changes have an ordering dependency (§ 6.1) or share a requirement (§ 6.2).
+It is a file, not a directory, so it is not an active change and it is never archived.
+Delete it when the remaining active changes can apply and sync in any order.
+
+The order is a graph, not a list.
+Each change's **Starts after** entries are the constraints; the row order is one valid order among possibly several.
+Two changes whose constraints are met can run in parallel.
+
+### 6.1 Ordering dependencies
+
+A change depends on another change when it cannot start `sdd-apply` until the other change reaches a gate.
+Each dependency has one kind:
+
+- **capability**: the later change uses behavior, a contract, or code that the earlier change adds or changes.
+- **rework**: either order works, but one order makes a change redo work that the other change does, for example porting code that the other change then rewrites.
+  Record the chosen order and what the other order costs.
+- **spec text**: the two changes edit the same requirement (§ 6.2), and the later change copies the requirement only after the earlier change syncs.
+
+A gate is one of these events of the earlier change:
+
+| Gate       | Met when                                            |
+| ---------- | --------------------------------------------------- |
+| `proposed` | Its proposal commit exists.                         |
+| `applied`  | Every task in its `tasks.md` is checked.            |
+| `synced`   | Its delta specs are merged into the baseline specs. |
+
+Use `synced` unless the later change needs the earlier change only as a proposal or as code.
+A **spec text** dependency is always `synced`.
+An archived change meets every gate, so remove it from `ORDER.md` (§ 6.5).
+
+A dependency cycle means that one change must split.
+Surface the cycle to the user (§ 4.2); do not record it.
+
+### 6.2 Shared requirements
+
+Two changes share a requirement when their delta specs name the same requirement in the same capability: both MODIFY or REMOVE it, one MODIFIES what the other ADDS, or one RENAMES the capability that the other edits.
+`sdd-sync` replaces a MODIFIED requirement as a whole.
+The change that syncs second therefore copied requirement text that is now out of date, and its sync silently reverts the first change's edit unless it copies the requirement again from the synced baseline.
+
+Two changes that edit different requirements in the same capability do not share a requirement.
+Sync preserves every requirement a delta does not name.
+
+Changes that share a requirement can be ordered by a **spec text** dependency (§ 6.1), or left unordered and rebased by whichever change syncs second.
+Both are valid; choose with the user.
+List each shared requirement in `ORDER.md` in either case.
+`sdd-sync` reports which changes must copy the requirement again after each sync.
+
+Copying the requirement again is a **rebase**.
+It edits the delta spec after the proposal commit, so the spec-drift check (§ 5.5) sees it.
+Record each rebase in `design.md` § Spec Changes with **Source** set to `rebase onto {change-name}`, and get the user's approval.
+If the two changes' edits conflict, the merged requirement is a requirement change (§ 5.2).
+
+### 6.3 Template
+
+```markdown
+# Change Order
+
+Last reviewed: {YYYY-MM-DD} ({event that prompted the review, e.g. "`token-refresh` archived"})
+
+This file lists the active changes whose order matters, and why.
+Refer to a change by its directory name, never by its position in a list.
+Update this file when a change is proposed, archived, or reordered.
+Delete this file when the remaining changes can apply and sync in any order.
+
+## Sequence
+
+| Change          | Starts after                                    |
+| --------------- | ----------------------------------------------- |
+| `{change-name}` | (none)                                          |
+| `{change-name}` | `{change-name}` synced                          |
+| `{change-name}` | `{change-name}` synced, `{change-name}` applied |
+
+## Reasons
+
+### `{change-name}`
+
+- **After `{change-name}` ({capability | rework | spec text}):** {what this change needs from the earlier change, or what goes wrong in the other order.}
+
+## Shared requirements
+
+- `{capability}`: `{Requirement name}`: `{change-name}`, `{change-name}`.
+
+## Not scheduled
+
+| Change          | Starts when                                                      |
+| --------------- | ---------------------------------------------------------------- |
+| `{change-name}` | {external condition, e.g. "the user settles the open questions"} |
+
+## Independent
+
+- `{change-name}`
+```
+
+Omit any section that has no entries.
+
+### 6.4 Rules
+
+- Every active change directory appears in exactly one of `## Sequence`, `## Not scheduled`, or `## Independent`.
+  A change that appears in none of them has not been assessed.
+
+  - `## Sequence` holds each change that has a **Starts after** entry or is named in one.
+  - `## Not scheduled` holds each change that waits for a condition outside the active changes, such as a user decision or an external release.
+    Name the condition so that someone can check whether it is met.
+  - `## Independent` holds every other change.
+    A change that shares a requirement but has no **Starts after** entry goes here; `## Shared requirements` lists what it must rebase.
+
+- Every change named in the file is an active change directory.
+  An archived change does not appear, not even as a met prerequisite.
+
+- Name each change by its exact directory name in backticks.
+  Never refer to a change by position ("the third change", "the next one").
+
+- Each `## Sequence` row comes after every change in its **Starts after** entry.
+
+- Every **Starts after** entry has a matching bullet under `## Reasons`, with its kind from § 6.1.
+  A **spec text** reason names each shared requirement as `{capability}`: `{Requirement name}`.
+
+- `ORDER.md` records ordering only.
+  Do not record a change's progress; read it from the change's own artifacts and the git history.
+  Keep open questions, scope, and design in the change's own artifacts.
+  A reason states what one change needs from another, not the full content of either change.
+
+### 6.5 Maintenance
+
+| Event                | Skill         | Update to `ORDER.md`                                                                                                                                                                  |
+| -------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A change is proposed | `sdd-propose` | Assess the new change against every other active change (§ 6.1, § 6.2). Add the change to one section. Create the file when the first dependency or shared requirement appears.       |
+| A change syncs       | `sdd-sync`    | No update. Report the changes whose **Starts after** entries are now all met, and the changes that share a requirement with the synced change.                                        |
+| A change is archived | `sdd-archive` | Remove the change from every section. Remove each **Starts after** entry and **Reasons** bullet that names it. Remove each shared requirement line that names fewer than two changes. |
+| Any update           | any           | Update **Last reviewed**. Delete the file when no **Starts after** entry, no shared requirement, and no `## Not scheduled` change remains.                                            |
+
+Commit `ORDER.md` together with the change artifacts that caused the update.

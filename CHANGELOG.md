@@ -5,11 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [3.4.0] - 2026-10-17
 
 ### Added
 
 - `writing-docstrings` — a skill for writing and auditing Python docstrings that a documentation site renders. It finds which objects the site renders, sets each docstring's register and shape by the level of its page, calibrates verdicts with the user three docstrings at a time before any bulk edit, and checks every stated fact against the code.
+- `sdd` — an optional `changes/ORDER.md` records which active changes must wait for others, and which changes edit the same requirement. Each wait names the earlier change, a gate (`proposed`, `applied`, or `synced`), and a reason. `sdd-propose` assesses a new change against the active changes and updates the file, `sdd-apply` warns when a gate is not met, and `sdd-archive` removes the archived change and deletes the file when no ordering remains.
+
+### Changed
+
+- `sdd-sync` — stops before replacing a MODIFIED or REMOVED requirement that another change edited in the baseline after this change's proposal commit, because the replacement would revert that edit. The change copies the requirement again and records the rebase in `design.md` § Spec Changes. The sync report lists the other active changes that must rebase and the changes that are now ready to start.
 
 ## [3.3.3] - 2026-10-16
 
@@ -568,3 +573,4 @@ MINOR, fixes bump PATCH.
 [3.3.1]: https://github.com/ahgraber/skills/compare/skills-v3.3.0...skills-v3.3.1
 [3.3.2]: https://github.com/ahgraber/skills/compare/skills-v3.3.1...skills-v3.3.2
 [3.3.3]: https://github.com/ahgraber/skills/compare/skills-v3.3.2...skills-v3.3.3
+[3.4.0]: https://github.com/ahgraber/skills/compare/skills-v3.3.3...skills-v3.4.0

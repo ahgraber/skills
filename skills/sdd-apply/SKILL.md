@@ -102,6 +102,10 @@ When drafting a commit message during apply:
 7. Check task ordering against `references/sdd-change-formats.md` § 4 — each task should depend only on capabilities built by earlier tasks.
    The schema-config rule below is the named instance: if `.specs/.sdd/schema-config.yaml` exists, identify tasks that define schema contracts (endpoint definitions, model schemas, DDL changes) and confirm they are sequenced before any tasks that consume them.
    Surface any ordering gaps to the user before implementing (advisory — the user may decide the order is intentional).
+8. If `.specs/changes/ORDER.md` exists, find this change in it (`references/sdd-change-formats.md` § 6).
+   If a **Starts after** gate is not met, or the change is under `## Not scheduled`, tell the user which gate or condition is open and its reason, and ask whether to proceed.
+   If the change is in none of the sections, tell the user that its order has not been assessed.
+   If the change appears under `## Shared requirements`, tell the user which requirements must rebase if the other change syncs first (§ 6.2).
 
 ### Phase 2: Identify Starting Point
 
@@ -227,5 +231,5 @@ Read § 5 before you edit any spec text.
 
 ## References
 
-- `references/sdd-change-formats.md` — artifact formats, implementation ordering (§ 4), and the rules for spec changes during implementation (§ 5)
+- `references/sdd-change-formats.md` — artifact formats, implementation ordering (§ 4), the rules for spec changes during implementation (§ 5), and change order across active changes (§ 6)
 - `references/sdd-schema.md` — schema config format (§ 3) and lifecycle policy (§ 4)

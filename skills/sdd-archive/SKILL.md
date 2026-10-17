@@ -75,11 +75,26 @@ Confirm the move succeeded by checking the archive path exists.
 
 The change's `.verify/` scratch (if present) is self-gitignored, so it never enters the archived commit even though `mv` carries it along — leave it or delete it; it is not part of the archived record.
 
-### Phase 4: Report
+### Phase 4: Update Change Order
+
+If `.specs/changes/ORDER.md` exists, update it per `references/sdd-change-formats.md` § 6.5:
+
+1. Remove the archived change from every section.
+2. Remove each **Starts after** entry and each **Reasons** bullet that names the archived change.
+3. Remove each shared requirement line that now names fewer than two changes.
+4. Update **Last reviewed**.
+5. If no **Starts after** entry, no shared requirement, and no `## Not scheduled` change remains, delete `ORDER.md`.
+
+Check the result against the rules in § 6.4.
+Every active change directory must appear in exactly one section, and no archived change may appear anywhere.
+
+### Phase 5: Report
 
 ```text
 Archived: .specs/changes/<name>/ → .specs/changes/archive/YYYY-MM-DD-<name>/
 Tasks: {N}/{N} complete
+Change order: {updated | deleted | no ORDER.md}
+Ready to start: {each change in ORDER.md whose Starts after entries are all met, or "none"}
 ```
 
 ## Common Mistakes
@@ -87,3 +102,9 @@ Tasks: {N}/{N} complete
 - Deleting instead of moving (archive, not delete — change history is preserved)
 - Archiving before syncing delta specs into main specs
 - Not checking for the target path existence before moving
+- Leaving the archived change in `ORDER.md` as a met prerequisite, instead of removing it
+- Keeping `ORDER.md` after the remaining changes can apply in any order
+
+## References
+
+- `references/sdd-change-formats.md` — change order format and maintenance (§ 6)

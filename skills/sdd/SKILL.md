@@ -156,7 +156,8 @@ digraph sdd_router {
 4. **One hard gate** — `sdd-apply` requires `tasks.md` at `SPECS_ROOT/changes/<change-name>/tasks.md`; if missing, stop and route to `sdd-propose`
 5. **Prefer minimal next step** — don't run the full pipeline unless requested
 6. **Explore is mode-agnostic** — available at every stage, before or after any action
-7. **Multiple active changes** — ask which change before routing to apply/verify/sync/archive
+7. **Multiple active changes** — ask which change before routing to apply/verify/sync/archive.
+   If `SPECS_ROOT/changes/ORDER.md` exists, list first the changes whose **Starts after** entries are all met (`references/sdd-change-formats.md` § 6).
 
 ## Sequence Gates
 
@@ -186,6 +187,7 @@ Child skills replace `.specs/` with `SPECS_ROOT` in all paths.
 │   ├── .schema-sources.yaml        # Manifest: generation date and source per schema
 │   └── <schema-type>               # e.g., openapi.yaml, db-schema.sql, schema.graphql
 ├── changes/
+│   ├── ORDER.md                    # Optional: order and shared requirements across active changes
 │   ├── <change-name>/              # In-progress changes (kebab-case)
 │   │   ├── proposal.md
 │   │   ├── design.md
@@ -209,6 +211,10 @@ An **active change** is any directory directly under `SPECS_ROOT/changes/` (not 
 Archived changes live in `SPECS_ROOT/changes/archive/YYYY-MM-DD-<name>/`.
 Schema snapshots travel with the change directory into the archive — no separate schema archive path is needed.
 
+`changes/ORDER.md` is optional and is not a change.
+It records which active changes must wait for others, and which changes edit the same requirement, so that a later sync does not revert an earlier one.
+`sdd-propose`, `sdd-apply`, `sdd-sync`, and `sdd-archive` maintain it; `references/sdd-change-formats.md` § 6 defines its format.
+
 Everything in a change directory is durable and committed — proposal, design, tasks, delta specs, and schema snapshots all travel into the archive as the change's record.
 The one exception is `.verify/`: run-scoped scratch (the captured test output and any persisted verification report) that `sdd-verify` regenerates on each run.
 It is self-gitignored — `sdd-verify` writes a `.gitignore` containing `*` into the directory — so it never enters a commit or the archive.
@@ -222,7 +228,7 @@ Unlike baseline specs, it carries product intent, not contracts — keep it shor
 ## References
 
 - `references/sdd-spec-formats.md` — baseline spec, delta spec, scenario formats
-- `references/sdd-change-formats.md` — proposal, design, tasks formats
+- `references/sdd-change-formats.md` — proposal, design, tasks, and `ORDER.md` formats
 - `references/sdd-schema.md` — schema artifacts and lifecycle policy
 - `references/sdd-router.dot` — canonical DOT source for the routing flowchart above
 - `references/find-specs-roots.md` — output schema for the discovery script used in **Locate Specs Root**

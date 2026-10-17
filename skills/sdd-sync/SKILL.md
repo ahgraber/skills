@@ -110,6 +110,22 @@ A mechanical backstop ships with the skill for the **dropped-scenario** half of 
 It compares scenario names only and exits non-zero when a MODIFIED delta drops a baseline scenario — sub-clause and body-text preservation is _not_ mechanically checked, so keep verifying that by reading.
 Mark intentional scenario drops with a `<!-- modified-removes: ScenarioName -->` comment inside the delta block.
 
+**Stale-copy guard:** A MODIFIED block is a copy of the baseline requirement as it was when the change was proposed.
+If another change synced an edit to the same requirement after that, the copy is out of date, and replacing the requirement silently reverts the other change's edit.
+For each capability with a MODIFIED or REMOVED requirement, list the baseline commits made after the proposal commit (`references/sdd-change-formats.md` § 5.5, step 1):
+
+```bash
+git log -p <proposal-commit>..HEAD -- .specs/specs/<capability>/spec.md
+```
+
+If a listed commit edited the requirement, stop and surface it:
+
+> "MODIFIED `<name>`: the baseline requirement changed in `<commit>` after this change copied it. Copy the requirement again from the baseline, apply this change's edits to the copy, record the rebase, and run sync again."
+
+Record the rebase as `references/sdd-change-formats.md` § 6.2 describes, so the spec-drift check accepts it.
+
+The guard does not depend on `.specs/changes/ORDER.md`, but that file's `## Shared requirements` section names the changes at risk (`references/sdd-change-formats.md` § 6.2).
+
 **Idempotency rule:** Applying the same delta twice produces the same result as applying it once.
 For ADDED: check whether the requirement already exists by name before inserting — skip if already present.
 For RENAMED: check whether the new directory name already exists before renaming — skip if already renamed.
@@ -191,6 +207,17 @@ uv run --quiet <skill_root>/scripts/check_spec_format.py .specs/specs/<capabilit
 Fix any failure before reporting.
 Each message names the rule and its section in `references/sdd-spec-formats.md`.
 
+### Phase 5a: Find Affected Changes
+
+Find, for the report:
+
+- Each other active change whose delta specs MODIFY or REMOVE a requirement that this sync changed.
+  Search every active change's delta specs, whether or not `.specs/changes/ORDER.md` exists.
+  Each one must rebase before it syncs (`references/sdd-change-formats.md` § 6.2).
+- If `ORDER.md` exists, each change whose **Starts after** entries are now all met.
+
+Do not edit `ORDER.md` here; `sdd-archive` removes the change from it.
+
 ### Phase 6: Report
 
 List each capability synced:
@@ -209,6 +236,12 @@ Synced under overrides:
 
 Baseline errors fixed (not part of this change):
 - auth/          → corrected token lifetime in "Session expiry"
+
+Ready to start:
+- `session-limits` (all Starts after entries met)
+
+Must rebase before sync:
+- `token-rotation` → auth: "Session expiry"
 ```
 
 When committing the sync, list each spec change in the commit body, one line per change, prefixed with the capability (`references/sdd-change-formats.md` § 5.4).
@@ -230,11 +263,12 @@ List the baseline-error fixes after the change's own edits, under their own head
 - Treating a blocker as non-blocking without a recorded `design.md` override and an unchecked remediation task in `tasks.md`
 - Syncing without running the spec-drift check, or relying on an earlier verify run when specs changed after it
 - Mixing baseline-error fixes into the change's own edits in the report or commit body
+- Replacing a MODIFIED requirement whose baseline another change edited after this change copied it — the replacement reverts the other change's edit
 
 ## References
 
 - `references/sdd-spec-formats.md` — baseline spec format for new capabilities created during sync
-- `references/sdd-change-formats.md` — change directory artifact formats (proposal, design, tasks), spec-drift check (§ 5.5), and spec commit format (§ 5.4)
+- `references/sdd-change-formats.md` — change directory artifact formats (proposal, design, tasks), spec-drift check (§ 5.5), spec commit format (§ 5.4), and change order (§ 6)
 - `references/sdd-schema.md` — schema lifecycle policy (§ 4) and `.schema-sources.yaml` format (§ 3)
 - `scripts/check_spec_format.py` — checks each synced baseline spec's heading structure; exits non-zero on a malformed spec
 - `scripts/check_modified_completeness.py` — mechanical dropped-scenario check (scenario names only, not body sub-clauses); exits non-zero on dropped baseline scenarios, wireable as a pre-commit/CI gate
