@@ -153,6 +153,23 @@ Include:
 
 Only include sections with content — omit empty sections.
 
+#### Suggest Formal Verification Where Tests Only Sample
+
+Formal verification is opt-in: suggest it, never start it.
+Suggest it once, in one short message, when a requirement in this change meets all three conditions:
+
+1. The requirement governs behavior whose failing cases are rare combinations: concurrency or distributed protocols (locking, replication, consensus, cache coherence), crash recovery and retries, transaction or ordering guarantees, authorization invariants, or a core algorithm that must be correct for every input.
+2. Failure is expensive: data loss or corruption, a security breach, financial error, or state that cannot be recovered.
+3. The requirement is a universal claim ("never", "always", "at most once") over a space that the planned tests and property-based tests only sample.
+   Past incidents in that area that tests missed are strong evidence.
+
+Name the requirement and the reason each condition holds.
+Say that formal verification is separate work (a model or a proof, run with the `formal-verification` skill), not a task in this change.
+
+If the user declines, continue and record nothing.
+If the user accepts, finish this proposal unchanged; the formal work reads this change's requirements and runs on its own.
+Every SHALL still needs its evidence-producing task in Phase 6, because a formal result does not replace it.
+
 Present to user and confirm before continuing.
 
 ### Phase 6: Generate tasks.md

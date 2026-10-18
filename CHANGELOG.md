@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `formal-verification` — a skill for formal methods work, opted into by the user: deciding whether formal verification fits and which tool, writing and validating the specification, checking or proving, connecting a design model to code, reporting, and keeping results current. Each stage is an entry point. Every effort records its purpose, its requirements trace, approvals, and results in an alignment file outside the source tree. Statements are frozen after the user approves them, every pass must first be seen to fail on a case it must reject, and the report cites saved checker output. It covers design models (TLA+, Alloy, P, Quint), code-level verifiers (Dafny, Verus, SPARK, Frama-C), and interactive provers (Lean, Rocq).
 
+### Changed
+
+- `sdd-propose` — during design, suggests formal verification once when a requirement meets three conditions: it governs behavior whose failing cases are rare combinations (concurrency, crash recovery, ordering, authorization, or a core algorithm), failure is expensive, and the planned tests only sample its universal claim. The user opts in. The formal work runs separately with `formal-verification`, and every SHALL keeps its evidence-producing task.
+
 ## [3.4.0] - 2026-10-17
 
 ### Added
