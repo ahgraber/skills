@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- `grill-me` — questions are open by default; the agent presents the decision space, with each choice's implications traced to the second and third order, only when the user does not know it or asks. On decisions that constrain others, the agent forms its view before asking and reveals it only after the user answers, opening its reply with an explicit verdict and that prior view instead of agreeing by default. A disagreement or a conflict with a settled decision ends the reply until the user resolves it. Answers about the user's own needs or taste get no verdict.
+
 ## [3.5.0] - 2026-10-17
 
 ### Added
