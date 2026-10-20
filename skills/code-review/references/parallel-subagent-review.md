@@ -171,7 +171,7 @@ Main agent again — not a subagent.
 
 ## Step E — Produce Report
 
-Use the standard Step 3 report format from `SKILL.md`.
+Use the standard Step 3 report format from `SKILL.md`, and persist the synthesized report as Step 3 describes.
 Add:
 
 - A header line noting the parallel-subagent path was used.

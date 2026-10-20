@@ -35,6 +35,8 @@ import tempfile
 
 DEFAULT_MAX_DIFF_BYTES = 400_000
 
+OUTPUT_DIRS = (".review", "._scratch", ".scratch")
+
 
 def git(repo: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
     """Run a git subcommand in `repo` and capture its output."""
@@ -63,6 +65,16 @@ def resolve_base(repo: Path, explicit: str | None) -> str | None:
         if git(repo, "rev-parse", "--verify", "--quiet", candidate, check=False).returncode == 0:
             return candidate
     return None
+
+
+def default_out_dir(repo: Path) -> Path:
+    """Return the first existing OUTPUT_DIRS entry at the repo root, else TMPDIR."""
+    toplevel = git(repo, "rev-parse", "--show-toplevel", check=False).stdout.strip()
+    root = Path(toplevel) if toplevel else repo
+    for name in OUTPUT_DIRS:
+        if (root / name).is_dir():
+            return root / name
+    return Path(tempfile.gettempdir())
 
 
 def detect_scope(repo: Path, args: argparse.Namespace) -> str:
@@ -190,9 +202,7 @@ def build_packet(args: argparse.Namespace) -> dict[str, object]:
         + "\n"
     )
 
-    out_path = (
-        Path(args.out) if args.out else Path(tempfile.gettempdir()) / f"review-packet-{(head or 'work')[:12]}.md"
-    )
+    out_path = Path(args.out) if args.out else default_out_dir(repo) / f"review-packet-{(head or 'work')[:12]}.md"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(packet, encoding="utf-8")
 
@@ -223,7 +233,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="inline a source-of-truth file (spec, plan, PR description); repeatable",
     )
     parser.add_argument("--intent", metavar="TEXT", help="short statement of what the change is meant to do")
-    parser.add_argument("--out", metavar="PATH", help="packet output path (default: a file under TMPDIR)")
+    parser.add_argument(
+        "--out",
+        metavar="PATH",
+        help="packet output path (default: the first existing .review/, ._scratch/, or .scratch/ at the repo root, else TMPDIR)",
+    )
     parser.add_argument("--repo", default=".", metavar="DIR", help="repository directory (default: cwd)")
     parser.add_argument(
         "--max-diff-bytes",

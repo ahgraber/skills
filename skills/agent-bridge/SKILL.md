@@ -82,6 +82,9 @@ Prefer `--prompt` because `send` can lose text before the TUI composer exists.
 For another adapter, spawn without a prompt, run `scripts/agent_bridge.py wait <name>`, and then use `scripts/agent_bridge.py send <name> "<message>"`.
 Use `scripts/agent_bridge.py send <name> --file <path>` for a long brief.
 
+When the target writes a report or findings file, name its path in the brief, inside the target's working directory.
+The target has its own sandbox and `$TMPDIR`, loads its own harness's instructions file, and may run a different installed copy of a skill, so its default output location can be one you cannot find.
+
 `--cd` sets the tmux window's working directory for every adapter.
 Pass extra CLI flags after `--`, for example `spawn api -- --search`.
 

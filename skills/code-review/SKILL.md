@@ -83,6 +83,7 @@ scripts/build_review_packet.py --intent "<what this change is for>" --include <s
 ```
 
 It prints JSON with `packet_path` and `has_source_of_truth`.
+Without `--out`, the packet goes to the first of `.review/`, `._scratch/`, or `.scratch/` that exists at the repo root, else `$TMPDIR`; when this run or the project instructions set a report destination (see Step 3), pass `--out` to put the packet beside it.
 Use `packet_path` as the deterministic scope baseline for the rest of the review and for every subagent dispatch — it fixes _what changed_ so no one re-derives it, but it is a floor, not a ceiling: keep reading surrounding code, callers, history, and tests beyond the diff as the review demands.
 The raw git commands below are what the script automates; reach for them directly only when scoping a review the script's scope detection does not cover.
 
@@ -222,6 +223,23 @@ Present the review as a prioritized list of issues from Step 2.
 
 - **Blast Radius Summary** — directly changed functions/files, impacted downstream count, affected execution flows.
 - **Test Coverage Gaps** — table of changed functions with no test coverage or insufficient coverage for new behavior.
+
+**Persist the report.**
+Write the full report to a file so it outlives the conversation and can be handed to another agent or to the `refactor` skill.
+Pick the destination in this order:
+
+1. A path given for this run: by the user, a subagent brief, or an agent-bridge brief.
+2. A location set by project instructions (AGENTS.md, CLAUDE.md, or the equivalent).
+3. The first of `.review/`, `._scratch/`, or `.scratch/` that already exists at the repo root.
+4. `$TMPDIR`.
+
+Never create those repo directories; they belong to the user.
+Name the file `code-review-<YYYY-MM-DD-HHMMSS>-<scope-slug>.md`, so parallel runs do not collide.
+Start it with the scope, base and head, the packet path, and the date, then the report as presented.
+If the write fails, say so in chat; the chat report then is the only copy.
+
+The file does not replace the chat report.
+End with the prioritized issues and the report path.
 
 ### Step 4 — Apply Changes (Only on Explicit Request)
 

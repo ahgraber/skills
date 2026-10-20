@@ -19,7 +19,7 @@ Ask the user which mode to use:
 
 Scope is configurable: the default is the current change set, but a file, a directory, or the whole repo are equally valid targets when the user names one.
 
-Every pass ends with a report persisted to a dated file (see `references/edit-ledger.md`).
+Every pass ends with a report persisted to a dated file: a path given for this run, else a location set by project instructions, else the first existing `.review/`, `._scratch/`, or `.scratch/` at the repo root, else `$TMPDIR` (see `references/edit-ledger.md`).
 The file matters most for deletions, because a diff shows what was removed but cannot carry why removing it was safe.
 
 Anything a configured linter or formatter already flags is out of scope.

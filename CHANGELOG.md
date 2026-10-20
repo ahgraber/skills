@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `grill-me` — questions are open by default; the agent presents the decision space, with each choice's implications traced to the second and third order, only when the user does not know it or asks. On decisions that constrain others, the agent forms its view before asking and reveals it only after the user answers, opening its reply with an explicit verdict and that prior view instead of agreeing by default. A disagreement or a conflict with a settled decision ends the reply until the user resolves it. Answers about the user's own needs or taste get no verdict.
+- `code-review`, `simplify`, `refactor` — findings are saved to a file: the path given for the run, else a location set in project instructions (AGENTS.md, CLAUDE.md), else the first existing `.review/`, `._scratch/`, or `.scratch/` at the repo root, else `$TMPDIR`. The skills never create those directories. `code-review` now saves its report, and its review packet follows the same order. Ledgers leave `.simplify/` and are named `simplify-<timestamp>-<scope>.md` or `refactor-<timestamp>-<scope>.md`; to have `refactor` find an existing ledger, move and rename it, or point `refactor` at it.
+- `agent-bridge` — when the target writes a report, the controller names its path in the brief, because the target's own sandbox, `$TMPDIR`, and instructions file can put the default where the controller cannot find it.
 
 ## [3.5.0] - 2026-10-17
 

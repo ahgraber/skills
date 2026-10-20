@@ -111,6 +111,43 @@ def test_non_git_repo_errors(tmp_path):
         _run(tmp_path, "--staged", out=tmp_path / "packet.md")
 
 
+def _run_default_out(repo: Path) -> Path:
+    args = brp.parse_args(["--staged", "--repo", str(repo)])
+    return Path(brp.build_packet(args)["packet_path"])
+
+
+@pytest.mark.parametrize(
+    ("present", "expected"),
+    [
+        ([".review", "._scratch", ".scratch"], ".review"),
+        (["._scratch", ".scratch"], "._scratch"),
+        ([".scratch"], ".scratch"),
+    ],
+)
+def test_default_out_uses_first_existing_repo_dir(tmp_path, present, expected):
+    repo = _init_repo(tmp_path)
+    for name in present:
+        (repo / name).mkdir()
+    assert _run_default_out(repo).parent == repo / expected
+
+
+def test_default_out_resolves_repo_root_from_subdir(tmp_path):
+    repo = _init_repo(tmp_path)
+    (repo / ".review").mkdir()
+    (repo / "sub").mkdir()
+    assert _run_default_out(repo / "sub").parent == repo / ".review"
+
+
+def test_default_out_falls_back_to_tmpdir(tmp_path, monkeypatch):
+    repo = _init_repo(tmp_path)
+    tmp = tmp_path / "tmp"
+    tmp.mkdir()
+    monkeypatch.setattr(brp.tempfile, "tempdir", str(tmp))
+    out = _run_default_out(repo)
+    assert out.parent == tmp
+    assert not (repo / ".review").exists()
+
+
 if __name__ == "__main__":
     here = str(Path(__file__).parent)
     raise SystemExit(pytest.main([__file__, "-q", "--rootdir", here, "--confcutdir", here]))

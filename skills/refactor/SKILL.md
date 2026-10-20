@@ -49,9 +49,11 @@ A proposal comes from one of three sources.
 Use whichever the request provides:
 
 - **A ledger.**
-  The user points at a `.simplify/ledger-*.md` (or says "work through the deferred items", in which case take the newest).
+  The user points at a ledger file, or says "work through the deferred items".
+  In that case take the newest `simplify-*.md` or `refactor-*.md` in the location project instructions set, `.review/`, `._scratch/`, `.scratch/` at the repo root, or `$TMPDIR`.
   Its Deferred section is the work list; each entry carries a proposed move, blast radius, and verification plan.
   If no ledger exists, say so and ask what to work on.
+  A ledger written to `$TMPDIR` in another session or harness may not be visible here; ask for its path.
 - **A report or finding list** from a review or another agent.
   Treat each item as a proposal to validate, not a decision already made.
 - **A direct request**: decompose this, split that.
@@ -163,7 +165,16 @@ Discovering three more call sites mid-move means the user approved a plan that w
 If the work came from a ledger, append an outcome block under each executed entry: what changed, files touched, verification result, anything discovered.
 Note declined proposals.
 Add new Deferred entries for structural work this pass surfaced but did not do.
-If the work came from chat, write a fresh ledger for the pass instead (same format).
+If the work came from chat or a review report, write a fresh ledger for the pass instead (same format), named `refactor-<YYYY-MM-DD-HHMMSS>-<scope-slug>.md`.
+Pick its destination in this order:
+
+1. A path given for this run: by the user, a subagent brief, or an agent-bridge brief.
+2. A location set by project instructions (AGENTS.md, CLAUDE.md, or the equivalent).
+3. The first of `.review/`, `._scratch/`, or `.scratch/` that already exists at the repo root.
+4. `$TMPDIR`.
+
+Never create those repo directories; they belong to the user.
+If the write fails, put the ledger in chat and say no file was written.
 
 **Rationale goes in the ledger, not the code.**
 Do not leave comments narrating the restructuring.

@@ -11,10 +11,18 @@ No skill is obligated to read an old ledger, entries have no status lifecycle, a
 
 ## Location and lifetime
 
-- Write to `.simplify/ledger-<YYYY-MM-DD-HHMM>.md` at the repo root.
+Pick the destination in this order:
+
+1. A path given for this run: by the user, a subagent brief, or an agent-bridge brief.
+2. A location set by project instructions (AGENTS.md, CLAUDE.md, or the equivalent).
+3. The first of `.review/`, `._scratch/`, or `.scratch/` that already exists at the repo root.
+4. `$TMPDIR`.
+
+- Never create those repo directories; they belong to the user, and so does keeping them untracked.
+- Name the file `simplify-<YYYY-MM-DD-HHMMSS>-<scope-slug>.md`, so parallel passes do not collide.
 - One file per pass; never overwrite an earlier one.
 - The ledger is scratch, not source.
-  Offer to keep it untracked: add `.simplify/` to the repo's root `.gitignore`, or create `.simplify/.gitignore` containing `*`.
+- If the write fails, put the ledger in chat and say no file was written.
 - Tell the user the path when the pass finishes.
 
 ## Hard rules
@@ -103,6 +111,6 @@ Proposing a deletion without the consumer sweep and the history check is a guess
 
 ## Consumption by other skills
 
-The `refactor` skill accepts a Deferred section as a work list when the user points it at one (or at the newest ledger).
+The `refactor` skill accepts a Deferred section as a work list when the user points it at one (or at the newest ledger in the destinations above).
 If it executes a proposal, it appends an outcome block under that entry — what changed, files touched, verification result.
 That append is a courtesy for the reader, not a protocol: refactor works equally well from proposals given in chat, and simplify never reads ledgers back.
