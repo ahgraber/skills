@@ -10,6 +10,7 @@ Lineage and background:
 - The "de-slop" framing is in the spirit of [blader/humanizer](https://github.com/blader/humanizer), a Claude Code skill for removing signs of AI-generated writing.
 - Packaging The Economist's guide as an editing skill follows [TAJD/economist-style-guide-plugin](https://github.com/TAJD/economist-style-guide-plugin) (Tom Dickson).
 - The surface-tic vs. structural-reflex split reflects empirical detection work — notably Kobak, González-Márquez, Horvát & Lause, _"Delving into LLM-assisted writing in biomedical publications through excess vocabulary,"_ Science Advances (2025), arXiv:2406.07016 — which finds the LLM fingerprint is a style-word shift rather than a content shift.
+- The compression reflex and its entries (noun stacks, ad-hoc noun-to-verb, things that act like people, dropped signposts, long reach) follow Clark, Martin & Mahowald, _"Why is AI-generated language so hard to understand?"_ (2026), arXiv:2610.29162, which finds frontier models overuse constructions with known human processing costs and links the shift to post-training pressure for information density.
 
 Prose-craft directives draw on the standard style canon:
 

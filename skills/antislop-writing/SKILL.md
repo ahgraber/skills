@@ -24,8 +24,9 @@ A passage that would read at home in a conference-talk abstract or a social feed
 That is the _professional_ register, the default here.
 The universal part — prose someone would sign, never slop — is the floor under every register; a register adds genre-specific allowances on top of it (a table in a design doc, a greeting in an email), never a license for slop (see "Route by register").
 
-Every AI tell is a symptom of one underlying reflex: engineered symmetry and promotional polish, the default voice a model reaches for when left alone.
-Deleting a flagged phrase while that reflex keeps running regenerates the same voice with fewer tells.
+Most AI tells are symptoms of one underlying reflex: engineered symmetry and promotional polish, the default voice a model reaches for when left alone.
+A second reflex pulls the other way: compression, which packs a meaning into the fewest words and leaves the reader to unpack it (see "The compression reflex" below).
+Deleting a flagged phrase while either reflex keeps running regenerates the same voice with fewer tells.
 Work against the reflex, not the token:
 
 - **Rewrite toward the register; do not patch away tells.**
@@ -59,6 +60,34 @@ Each is fine once and a tic in bulk:
 - **Sweeping closers.**
   "It will win the next ten years."
   "The future belongs to X." Close on a concrete claim about what to build.
+
+### The compression reflex
+
+Post-training on code, math, and reasoning rewards a model for using fewer tokens, and the habit carries into prose.
+Each construction below is grammatical and shorter than the plain form, and each costs a human reader effort to parse.
+The reflex is strongest late in long agent sessions: status reports, code summaries, and chat replies.
+Hunt these by construction:
+
+- **Noun stacks.**
+  Three or more nouns in a row, often forming a word pair the reader has never seen: "dry-run write prevention," "reader-patience budget."
+  Unpack the relations with verbs and prepositions: "tests that a dry run writes nothing."
+  An established term ("HTTP request header") stays.
+- **Ad-hoc noun-to-verb.**
+  "Calendar it."
+  "Footnote it."
+  Use the conventional verb phrase: "add it to your calendar."
+- **Things that act like people.**
+  An inanimate subject with a verb that normally takes a person or an animal: "this asymmetry bites," "`is_file()` swallows that."
+  Name what happens: "this asymmetry causes failures," "`is_file()` catches the error and returns `False`."
+- **Dropped signposts.**
+  An optional "that" or relative pronoun removed before a long or unexpected clause: "the fix the reviewer flagged in the second pass broke the build."
+  Keep "that" where it tells the reader a new clause starts.
+- **Long reach.**
+  A subject far from its verb, or a modifier far from what it modifies.
+  Move the long part to the end of the sentence.
+
+Lean and compressed are different.
+Cut words that carry no meaning; keep the words a reader uses to see how the sentence is built.
 
 ## Route by register
 
@@ -122,7 +151,7 @@ The itemized craft checks live in `references/audit-checklist.md` and run in the
   If not, it is narration; write it as sentences.
   This holds in every register; a technical piece has more content that passes the test, but the test itself does not relax.
 - **Write the minimum that carries the point**: if a paragraph could be a sentence, cut it down; if a section serves no claim the piece needs, cut it.
-  A shorter draft that says the same thing is the better draft.
+  A shorter draft that says the same thing is the better draft, provided it is shorter by ideas and filler, not by the function words a reader parses with.
 - **Close on substance**: end on a concrete outcome or next step, not generic optimism or a signposted "in conclusion."
 
 ### Voice and register
@@ -139,11 +168,11 @@ The itemized craft checks live in `references/audit-checklist.md` and run in the
 ## AI tells: catch by level, strip or rewrite
 
 AI writing has characteristic tells.
-They are symptoms of the reflex above, and they sort by linguistic level and by how they are fixed:
+They are symptoms of the reflexes above, and they sort by linguistic level and by how they are fixed:
 
 - **Strip** — surface tics removable without touching meaning: em-dash pile-ups, "delve"/"tapestry," curly quotes, emojis, bold-first bullets, chatbot phrases.
   A checklist pass handles these.
-- **Rewrite** — structural reflexes that encode a rhetorical move, not a token: negative parallelism, engineered symmetry, one-point dilution, fractal summaries, significance inflation, performed voice (maxims and abstraction-as-agent in explanatory and instructional prose).
+- **Rewrite** — structural reflexes that encode a rhetorical move, not a token: negative parallelism, engineered symmetry, one-point dilution, fractal summaries, significance inflation, performed voice (maxims and abstraction-as-agent in explanatory and instructional prose), compression (noun stacks, long reach).
   You cannot find-replace these; return to what the passage is actually asserting.
 
 Stripping tics while the reflex runs is a losing game — surface-laundered text still reads as machine-made, because the structure is the signal.
@@ -241,6 +270,7 @@ Ask only when an ambiguity would materially change the piece; do not silently ch
 - Is the contrast move within budget, in every syntax it wears?
 - Does any line read as a maxim, give an abstraction or the text itself agency, or swap a plain term for decorative figuration?
   Name the actor and the plain action — unless the register is editorial, where one maxim can be earned.
+- Can a reader parse each sentence on one pass: no unfamiliar noun stacks, no ad-hoc verbs made from nouns, no dropped "that" before a long clause?
 - Name what you did not fix and why, and what you asked the user versus decided alone.
 
 ## References

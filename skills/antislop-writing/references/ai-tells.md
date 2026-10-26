@@ -1,7 +1,10 @@
 # AI Writing Tells
 
 A single de-duplicated catalog of the patterns that mark text as machine-generated.
-Every tell is a symptom of one reflex: engineered symmetry and promotional polish, the default voice a model reaches for when left alone.
+Most tells are symptoms of one reflex: engineered symmetry and promotional polish, the default voice a model reaches for when left alone.
+A second reflex, compression, packs a meaning into the fewest words and leaves the reader to unpack it.
+Its entries are "Noun stacks," "Ad-hoc noun-to-verb," "Things that act like people," "Dropped signposts," and "Long reach."
+The two reflexes call for opposite fixes: symmetry and polish are cured by cutting, compression by restoring the words a reader parses with.
 Entries are organized by linguistic level and tagged by how to fix them.
 
 - **[strip]** — a surface tic removable without touching meaning (a token, a mark, a formatting habit).
@@ -93,6 +96,21 @@ Fix: make the argument, or use the established term if one exists.
 The earned exception: a coined label that substitutes for the argument — "the supervision paradox," asserted and never shown — fails, while a label that names a result the passage has already proven — a "verification tax" coined after the mechanism is argued — is craft.
 The test is payment order: the argument buys the label before the label appears.
 
+### Noun stacks — [rewrite]
+
+Three or more nouns in a modifier chain, with the relations between them left for the reader to work out: "dry-run write prevention," "existing xfailed lazy-intermediate Lookup behavior," "a horror movie soundtrack generator."
+The stack often produces a word pair the reader has never seen ("class-time shutdown requirement"), and it can bracket two ways, as in the headline "Squad Helps Dog Bite Victim."
+Fix: unpack the relations with verbs and prepositions — "new tests check that a dry run writes nothing."
+An established compound ("HTTP request header," "unit test suite") is a term, not this tell; the test is whether the reader has met the whole phrase before.
+Invented concept labels above are one kind of noun stack.
+
+### Ad-hoc noun-to-verb — [strip]
+
+A noun used as a verb where no such verb is in common use: "calendar it," "footnote it," "ticket this."
+The reader has to stop and reanalyze the word's part of speech.
+Fix: use the conventional verb phrase — "add it to your calendar," "put it in a footnote," "open a ticket for this."
+Conventionalized conversions ("email," "bottle," "google") are fine.
+
 ---
 
 ## 2. Syntactic (sentence patterns)
@@ -163,6 +181,27 @@ Writing straightforward features.
 Implementing well-defined tickets."
 The first sentence already said everything; the fragments add cadence and word count.
 Fix: cut the fragments, or fold one concrete example into the sentence.
+
+### Things that act like people — [rewrite]
+
+An inanimate subject with an active verb that normally takes a person or an animal, used as shorthand for a longer plain phrase: "this asymmetry bites" (causes failures), "`is_file()` swallows that and returns False" (catches the error), "the whole conversation is eating its own tail."
+Readers use animacy to parse a sentence, and the mismatch forces a second reading.
+Fix: name what happens in plain words — "this asymmetry causes failures," "`is_file()` catches the error and returns `False`."
+Conventional verbs for software and documents ("returns," "accepts," "raises," "lists") are not this tell.
+"Abstraction or document as agent" (§4) is the related case where a concept or the text itself acts in order to sound authoritative.
+
+### Dropped signposts — [strip]
+
+An optional "that" or relative pronoun removed so the reader cannot see where a clause starts: "the fix the reviewer flagged in the second pass broke the build," "make sure the config the installer writes is valid."
+Human writers keep the optional word more often when the clause that follows is long or hard to predict.
+Fix: restore "that" where a clause begins after a noun or after verbs like "make sure," "found," and "said" — "the fix that the reviewer flagged in the second pass broke the build."
+A short, predictable clause can go without it ("the file I sent").
+
+### Long reach — [rewrite]
+
+A subject separated from its verb, or a modifier separated from what it modifies, by a long stretch of other words: "A cat who can always get up and away is a much calmer cat."
+The reader holds the open phrase in memory until the sentence closes it.
+Fix: put the long part last, or split it out — "A cat is much calmer when it can always get up and leave."
 
 ---
 
