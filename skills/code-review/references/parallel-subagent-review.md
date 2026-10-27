@@ -1,8 +1,10 @@
 # Parallel Subagent Review Path
 
 Use this path when reviewing non-trivial changes and a subagent dispatch tool is available.
-Fan out critique across specialist subagents — always quality and spec compliance, plus architecture when warranted — then synthesize and have a devil's-advocate subagent stress-test the synthesis.
-Keeps the main agent's context free for coordination, tiebreaks, and user dialogue.
+Defect discovery runs over a partition list (`references/partition-discovery.md`): one small-model explorer per domain feature, a runner that executes their distinguishing inputs, and a variant hunt on each confirmed defect.
+Lens subagents (architecture when warranted, spec compliance, quality, test adversary, security) run in the same pass.
+A devil's-advocate subagent then runs a challenge pass on every finding that could not be run.
+The main agent keeps coordination, tiebreaks, and user dialogue.
 
 This path's rules — model resolution, the agent set, synthesis ownership, and the challenge pass — are purpose-built for code review and take precedence over any general subagent skill (e.g. `subagent-patterns`) when reviewing code.
 
@@ -11,7 +13,7 @@ This path's rules — model resolution, the agent set, synthesis ownership, and 
 
 ## Architecture Subagent — When to Include
 
-The architecture critique (Agent 1) is **conditional**, not default.
+The architecture critique is **conditional**, not default.
 Include it when any of these apply:
 
 - **Pre-merge / pre-PR review** — reviewing a branch against its target base.
@@ -31,24 +33,28 @@ Run this check once at the start of Step 0, after the graph gate.
 
 1. Confirm the `Agent` tool is available in this session.
 2. Assess diff size and scope from Step 0 scope detection.
-3. Decide using the table below.
-4. If the parallel path was selected and the dispatch schema exposes a model parameter, surface the model question now (see Prerequisites step 4) — same decision point as the path choice.
+3. Apply the table below; the first matching row wins.
+4. If the parallel path was selected, resolve the models and the depth now (Prerequisites steps 4 and 5) — same decision point as the path choice.
 
-| Condition                                             | Path                            |
-| ----------------------------------------------------- | ------------------------------- |
-| `Agent` tool unavailable                              | Single-agent (skip this path)   |
-| Single file, \<50 lines, no cross-module surface      | Single-agent (overhead too big) |
-| User explicitly asked for a "quick" or "sanity" check | Single-agent                    |
-| 2+ files OR >100 lines OR cross-module OR spec-driven | Parallel-subagent               |
-| Ambiguous                                             | Ask the user which they prefer  |
+| Order | Condition                                               | Path                            |
+| ----- | ------------------------------------------------------- | ------------------------------- |
+| 1     | `Agent` tool unavailable                                | Single-agent (skip this path)   |
+| 2     | User explicitly asked for a "quick" or "sanity" check   | Single-agent                    |
+| 3     | Change touches a security boundary, or a spec drives it | Parallel-subagent, at any size  |
+| 4     | Single file, \<50 lines, no cross-module surface        | Single-agent (overhead too big) |
+| 5     | 2+ files OR >100 lines OR cross-module                  | Parallel-subagent               |
+| 6     | Ambiguous                                               | Ask the user which they prefer  |
+
+Row 3 comes before the size rows because a one-file change to a parser or a policy check carries the most risk per line.
+`references/partition-discovery.md` § 1 defines a security boundary.
 
 ## Prerequisites Before Dispatch
 
 Subagents have no conversation history.
 Gather what they need first, or dispatch is wasted.
 
-1. **Finish Step 1 Triage.**
-   You need the prioritized file list, risk hotspots, and (if graph is on) the blast-radius snapshot to brief each subagent.
+1. **Finish Step 1 Triage, including the partition list** (`references/partition-discovery.md` § 1).
+   You need the prioritized file list, risk hotspots, the ranked partitions, and (if graph is on) the blast-radius snapshot.
 
 2. **Clarify intent with the user.**
    Ask, if not already clear:
@@ -63,51 +69,53 @@ Gather what they need first, or dispatch is wasted.
    The review packet from Step 0 (`scripts/build_review_packet.py`) is this block — build it once and hand every subagent its `packet_path` rather than inlining the diff into each prompt.
    The packet already carries:
 
-   - Scope refs (base branch, merge-base SHA, or staged) and the full diff.
+   - Scope refs (base branch, merge-base SHA, or staged), the branch, and the full diff.
    - The changed-file list.
    - The source of truth (intent plus any `--include`d spec/plan), when provided.
 
-   Add per-dispatch only what the packet lacks: file priorities from triage and the surrounding code paths a reviewer will likely need to read.
+   For lens subagents, add per-dispatch only what the packet lacks: file priorities from triage and the surrounding code paths a reviewer will likely need to read.
+   Partition explorers get only their template's slots (`references/partition-discovery.md` § 2).
 
-4. **Resolve the model (if the dispatch schema exposes one).**
-   When the dispatch schema has a model parameter, the choice is the user's, not the harness default.
+4. **Resolve the models (if the dispatch schema exposes a model parameter).**
+   The choice is the user's, not the harness default.
+   Ask once, name the two roles, then apply the answer to every dispatch in this review:
 
-   - If the user specified a model earlier in the conversation, reuse it across every dispatch in this review.
+   ```text
+   Subagent dispatch supports a model override.
+   Partition explorers and the runner work best on a small, fast model (e.g., `haiku`); triage, architecture, spec compliance, quality, the test adversary, security, the variant hunt, and the challenge pass need a strong one (e.g., `opus` or `sonnet`).
+   Which models should I use for each role?
+   ```
 
-   - Otherwise, ask once before dispatching, then record the answer and apply it uniformly to Agents 1–4.
-     Suggested phrasing:
+   If the user specified models earlier in the conversation, reuse them.
+   Do not silently default.
 
-     ```text
-     Subagent dispatch supports a model override (e.g., `opus`, `sonnet`, `haiku`).
-     Which should I use for this review? I'll reuse it across all critique agents and the challenge pass.
-     ```
+5. **State the depth and the dispatch count** (`references/partition-discovery.md` § 5).
+   Example: "Standard depth: 8 of 23 partitions, 5 lens subagents, 1 runner, variant hunts on critical and high findings, 1 challenge pass — about 17 dispatches."
+   The user can lower the depth or the partition count.
 
-   - Do not silently default.
+## Step A — Breadth Pass
 
-## Step A — Parallel Critique
-
-Dispatch all active subagents in a **single message** with multiple `Agent` tool calls so they run concurrently.
-Always dispatch Agents 2, 3, and 4 (quality, spec compliance, security).
-Include Agent 1 (architecture) only when the "When to Include" criteria above are met.
-If the dispatch schema exposes a model parameter, the model MUST be resolved before dispatch — either from an explicit user specification earlier in the conversation, or by asking the user (see Prerequisites step 4).
-Do not silently fall back to the runtime default; that choice belongs to the user.
-Include the phrase **"think hard"** in the prompt to engage extended thinking.
-Subagents must have explicit instructions to critique only — no code edits.
+Dispatch the partition explorers (`references/partition-discovery.md` § 2) and the lens subagents together, at most 8 per message; batch the rest in rounds of 8.
+Every subagent prompt states that the subagent must not edit code.
+Include the phrase **"think hard"** in each lens prompt to engage extended thinking.
 If available, include applicable `code-review-graph` instructions.
 
-Use the prompt templates in the next section.
+Fill only each template's slots.
+Do not add prior findings, prior verdicts, edges to probe, or notes from earlier runs.
 
-### Agent 1 — Architectural Critique
+### Lens 1 — Architectural Critique (conditional)
 
 **Focus:** module boundaries, coupling, layering, separation of concerns, abstraction quality, API shape, hidden dependencies, blast radius, consistency with surrounding architecture, premature abstraction vs. missing abstraction, and the shape of the data that crosses boundaries.
 
 Subagents cannot invoke skills, so **you** (the orchestrator) must expand the prompt before dispatch: copy the three tests from `references/data-representation.md` into the `## Data representation` placeholder in the template.
 
-### Agent 2 — Code Quality & Correctness
+### Lens 2 — Code Quality & Correctness
 
-**Focus:** logic bugs, edge cases, nil/null paths, error handling, concurrency hazards, resource leaks, idiomatic usage, readability, naming, dead code, test adequacy for behavior changes, obvious performance pitfalls.
+**Focus:** logic bugs, edge cases, nil/null paths, error handling, concurrency hazards, resource leaks, idiomatic usage, readability, naming, dead code, duplication, obvious performance pitfalls.
+Partition explorers search by domain feature; this lens reads the diff line by line for defects that belong to no feature, such as an off-by-one, a wrong operator, or a wrong default.
+Test adequacy belongs to Lens 4.
 
-### Agent 3 — Spec Compliance
+### Lens 3 — Spec Compliance
 
 **Focus:** does the implementation do what the spec/ticket says?
 Unstated behaviors added?
@@ -117,13 +125,22 @@ Deviations from the spec's acceptance criteria?
 If no spec was provided, report that the subagent was dispatched without one and focus only on stated PR intent.
 When the packet reports `has_source_of_truth: false`, this is that case — proceed on stated intent and do not infer a spec from the diff; if a spec exists, the better fix is to rebuild the packet with `--intent`/`--include` rather than skip this lens.
 
-### Agent 4 — Security Review
+### Lens 4 — Test Adversary
+
+**Focus:** for the tests that cover the changed behavior, "What wrong implementation would still pass these tests?"
+For each answer, the test adversary writes an input that distinguishes the wrong implementation from the right one and runs it against the real code.
+A wrong result is a defect; a right result that no test checks is a test gap.
+It also checks each property test that would close a partition (`references/partition-discovery.md` § 6).
+It writes probe scripts only under `$TMPDIR`, runs them with the project's own runner or interpreter, and never edits a repository file.
+
+### Lens 5 — Security Review
 
 **Focus:** security vulnerabilities and control gaps across all OWASP Top 10:2025 categories.
 Always dispatch — security is a required lens on every non-trivial review.
+Security partitions (`references/partition-discovery.md` § 1) add depth on a security boundary; this lens covers the whole change, including dependency, logging, and configuration changes that no partition reaches.
 Subagents cannot invoke skills, so **you** (the orchestrator) must expand the prompt before dispatch.
 
-**Before filling in Template — Agent 4:**
+**Before filling in Template — Lens 5:**
 
 1. Identify the feature domain(s) from triage.
 2. For each matching domain, read the corresponding `securing-code` tier3 reference and copy its **Review Checklist** section verbatim into the `## Domain-specific checks` placeholder in the template.
@@ -132,34 +149,45 @@ If no domain matches, omit the placeholder section — the OWASP checklist is st
 
 **Covers:** broken access control, injection (SQL/NoSQL/OS/XSS), cryptographic failures, insecure design, auth failures, supply chain risks, data integrity, logging gaps, exceptional condition mishandling, and security misconfiguration.
 
-## Step B — Synthesize
+## Step B — Judge Candidates
 
-Main agent consolidates the three reports.
+Collect the explorer candidates and run them (`references/partition-discovery.md` § 3).
+Dispatch one runner subagent, on the small model, with every runnable candidate.
+Confirmed candidates become findings; refuted candidates are dropped.
+Candidates that cannot be run go to Step E with the lens findings.
+
+## Step C — Variant Hunt
+
+For each confirmed finding the depth selects, dispatch a variant hunt (`references/partition-discovery.md` § 4).
+Judge its candidates the way Step B judges explorer candidates.
+Run Step A again for the new partitions only, explorers only.
+Stop when a round adds no partition, or at the depth's round cap.
+
+## Step D — Synthesize
+
+Main agent consolidates all reports.
 Do not delegate this.
 
 1. Group findings by file/function.
 2. Dedupe overlapping issues.
-   When two or more agents raised the same concern, mark it **corroborated** — higher-confidence signal.
+   When two or more subagents raised the same concern, mark it **corroborated** — higher-confidence signal.
 3. Resolve contradictions where possible.
-   Where unresolved, mark **disputed** and queue for challenge pass or self-tiebreak.
+   Where unresolved, mark **disputed** and queue for Step E or self-tiebreak.
 4. Sort by priority (critical > high > medium > low).
-5. Flag any finding whose verdict depends on intent you're not sure about; clarify with user before Step C.
+5. Flag any finding whose verdict depends on intent you're not sure about; clarify with user before Step E.
 
-## Step C — Challenge Pass (1 subagent, devil's advocate)
+## Step E — Challenge Pass (1 subagent, devil's advocate)
 
-Dispatch one subagent (Agent 5) using the runtime's available schema and "think hard" in the prompt.
+Dispatch one subagent with a strong model and "think hard" in the prompt.
 This agent challenges the **review itself**, not the code — it argues the author's side against the synthesized findings.
-Give it:
+It checks every finding that a run did not confirm: architecture, quality, spec-compliance, and security findings, and candidates that could not be run.
+Findings a run confirmed skip this step; the run is their evidence.
+For each finding it asks: is it wrong, overconfident, or missing counter-evidence, and what is the strongest counter-argument a thoughtful author would make?
+It returns challenges and a strength-of-evidence rating for each finding.
+The challenge pass does not search for new defects.
+It has read every finding, so its search would start from them; discovery belongs to Steps A and C, where the search starts without prior findings.
 
-- The synthesized findings from Step B.
-- The original diff and shared context block.
-- Instruction to attempt to **invalidate** the findings: which are wrong, overconfident, or missing counter-evidence?
-  What issues were missed entirely?
-  What are the strongest counter-arguments a thoughtful author would make?
-
-The devil's-advocate subagent returns its own structured report: challenges, missed issues, and strength-of-evidence ratings.
-
-## Step D — Final Synthesis and Tiebreak
+## Step F — Final Synthesis and Tiebreak
 
 Main agent again — not a subagent.
 
@@ -169,22 +197,24 @@ Main agent again — not a subagent.
 3. For items that hinge on unstated intent, ask the user before finalizing.
 4. Produce the final, deduped, priority-sorted issue list.
 
-## Step E — Produce Report
+## Step G — Produce Report
 
-Use the standard Step 3 report format from `SKILL.md`, and persist the synthesized report as Step 3 describes.
+Use the standard Step 3 report format from `SKILL.md`, and persist the synthesized report and the review state as Step 3 describes.
 Add:
 
-- A header line noting the parallel-subagent path was used.
+- A header line noting the parallel-subagent path and the depth.
+- A **Partitions** appendix: each partition explored this run, its result (`handled`, findings, or new partitions it produced), and the open partitions left for the next run.
 - A short **Challenge Pass Summary** appendix listing challenges raised and how each was resolved.
 - If graph was also used, include the Blast Radius and Test Coverage Gaps sections as normal.
 
 ## Agent Prompt Templates
 
-Each subagent prompt should be self-contained: it will not see this conversation.
+Each subagent prompt is self-contained: it will not see this conversation.
+The partition explorer and variant-hunt templates are in `references/partition-discovery.md`.
 
 In every template below, point the `## Diff` (and `## Context` / `## Intent and Spec`) placeholders at the packet rather than inline its contents: `Start from the review packet at <packet_path> — it has the diff, changed files, and source of truth, but it is a starting point, not the whole picture. You have Read/Grep/git; pull callers, surrounding code, and any file the diff does not show whenever a finding depends on it.` Inline a snippet only when a finding needs a specific excerpt called out.
 
-### Template — Agent 1: Architectural Critique
+### Template — Lens 1: Architectural Critique
 
 ```text
 You are a staff-level software architect reviewing a code change.
@@ -237,7 +267,7 @@ A markdown list of findings. For each finding:
 End with a brief summary of the 3 most important architectural concerns.
 ```
 
-### Template — Agent 2: Code Quality & Correctness
+### Template — Lens 2: Code Quality & Correctness
 
 ```text
 You are a senior engineer doing a correctness-focused code review.
@@ -263,9 +293,8 @@ Find bugs, edge cases, and quality issues. Do NOT rewrite code; produce findings
 - Error handling and propagation
 - Resource handling (files, connections, goroutines/tasks)
 - Idiomatic usage and readability
-- Dead code, unreachable branches
-- Tests: are behavior changes covered? Are new tests meaningful?
-- Obvious performance pitfalls (N+1, unbounded memory)
+- Dead code, unreachable branches, duplication
+- Obvious performance pitfalls (N+1, unbounded memory, sync calls in hot paths)
 
 ## Constraints
 - Do NOT edit code.
@@ -276,7 +305,7 @@ Find bugs, edge cases, and quality issues. Do NOT rewrite code; produce findings
 Markdown list of findings, each with: priority, location, observation, why it matters, suggested direction. End with a summary of the top 3 correctness risks.
 ```
 
-### Template — Agent 3: Spec Compliance
+### Template — Lens 3: Spec Compliance
 
 ```text
 You are a reviewer checking a code change against its spec.
@@ -312,7 +341,66 @@ Spec/ticket/PRD:
 Markdown list of compliance findings with priority, location, spec reference, observation, and suggested direction. End with a verdict: `matches spec`, `partial — {N} gaps`, `exceeds spec — {N} scope items`, or `no spec provided`.
 ```
 
-### Template — Agent 4: Security Review
+### Template — Lens 4: Test Adversary
+
+```text
+You are a test adversary in a code review.
+Think hard.
+
+## Goal
+Find defects and test gaps by asking what wrong implementation the tests would still accept.
+Do NOT edit any repository file.
+
+## Context
+- Repo: <...>
+- Scope: <...>
+- Intent (from author/user): <...>
+
+## Diff
+<full diff>
+
+## Tests in scope
+<test files that cover the changed behavior>
+
+## Property tests proposed to close partitions
+<test id → partition, or "none">
+
+## Task
+1. For each test in scope, name the wrong implementations it would still accept.
+2. For each, write a distinguishing input: one where the correct and the wrong implementation give different results.
+3. Write each input as a probe script under $TMPDIR and run it against the real code with the project's own runner or interpreter.
+4. For each proposed property test, ask the same question of its property and generator.
+
+## Constraints
+- Write files only under $TMPDIR. Never edit a repository file.
+- Run only the project's own test runner or interpreter.
+
+## Output format
+For each probe: the wrong implementation it targets, the input, the expected and actual results, and the probe path.
+Classify each as `defect` (actual is wrong), `test gap` (actual is right but no test checks it), or `covered`.
+For each property test: `spans the partition` or the wrong implementation it would accept.
+```
+
+### Template — Runner
+
+```text
+You are the runner in a code review.
+Do NOT edit any repository file.
+
+## Candidates
+<numbered list: file:line, distinguishing input, expected result>
+
+## Review packet
+<packet_path>
+
+## Task
+For each candidate, write the input as a probe script under $TMPDIR, run it against the real code with the project's own runner or interpreter, and compare the result with the expected result.
+
+## Output format
+For each candidate: `confirmed` (result differs from expected), `refuted` (result matches expected), or `not runnable` (with the reason), plus the actual result and the probe path.
+```
+
+### Template — Lens 5: Security Review
 
 ```text
 You are a senior application security engineer doing a security-focused code review.
@@ -360,7 +448,7 @@ Additional checks:
 
 ## Constraints
 - Do NOT edit code.
-- Do NOT comment on style or non-security quality issues — those belong to Agent 2.
+- Do NOT comment on style or non-security quality issues — those belong to Lens 2.
 - Reference exact file:line for every finding.
 
 ## Output format
@@ -368,7 +456,7 @@ Markdown list of findings, each with: priority (critical/high/medium/low), OWASP
 End with a summary of the top 3 security risks and any OWASP categories that are clean.
 ```
 
-### Template — Agent 5: Devil's Advocate (Challenge Pass)
+### Template — Challenge Pass (Devil's Advocate)
 
 ```text
 You are a senior engineer acting as devil's advocate against a code review.
@@ -377,8 +465,7 @@ Think hard.
 
 ## Goal
 Try to invalidate the findings below. Where are they wrong, overconfident, missing
-counter-evidence, or misdiagnosing the real issue? What issues did the reviewers
-miss entirely?
+counter-evidence, or misdiagnosing the real issue?
 
 ## Original diff
 <full diff>
@@ -387,7 +474,7 @@ miss entirely?
 <same shared context block>
 
 ## Findings to challenge
-<synthesized findings from Step B, as a numbered list>
+<numbered list: synthesized findings not confirmed by a run>
 
 ## What to produce
 For each numbered finding: one of
@@ -396,9 +483,7 @@ For each numbered finding: one of
 - `downgrade` — finding is real but priority is too high, with reason
 - `escalate` — finding is real and priority is too low, with reason
 
-Then a section `missed issues` listing problems the four reviewers did not raise,
-each with priority, location, observation, and why it matters.
-
+Do not report new defects.
 Finish with a one-paragraph meta-critique: where does the overall review lean too hard, or too soft?
 ```
 
@@ -409,54 +494,75 @@ Defer to the subagent tool schema available in the current runtime/harness.
 
 ```text
 Agent({
+  description: "Explore partition P3: here-documents feeding a pipeline",
+  subagent_type: "general-purpose",
+  model: "<small_model>",
+  prompt: "<partition explorer template filled in>",
+})
+Agent({
   description: "Architectural critique",
   subagent_type: "general-purpose",
-  model: "<specified_model>",
-  prompt: "<template 1 filled in>",
+  model: "<strong_model>",
+  prompt: "<template — lens 1 filled in>",
 })
 Agent({
   description: "Code quality and correctness review",
   subagent_type: "general-purpose",
-  model: "<specified_model>",
-  prompt: "<template 2 filled in>",
+  model: "<strong_model>",
+  prompt: "<template — lens 2 filled in>",
 })
 Agent({
   description: "Spec compliance check",
   subagent_type: "general-purpose",
-  model: "<specified_model>",
-  prompt: "<template 3 filled in>",
+  model: "<strong_model>",
+  prompt: "<template — lens 3 filled in>",
+})
+Agent({
+  description: "Test adversary",
+  subagent_type: "general-purpose",
+  model: "<strong_model>",
+  prompt: "<template — lens 4 filled in>",
 })
 Agent({
   description: "Security review",
   subagent_type: "general-purpose",
-  model: "<specified_model>",
-  prompt: "<template 4 filled in>",
+  model: "<strong_model>",
+  prompt: "<template — lens 5 filled in>",
 })
 ```
 
-All active subagent calls must be in a **single message** to run concurrently.
-Omit Agent 1 unless the "When to Include" criteria apply.
-Agents 2, 3, and 4 are always dispatched.
-Challenge pass (Agent 5, devil's advocate) dispatches separately after Step B completes.
+Send the explorers and lenses for one round in a **single message**, at most 8 calls; batch the rest in rounds of 8.
+Omit Lens 1 unless the "When to Include" criteria apply.
+Lenses 2 through 5 are always dispatched.
+The runner (small model) dispatches after the breadth pass, each variant hunt (strong model) after its finding is confirmed, and the challenge pass (strong model) after Step D completes.
 
 ## Common Mistakes
 
 - **Skipping intent clarification.**
   Subagents cannot ask the user; missing intent = guesswork at best, wasted dispatch at worst.
 - **Letting subagents edit code.**
-  They critique only.
-  The main agent (or a later explicit request) handles edits.
-- **Dispatching on a tiny diff.**
-  Overhead is not worth it for \<50-line single-file changes.
-- **Dispatching subagents sequentially.**
-  Always fan out active critique agents in one message.
+  They critique only; the test adversary and the runner write only under `$TMPDIR`.
+- **Seeding the partition list from the last review's findings.**
+  Partitions come from the domain, the implementation's tables, the spec, and the diff's constructs (`references/partition-discovery.md` § 1).
+- **Adding prior findings, edge lists, or notes to an explorer prompt.**
+  The explorer then searches near the last defect, and each review finds one more class instead of all of them.
+- **Running the variant hunt on unjudged candidates.**
+  A false positive then adds partitions that every later review explores.
+- **Ending the loop because explorers found nothing.**
+  The loop ends when a round adds no partition; the partition list, not the findings, sets the search.
+- **Dispatching on a tiny diff that touches no security boundary.**
+  Overhead is not worth it for \<50-line single-file changes; row 3 of the gate overrides this for security and spec-driven changes.
+- **Exceeding 8 subagents in one message.**
+  Batch in rounds of 8.
 - **Dispatching the architecture agent by default.**
   It's conditional — see "When to Include" above.
-- **Skipping the security agent.**
-  Agent 4 is always dispatched alongside Agents 2 and 3 — not optional.
-- **Dispatching without confirming the model.**
+- **Dispatching without resolving the models.**
   If the harness exposes model selection, silent defaulting hides a cost/quality decision from the user.
   Ask once, reuse across all dispatches.
+- **Skipping the security lens.**
+  Lens 5 is always dispatched alongside Lenses 2 through 4; security partitions do not replace it.
+- **Asking the challenge pass for missed issues.**
+  The challenge pass has read every finding, so its search would start from them; discovery belongs to the breadth pass.
 - **Treating the challenge pass as authoritative.**
   It's one more perspective; main agent arbitrates.
 - **Delegating synthesis.**

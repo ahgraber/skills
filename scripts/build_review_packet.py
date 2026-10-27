@@ -21,6 +21,12 @@ a spec it invents. Pass the intent/spec via --intent / --include so the packet
 carries what the change is judged against. When neither is supplied the packet
 says so loudly and the JSON sets has_source_of_truth=false, so the calling
 skill can refuse to dispatch a spec-compliance reviewer on an invented spec.
+
+Review state: code-review keeps a partition list across runs in a JSON file
+beside the packet, one file per repo, branch, and base. This script names that
+file and, when it exists, reports which closed partitions have changed since
+they were last explored, so a later run knows what to reopen. The review skill
+writes the file; this script only reads it.
 """
 
 from __future__ import annotations
@@ -29,6 +35,7 @@ import argparse
 import datetime as _dt
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
@@ -75,6 +82,71 @@ def default_out_dir(repo: Path) -> Path:
         if (root / name).is_dir():
             return root / name
     return Path(tempfile.gettempdir())
+
+
+def current_branch(repo: Path) -> str:
+    """Return the checked-out branch name, or "" on a detached HEAD."""
+    name = git(repo, "rev-parse", "--abbrev-ref", "HEAD", check=False).stdout.strip()
+    return "" if name in ("", "HEAD") else name
+
+
+def _slug(text: str) -> str:
+    return re.sub(r"[^A-Za-z0-9._-]+", "-", text).strip("-") or "none"
+
+
+def state_path_for(out_dir: Path, repo_root: Path, branch: str, base: str | None, head: str) -> Path:
+    """Name the review-state file for this repo, branch, and base.
+
+    The repo name is part of the key because the TMPDIR fallback is shared
+    across repositories. A detached HEAD is keyed by its commit.
+    """
+    branch_key = branch or f"detached-{head[:12]}"
+    name = f"review-state-{_slug(repo_root.name)}--{_slug(branch_key)}--{_slug(base or 'none')}.json"
+    return out_dir / name
+
+
+def stale_closed_partitions(repo: Path, state: dict[str, object]) -> list[str]:
+    """Return the ids of closed partitions whose files changed since their last exploration.
+
+    A closed partition is stale when any of its paths differ between its last
+    explored head and the working tree, when it lists no paths, or when that
+    head no longer exists (after an amend or rebase and garbage collection).
+    Each case means the closing evidence can no longer be assumed to cover it.
+    """
+    partitions = state.get("partitions", [])
+    if not isinstance(partitions, list):
+        return []
+    return [
+        str(part.get("id", "?"))
+        for part in partitions
+        if isinstance(part, dict) and part.get("status") == "closed" and _closed_partition_is_stale(repo, part)
+    ]
+
+
+def _closed_partition_is_stale(repo: Path, part: dict[str, object]) -> bool:
+    explored = part.get("explored") or []
+    paths = [p for p in part.get("paths") or [] if isinstance(p, str)]
+    last = explored[-1] if isinstance(explored, list) and explored else None
+    last_head = last.get("head") if isinstance(last, dict) else None
+    if not paths or not isinstance(last_head, str) or not last_head:
+        return True
+    if git(repo, "cat-file", "-e", f"{last_head}^{{commit}}", check=False).returncode != 0:
+        return True
+    changed = git(repo, "diff", "--name-only", last_head, "--", *paths, check=False)
+    return changed.returncode != 0 or bool(changed.stdout.strip())
+
+
+def read_state(repo: Path, path: Path) -> dict[str, object]:
+    """Summarize the review-state file at `path` for the packet JSON."""
+    if not path.exists():
+        return {"state_exists": False, "stale_closed_partitions": []}
+    try:
+        state = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        return {"state_exists": True, "stale_closed_partitions": [], "state_error": str(exc)}
+    if not isinstance(state, dict):
+        return {"state_exists": True, "stale_closed_partitions": [], "state_error": "state is not a JSON object"}
+    return {"state_exists": True, "stale_closed_partitions": stale_closed_partitions(repo, state)}
 
 
 def detect_scope(repo: Path, args: argparse.Namespace) -> str:
@@ -178,12 +250,14 @@ def build_packet(args: argparse.Namespace) -> dict[str, object]:
 
     changed_files = [line for line in name_status.splitlines() if line.strip()]
     head = git(repo, "rev-parse", "HEAD", check=False).stdout.strip()
+    branch = current_branch(repo)
     sot_md, has_sot = render_source_of_truth(args.intent, [Path(p) for p in args.include])
     generated = _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds")
 
     meta_lines = [
         f"- scope: {range_meta['scope']}",
         f"- range: {range_meta['range']}",
+        f"- branch: {branch or '(detached)'}",
         f"- head: {head or '(unknown)'}",
         f"- changed files: {len(changed_files)}",
         f"- generated (UTC): {generated}",
@@ -206,10 +280,19 @@ def build_packet(args: argparse.Namespace) -> dict[str, object]:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(packet, encoding="utf-8")
 
+    toplevel = git(repo, "rev-parse", "--show-toplevel", check=False).stdout.strip()
+    repo_root = Path(toplevel) if toplevel else repo
+    state_base = range_meta.get("base") or resolve_base(repo, None)
+    state_path = state_path_for(out_path.parent, repo_root, branch, state_base, head)
+
     return {
         "packet_path": str(out_path),
+        "output_dir_is_tmp": out_path.parent.resolve() == Path(tempfile.gettempdir()).resolve(),
+        "state_path": str(state_path),
+        **read_state(repo, state_path),
         "scope": range_meta["scope"],
         "base": range_meta.get("base", ""),
+        "branch": branch,
         "head": head,
         "changed_files": len(changed_files),
         "has_source_of_truth": has_sot,

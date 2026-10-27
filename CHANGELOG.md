@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `antislop-writing` — flags a second family of AI tells: compressed prose that packs meaning into the fewest words and leaves the reader to unpack it. The new tells are noun stacks, nouns used ad hoc as verbs ("calendar it"), things given a person's verb ("this asymmetry bites"), a dropped optional "that" before a long clause, and a subject far from its verb. These tells are fixed by restoring the small words a reader uses to parse a sentence, so "lean" no longer means cutting those words. The guidance follows Clark, Martin & Mahowald (2026), arXiv:2610.29162.
 - `sdd-verify`, `sdd-propose` — `sdd-verify` checks only whether the evidence covers each claim, so re-runs on unchanged code converge; it no longer hunts for defects and instead offers `code-review` (and `security-scan` for security-boundary changes). Universal claims over uncontrolled inputs with only example tests get a WARNING, and `sdd-propose` plans a property-based or differential test for them. Narrowing a requirement must state the behavior it gives up.
+- `code-review` — defect search runs over a list of domain features built before the search, with a small-model explorer per feature, a runner for their inputs, a variant hunt per confirmed defect, and a test adversary. The list is saved per branch so later reviews explore only open or changed features. Reviews run at quick, standard, or deep depth.
 
 ## [3.6.0] - 2026-10-20
 

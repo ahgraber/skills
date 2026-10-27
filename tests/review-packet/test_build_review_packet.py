@@ -8,6 +8,7 @@
 """Tests for scripts/build_review_packet.py."""
 
 import importlib.util
+import json
 from pathlib import Path
 import subprocess
 
@@ -146,6 +147,120 @@ def test_default_out_falls_back_to_tmpdir(tmp_path, monkeypatch):
     out = _run_default_out(repo)
     assert out.parent == tmp
     assert not (repo / ".review").exists()
+
+
+def test_branch_is_reported_in_json_and_packet(tmp_path):
+    repo = _init_repo(tmp_path)
+    _git(repo, "checkout", "-qb", "feature/x")
+    (repo / "a.txt").write_text("changed\n")
+    _git(repo, "add", "a.txt")
+    out = tmp_path / "packet.md"
+    result = _run(repo, "--staged", out=out)
+    assert result["branch"] == "feature/x"
+    assert "- branch: feature/x" in out.read_text()
+
+
+def test_state_path_sits_beside_packet_and_is_keyed_by_repo_and_branch(tmp_path):
+    repo = _init_repo(tmp_path)
+    _git(repo, "checkout", "-qb", "feature/x")
+    (repo / "a.txt").write_text("changed\n")
+    _git(repo, "add", "a.txt")
+    out = tmp_path / "out" / "packet.md"
+    result = _run(repo, "--staged", out=out)
+    state = Path(result["state_path"])
+    assert state.parent == out.parent
+    assert "repo" in state.name
+    assert "feature-x" in state.name
+    assert result["state_exists"] is False
+    assert result["stale_closed_partitions"] == []
+
+
+def _write_state(path: Path, partitions: list[dict]) -> None:
+    path.write_text(json.dumps({"version": 1, "partitions": partitions}))
+
+
+def _head(repo: Path) -> str:
+    return subprocess.run(  # noqa: S603
+        ["git", "-C", str(repo), "rev-parse", "HEAD"], check=True, capture_output=True, text=True
+    ).stdout.strip()
+
+
+def _state_run(repo: Path, tmp_path: Path, partitions_for_head) -> dict:
+    out = tmp_path / "out" / "packet.md"
+    out.parent.mkdir(exist_ok=True)
+    first = _run(repo, "--worktree", out=out)
+    _write_state(Path(first["state_path"]), partitions_for_head(_head(repo)))
+    return first
+
+
+def test_closed_partition_with_unchanged_paths_is_not_stale(tmp_path):
+    repo = _init_repo(tmp_path)
+    (repo / "b.txt").write_text("other\n")
+    _state_run(
+        repo,
+        tmp_path,
+        lambda head: [{"id": "P1", "status": "closed", "paths": ["a.txt"], "explored": [{"head": head}]}],
+    )
+    result = _run(repo, "--worktree", out=tmp_path / "out" / "packet.md")
+    assert result["state_exists"] is True
+    assert result["stale_closed_partitions"] == []
+
+
+def test_closed_partition_whose_path_changed_is_stale(tmp_path):
+    repo = _init_repo(tmp_path)
+    _state_run(
+        repo,
+        tmp_path,
+        lambda head: [
+            {"id": "P1", "status": "closed", "paths": ["a.txt"], "explored": [{"head": head}]},
+            {"id": "P2", "status": "open", "paths": ["a.txt"], "explored": [{"head": head}]},
+        ],
+    )
+    (repo / "a.txt").write_text("edited after the partition closed\n")
+    result = _run(repo, "--worktree", out=tmp_path / "out" / "packet.md")
+    assert result["stale_closed_partitions"] == ["P1"]
+
+
+@pytest.mark.parametrize(
+    "partition",
+    [
+        {"id": "P1", "status": "closed", "paths": [], "explored": [{"head": "HEAD"}]},
+        {"id": "P1", "status": "closed", "paths": ["a.txt"], "explored": []},
+        {"id": "P1", "status": "closed", "paths": ["a.txt"], "explored": [{"head": "0" * 40}]},
+    ],
+    ids=["no-paths", "never-explored", "head-missing"],
+)
+def test_closed_partition_without_usable_history_is_stale(tmp_path, partition):
+    repo = _init_repo(tmp_path)
+    (repo / "b.txt").write_text("other\n")
+    _state_run(repo, tmp_path, lambda _head: [partition])
+    result = _run(repo, "--worktree", out=tmp_path / "out" / "packet.md")
+    assert result["stale_closed_partitions"] == ["P1"]
+
+
+def test_malformed_state_is_reported_not_raised(tmp_path):
+    repo = _init_repo(tmp_path)
+    (repo / "a.txt").write_text("changed\n")
+    out = tmp_path / "out" / "packet.md"
+    out.parent.mkdir()
+    first = _run(repo, "--worktree", out=out)
+    Path(first["state_path"]).write_text("{not json")
+    result = _run(repo, "--worktree", out=out)
+    assert result["state_exists"] is True
+    assert "state_error" in result
+
+
+def test_output_dir_is_tmp_flags_the_fallback(tmp_path, monkeypatch):
+    repo = _init_repo(tmp_path)
+    (repo / "a.txt").write_text("changed\n")
+    _git(repo, "add", "a.txt")
+    tmp = tmp_path / "tmp"
+    tmp.mkdir()
+    monkeypatch.setattr(brp.tempfile, "tempdir", str(tmp))
+    args = brp.parse_args(["--staged", "--repo", str(repo)])
+    assert brp.build_packet(args)["output_dir_is_tmp"] is True
+    (repo / ".review").mkdir()
+    assert brp.build_packet(args)["output_dir_is_tmp"] is False
 
 
 if __name__ == "__main__":

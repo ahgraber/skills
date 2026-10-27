@@ -50,7 +50,7 @@ Act as a senior engineer: thorough, pragmatic, impact-first.
 | Structure & Maintainability | Coupling, duplication, separation of concerns                                                                                |
 | Data Representation         | Structures that can hold invalid states, replicate information, or make every consumer enforce their rules                   |
 | Best Practices              | Language/framework conventions, SOLID, DRY                                                                                   |
-| Test Adequacy               | Missing tests for behavior changes, regression gaps                                                                          |
+| Test Adequacy               | Wrong implementations the tests would still accept, missing tests for behavior changes, regression gaps                      |
 | Performance                 | N+1 queries, unbounded loops/fan-out, missing pagination, sync calls in hot paths, large allocations, missed async           |
 | Security & Risk             | OWASP Top 10: access control, injection, crypto, auth, supply chain, logging, error handling — use `securing-code` checklist |
 | Documentation               | Misleading comments, missing doc for public API                                                                              |
@@ -62,6 +62,7 @@ Act as a senior engineer: thorough, pragmatic, impact-first.
 - **Nitpick overload** — burying critical issues under dozens of style nitpicks.
 - **Ignoring intent** — critiquing design choices without understanding the constraints or goals behind them.
 - **Incomplete scope** — reviewing only one file when the change spans multiple files or modules.
+- **Searching near the last defect** — a re-review that looks only at last review's findings and their neighbors finds one more class of defect per run; start from the partition list instead.
 
 ## Workflow
 
@@ -82,10 +83,16 @@ Run `scripts/build_review_packet.py` (shipped in this skill's `scripts/`) to res
 scripts/build_review_packet.py --intent "<what this change is for>" --include <spec-or-plan-if-any>
 ```
 
-It prints JSON with `packet_path` and `has_source_of_truth`.
+It prints JSON with `packet_path`, `has_source_of_truth`, `branch`, `state_path`, `state_exists`, `stale_closed_partitions`, and `output_dir_is_tmp`.
 Without `--out`, the packet goes to the first of `.review/`, `._scratch/`, or `.scratch/` that exists at the repo root, else `$TMPDIR`; when this run or the project instructions set a report destination (see Step 3), pass `--out` to put the packet beside it.
 Use `packet_path` as the deterministic scope baseline for the rest of the review and for every subagent dispatch — it fixes _what changed_ so no one re-derives it, but it is a floor, not a ceiling: keep reading surrounding code, callers, history, and tests beyond the diff as the review demands.
 The raw git commands below are what the script automates; reach for them directly only when scoping a review the script's scope detection does not cover.
+
+**Review state.** `state_path` names the file that keeps this branch's partition list across reviews (`references/partition-discovery.md` § 6).
+When `output_dir_is_tmp` is true, the state lands in `$TMPDIR`, which a later session or another sandbox may not see, so later reviews would start over.
+Ask the user once per repo: "May I create `.review/` at the repo root for review files and state, with a `.gitignore` so git ignores it?"
+If the user agrees, create `.review/` with a `.gitignore` that contains `*`, and rebuild the packet.
+If the user declines, or the run cannot ask, continue in `$TMPDIR` and say in the report that later reviews will not see this review's state.
 
 **Source of truth.**
 If `has_source_of_truth` is false, the packet is a bare diff.
@@ -139,6 +146,7 @@ The reference doc specifies required and optional tool calls per phase, with dec
 **Parallel subagent gate:**
 
 If the `Agent` tool is available and the change is non-trivial, plan to use the parallel-subagent path in Step 2.
+A change that touches a security boundary or that a spec drives takes the parallel path at any size.
 See `references/parallel-subagent-review.md` for the thresholds, dispatch pattern, and prompt templates.
 Otherwise continue with the single-agent path.
 These dispatch rules are purpose-built for code review and take precedence over any general subagent skill (e.g. `subagent-patterns`) when the work is a code review.
@@ -165,7 +173,11 @@ Build a prioritized review plan before reading any code in detail.
 - Call `get_review_context_tool(base=<base>)` for token-efficient structural context instead of reading entire changed files.
 - Optionally call `get_affected_flows_tool` (change touches 2+ files), `get_architecture_overview_tool` (change spans 3+ directories), or `get_impact_radius_tool` (need raw blast-radius data) as the scope warrants.
 
-**Triage output:** Produce a prioritized file list and a brief review plan identifying the highest-risk areas to focus on.
+**Partition list:** Build the list of domain features the changed code handles, before looking for defects (`references/partition-discovery.md` § 1).
+When `state_exists` is true, load the saved list first, reopen `stale_closed_partitions`, and add partitions for code the saved list does not reach.
+Do not take partitions from the last review's findings.
+
+**Triage output:** Produce a prioritized file list, a ranked partition list, and a brief review plan identifying the highest-risk areas to focus on.
 
 ### Step 2 — Structured Review (No Edits)
 
@@ -173,8 +185,9 @@ Pick the path set at the Step 0 parallel subagent gate.
 
 **Parallel-subagent path** (when gate is active):
 
-Follow `references/parallel-subagent-review.md` — fan out quality, spec-compliance, and security subagents in parallel (plus architecture when warranted), synthesize, dispatch a devil's-advocate subagent for a challenge pass, then do final synthesis and tiebreak yourself.
-The security subagent (Agent 4) is always dispatched; it uses the OWASP Top 10:2025 checklist from `securing-code` skill references.
+Follow `references/parallel-subagent-review.md` — dispatch one partition explorer per open partition alongside the spec-compliance, quality and correctness, test-adversary, and security lenses (plus architecture when warranted), run the explorers' distinguishing inputs, hunt variants of each confirmed defect, dispatch a devil's-advocate subagent for a challenge pass on what could not be run, then do final synthesis and tiebreak yourself.
+The security subagent is always dispatched; it uses the OWASP Top 10:2025 checklist from `securing-code` skill references.
+Security partitions come from the `securing-code` threat-modeling, OWASP Top 10:2025, and tier3 checklists whenever the change touches a security boundary.
 Include the architecture subagent when: pre-merge / pre-PR review, the user mentions "merge", the user explicitly requests architectural review, or you judge it necessary (confirm with the user before dispatching).
 Clarify author intent with the user before dispatching; subagents have no conversation history.
 Skip the single-agent steps below — the reference doc drives this path end-to-end through Step 3.
@@ -183,7 +196,11 @@ Skip the single-agent steps below — the reference doc drives this path end-to-
 
 For each changed file or module, summarize what changed and why.
 Review tests before implementation: do tests exist for the changed behavior, do they assert behavior (not internals), do they cover edge cases and regressions?
+For each test, ask what wrong implementation it would still accept; when you can, run a distinguishing input (probe scripts under `$TMPDIR` only, the project's own runner, no repository edits).
 Test gaps shape what to scrutinize in the implementation pass.
+
+Work through the partition list one partition at a time, using the explorer task in `references/partition-discovery.md` § 2.
+For each confirmed defect, run the variant hunt (§ 4) yourself, unless the user asked for a quick review.
 
 Review the data structures before the logic.
 A structure that can hold invalid states leaves each consumer to guard against them or assume them away, and both choices generate findings elsewhere in this review; correcting the shape retires them at the source.
@@ -239,7 +256,16 @@ Start it with the scope, base and head, the packet path, and the date, then the 
 If the write fails, say so in chat; the chat report then is the only copy.
 
 The file does not replace the chat report.
-End with the prioritized issues and the report path.
+
+**Save the review state.**
+Write the partition list to `state_path` in the format of `references/partition-discovery.md` § 6, and append this run to `runs` with the report path.
+Keep findings out of the state file; triage on the next review reads it.
+
+**Offer a security scan.**
+When the change touches a security boundary (`references/partition-discovery.md` § 1), offer `security-scan` in one line, or `security-deep-scan` when the user needs exhaustive coverage.
+Run neither without the user's approval.
+
+End with the prioritized issues, the report path, and the number of partitions still open.
 
 ### Step 4 — Apply Changes (Only on Explicit Request)
 
@@ -263,4 +289,5 @@ When a default conflicts with project constraints, suggest a better-fit alternat
 - `references/git-diagnostics-before-review.md` — git commands for assessing codebase health before reviewing.
 - `references/code-review-graph-integration.md` — tool dispatch playbook for `code-review-graph` MCP plugin (required + optional tools per phase, decision guide).
 - `references/parallel-subagent-review.md` — parallel-subagent dispatch path: thresholds, agent prompt templates, synthesis and red-team steps.
-- `securing-code` skill (`references/tier2-review.md`, `references/tier3-*.md`) — OWASP-mapped security checklist used by the security subagent and single-agent security lens.
+- `references/partition-discovery.md` — partition list, breadth pass, judging, variant hunt, depth, closure rule, and review-state format.
+- `securing-code` skill (`references/tier2-review.md`, `references/tier3-*.md`) — OWASP-mapped security checklist; source of security partitions on the parallel path and of the single-agent security lens.
