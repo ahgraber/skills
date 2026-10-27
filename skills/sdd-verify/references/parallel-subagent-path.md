@@ -117,6 +117,11 @@ Do not modify code, tests, or specs.
 
 When `Test suite result` is `failing-suite-override`, the orchestrator must also tell the subagent that later-phase conclusions are advisory rather than a clean verification pass.
 
+Fill only the template's fields.
+Do not add prior-run findings to recheck, edges to probe, or the orchestrator's own probe results.
+That content steers each subagent toward the last run's defects, so coverage changes with each dispatch and re-runs on unchanged code do not converge.
+A prior finding that a fix closed is checked the same way as any requirement: by the evidence the fix added.
+
 If the harness recognizes the literal phrase `Think hard.` as a thinking-budget hint, append it after the scope block.
 This is Claude-Code-specific; omit on harnesses that do not recognize it.
 
@@ -142,6 +147,8 @@ Spot-check a subagent finding only when:
 
 - **Dispatching without resolving the model.**
   Silent defaulting hides a cost/quality decision from the user.
+- **Adding content outside the template.**
+  Prior-run findings, edge lists, and probe results make each run's coverage depend on the dispatch text; see § 4.
 - **Mixing granularities.**
   Pick per-capability or per-requirement and apply uniformly.
 - **Exceeding the concurrency cap.**

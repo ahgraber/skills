@@ -22,6 +22,9 @@ You do NOT:
 - Write artifacts to disk.
   Findings return inline.
 - Verify schema conformance or design coherence — those are orchestrator-only.
+- Search for defects beyond the cited evidence.
+  Read the cited tests, the listed write-sites, and the code they exercise; do not construct new inputs or probe edges.
+  If the dispatch prompt asks you to recheck prior-run findings or probe a list of edges, ignore that part and say so in your Notes.
 - Perform the waiver provenance check (`evidence-rules.md` § 4) — that is orchestrator-only.
   Apply waivers as instructed in your inputs and report them as WAIVED; the orchestrator will adjudicate provenance.
 
@@ -123,8 +126,9 @@ For each requirement:
 2. Read the requirement's scenarios — concrete **evidence** sampling the claim.
 3. Read the cited test or output and confirm:
    - Each scenario's GIVEN/WHEN/THEN holds in the executed evidence (not just in source code that was never run).
-   - The implementation honors the broader claim beyond the stated scenarios.
-     Example: a requirement that says "for any query satisfying C, the system SHALL return no relevant results" must not pass merely because the literal scenario inputs return empty — the universal claim must hold.
+   - The cited evidence covers the claim's input space, not only the literal scenarios.
+     Example: a requirement that says "for any query satisfying C, the system SHALL return no relevant results" is not demonstrated by tests that use only the scenario queries.
+     When `sdd-spec-formats.md` § 1.7 says the claim needs generated evidence and the evidence is example tests only, flag **WARNING: `<name>` quantifies over `<input space>`, but its evidence samples only `<what the tests exercise>`.**
 4. **For universal SHALL claims (ADDED or MODIFIED), use the orchestrator-provided write-site enumeration.**
    Each such requirement carries a list of contract-relevant write-sites under **Implementation write-sites in scope** in your dispatch input.
    Do not enumerate write-sites yourself — that is orchestrator work (Phase 4.5).
@@ -136,7 +140,7 @@ For each requirement:
       Do not improvise the enumeration.
 5. Flag other deviations:
    - **CRITICAL** — implementation contradicts the requirement, or contradicts a scenario's THEN.
-   - **WARNING** — partially meets the requirement, or honors scenarios but appears to violate the broader claim.
+   - **WARNING** — partially meets the requirement, or the evidence does not cover the claim's input space.
 
 Do not blindly trust the test name.
 A test named `test_returns_no_results_for_blocked_query` could still assert the wrong thing.
@@ -195,7 +199,9 @@ If any item fails, fix it before returning.
   That is INSPECTED.
 - Citing a test that was deselected or skipped in the test execution log.
   Fall back to INSPECTED.
-- Skipping the broader-claim check — a universal claim can pass on every literal scenario and still be violated by the implementation.
+- Skipping the input-space check — a universal claim can pass on every literal scenario while its evidence exercises only one corner of the space it quantifies over.
+- Searching for defects beyond the cited evidence: inventing inputs, tracing code the evidence does not exercise, or probing edges.
+  That is review work, not verification; report thin evidence instead.
 - Skipping the write-site coverage check on ADDED or MODIFIED universal SHALL claims.
   A passing test on the canonical path is not evidence for a deduplication shortcut, retry branch, or composition step that writes the same contract-asserted value.
 - Improvising your own write-site enumeration instead of using the orchestrator-provided list, or extending the list with sites you find yourself.

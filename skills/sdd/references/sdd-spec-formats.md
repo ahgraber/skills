@@ -111,8 +111,9 @@ Consequences:
    Whether the requirement's own promise is contract is a separate question, answered by the § 1.4 refactor test on the requirement text.
    GIVEN and WHEN lines may call public methods; they set up the case.
 
-Verification in SDD samples these claims via scenarios and implementation tracing — it does not formally prove them.
+Verification in SDD checks that the evidence samples these claims — it does not formally prove them, and it does not search for defects beyond the evidence.
 Strong universal claims supported by thin, happy-path-only scenarios are a risk flag, not a fault.
+See § 1.7 for the universal claims whose evidence must be generated, not hand-picked.
 Write the strongest claim you believe holds; select scenarios that would catch a plausible failure if the claim were violated.
 
 ### 1.6 Partition heuristic for universal claims
@@ -158,6 +159,34 @@ If you reach for implementation terms (write-site, code path, branch, function, 
 
 - `sdd-propose`, `sdd-translate`, `sdd-derive` apply it at spec-authoring time.
 - `sdd-verify` applies it at verification time as the "partition-incomplete coverage" smell — when partitions are evident from the heuristic but scenarios cover only some, that is a WARNING distinct from "universal claim, single scenario."
+
+### 1.7 Claims that need generated evidence
+
+Example tests sample a universal claim at hand-picked points.
+Some claims quantify over a space that hand-picked points cannot cover, and their defects sit in combinations no one wrote down.
+Those claims need generated evidence: a property-based test, which checks a stated rule over generated inputs, or a differential test, which compares results with an oracle over generated inputs.
+
+A universal SHALL needs generated evidence when both conditions hold:
+
+1. The claim quantifies over inputs or states that the system does not control: source text, paths, URLs, documents, event sequences, or concurrent writers.
+2. The input domain is unbounded, or its partitions combine, so the scenarios cannot name every case.
+
+A claim does not need generated evidence when it is one of these:
+
+- A claim over a fixed enumeration: flags, enum values, an operation list.
+- A signature or existence claim.
+- A metric gate on a fixed dataset.
+- A claim whose only oracle is a real external system: a kernel, a VM, a remote service, or wall-clock timing.
+
+Those claims keep one scenario per partition (§ 1.6).
+
+An oracle is any independent way to compute the expected result: a reference implementation, the system the claim says to match (for example, "as bash parses it"), a slower in-repo path, or a model of the state.
+The generator covers the claim's partitions (§ 1.6) and the features of the domain the claim quantifies over.
+
+**Where this rule is enforced.**
+
+- `sdd-propose` writes a generated-evidence test task for each such claim in Phase 6.
+- `sdd-verify` flags such a claim whose evidence is example tests only as a WARNING (Phase 5).
 
 ## 2. RFC 2119 Keywords
 

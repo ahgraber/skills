@@ -181,15 +181,31 @@ See `references/sdd-change-formats.md` for the tasks format.
 Rules:
 
 - Tasks are atomic — each can be done and tested independently
+
 - Order tasks and groups by build dependency per `references/sdd-change-formats.md` § 4 — each task must depend only on capabilities built by earlier tasks; never order alphabetically or by order of discussion
+
 - Group by component or phase, sequencing foundation groups before consumer groups
+
 - Every task is a concrete action, not an outcome
+
 - Every SHALL requirement must be paired with at least one task that produces runnable evidence — a named test (unit, integration, or e2e), a schema check, or a captured-output step.
   If automated evidence is genuinely infeasible, the requirement must appear in `design.md` § Verification Waivers with a manual evidence reference.
   `sdd-verify` enforces this rule.
+
 - For each SHALL, enumerate the **foreseeable write-sites** the design implies — every code path the design names that produces or modifies the contract-asserted value: canonical path plus any alternative paths in `design.md` (deduplication shortcuts, cache fast-paths, retry/fallback branches, idempotency early-returns, merge or composition steps).
   Each foreseeable write-site needs its own paired evidence-producing test task — one test on the canonical path is not evidence for the shortcut, retry, or merge.
   Write-sites that emerge later during implementation are handled by `sdd-apply`'s write-site emergence rule and `sdd-verify`'s write-site enumeration; covering the foreseeable ones here keeps verify from flagging them.
+
+- For each universal SHALL that needs generated evidence (`references/sdd-spec-formats.md` § 1.7), add a property-based or differential test task.
+  Name in the task:
+
+  - its form: a pure-function property, a stateful model (a sequence of generated operations checked against a model of the state), or a differential test;
+  - the property, or the oracle;
+  - the partitions and domain features its generator covers.
+
+  One task can cover several requirements that share an oracle or a generator.
+  When a property test already covers part of the claim, the task extends that test.
+  Add the task by default; the user deletes it during task review if they do not want it.
 
 ### Phase 7: Validate
 
@@ -228,6 +244,8 @@ Rules:
 - [ ] Every SHALL requirement maps to at least one evidence-producing task (test, schema check, or captured output) OR appears in `design.md` § Verification Waivers with a manual evidence reference
 
 - [ ] Every foreseeable write-site implied by `design.md` (canonical path plus any alternative paths the design names — shortcuts, retries, merges) is paired with its own evidence-producing test task
+
+- [ ] Every universal SHALL that needs generated evidence (`references/sdd-spec-formats.md` § 1.7) is covered by a property-based or differential test task that names its form, its property or oracle, and the partitions its generator covers
 
 - [ ] No delta markers in `.specs/specs/` (baseline specs untouched)
 

@@ -11,8 +11,11 @@ Produces a structured report across **six** dimensions (Completeness, Scope, Con
 
 Specs are contracts — property statements about observable state (see `references/sdd-spec-formats.md` § 1).
 Scenarios are evidence that samples those contracts, not the contracts themselves (§ 1.5).
-`sdd-verify` samples: it checks that implementations honor the stated scenarios and traces through code for the broader contract claim.
-It does not formally prove universal properties — strong claims supported by thin scenarios are a risk flag, not a failure.
+`sdd-verify` checks evidence: it confirms that the cited tests and outputs demonstrate each contract claim and cover the claim's input space.
+It does not formally prove universal properties — strong claims supported by thin evidence are a risk flag, not a failure.
+It does not search for defects beyond the cited evidence.
+That search has no stopping point inside verify, so re-runs on unchanged code would keep finding new defects.
+Defect search belongs to `code-review` and `security-scan`, which verify offers at the end of every run (Phase 9).
 
 > `SPECS_ROOT` is resolved by the `sdd` router before this skill runs.
 > Replace `.specs/` with your project's actual specs root in all paths below.
@@ -55,7 +58,7 @@ Before starting, check `.specs/changes/<name>/tasks.md`:
 | ---------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Completeness** | Is everything done?                                | All tasks checked off, all delta spec requirements implemented                                                                                                           |
 | **Scope**        | Is everything in scope, and no more?               | Every meaningful code change traces to a requirement; every requirement and change traces up to a user story; no unspecified behavior and no value-less over-engineering |
-| **Contract**     | Does the implementation satisfy the spec contract? | Implementation honors each requirement's scenarios and the broader contract claim stated in the text                                                                     |
+| **Contract**     | Does the implementation satisfy the spec contract? | Cited evidence demonstrates each requirement's scenarios and covers the input space of the claim stated in the text                                                      |
 | **Coverage**     | Do scenarios meaningfully sample the contract?     | Scenarios span happy path, boundaries, and plausible failure modes — not trivially-passing cases                                                                         |
 | **Coherence**    | Does it follow the design?                         | Implementation follows decisions in `design.md`                                                                                                                          |
 | **Conformance**  | Do schemas match the specs?                        | Generated schema diff confirms spec requirements are reflected in the schema                                                                                             |
@@ -331,6 +334,7 @@ Run the spec-drift check in § 5.5: diff the delta specs from the proposal commi
 - A scenario change with no `design.md` § Spec Changes entry, or with `Approved by user: pending` → **CRITICAL: scenario change `<capability>: <scenario>` has no recorded user approval.**
 - A requirement change with no `design.md` Decision entry or no dated Resolved Questions line → **CRITICAL: requirement change `<capability>: <requirement>` was not approved by the user.**
 - A scenario change that narrows what its requirement guarantees but is recorded only as a scenario change → **CRITICAL: `<capability>: <scenario>` narrows its requirement and needs approval as a requirement change.**
+- A requirement change that narrows its requirement, whose Decision entry does not state the behavior the narrowing gives up (`references/sdd-change-formats.md` § 5.2) → **CRITICAL: `<capability>: <requirement>` narrows its requirement without stating the behavior it gives up.**
 - A § Spec Changes entry whose rationale is only that the code behaves this way → **WARNING: `<capability>: <scenario>` is supported only by the code it describes.**
 - A hunk whose only change replaces one internal method, symbol, or span name with another → **WARNING: `<capability>: <requirement>` pins a call path; state the outcome instead (`references/sdd-spec-formats.md` § 1.4).**
 
@@ -353,8 +357,13 @@ For each implemented requirement at TESTED or VERIFIED:
    For each enumerated write-site, check the test execution log for at least one cited test that exercises the contract _through that site_ — not just through the canonical path.
    If a write-site has no covering test in the log, flag **CRITICAL: partition-incomplete evidence — write-site `<path:line>` for SHALL `<name>` has no test coverage.**
    A passing test on one path is not evidence for a deduplication shortcut, retry branch, or composition step that writes the same value.
-5. Consider whether the implementation honors the broader claim beyond the stated scenarios (e.g., if the requirement says "for any query satisfying C, the system SHALL return no relevant results," check that the implementation doesn't only work on the scenario examples).
-6. Flag deviations as CRITICAL (contradicts requirement or scenario, or write-site lacks evidence) or WARNING (partially meets it, or honors scenarios but appears to violate the broader claim).
+5. **Check that the evidence covers the claim's input space.**
+   For each universal SHALL, compare the inputs the claim quantifies over with the inputs the cited evidence exercises: the write-sites from step 4, the partitions (`references/sdd-spec-formats.md` § 1.6), and generated evidence (§ 1.7).
+   For example, a requirement that says "for any query satisfying C, the system SHALL return no relevant results" is not demonstrated by tests that use only the scenario queries.
+   When § 1.7 says the claim needs generated evidence and the evidence is example tests only, flag **WARNING: `<name>` quantifies over `<input space>`, but its evidence samples only `<what the tests exercise>` — add a property or differential test, or use the `formal-verification` skill.**
+   Read only the cited evidence, the enumerated write-sites, and the code they exercise.
+   Do not construct new inputs, write probe scripts, or list edges to probe; that is defect search, and the Phase 9 review handoff owns it.
+6. Flag deviations as CRITICAL (the evidence or code read in this phase contradicts the requirement or a scenario, or a write-site lacks evidence) or WARNING (partially meets the requirement, or the evidence does not cover the claim's input space).
 
 ### Phase 6: Check Scenario Coverage
 
@@ -503,6 +512,22 @@ Only include checklist items for dimensions that actually applied — match what
 If the run has no remaining blockers but does include overrides, do not use the clean-pass template above.
 State instead that verification found issues the user explicitly chose not to let block sync, and that remediation remains open in `tasks.md`.
 
+#### Offer the Review Handoff
+
+Verify checks evidence; it does not search for defects.
+After the report, on every run, offer `code-review` in one line.
+When the change touches a security boundary, also offer `security-scan`.
+A change touches a security boundary when it parses or classifies untrusted input, makes an authorization, sandbox, or policy decision, or handles secrets or credentials.
+
+For each skill you offer, state what you will pass to it:
+
+- The change's delta specs and `design.md` as the source of truth (for `code-review`, through `build_review_packet.py --include`).
+- The universal SHALL claims this run flagged because their evidence does not cover their input space, as the areas to examine first.
+
+Run neither skill without the user's approval.
+If the user declines, end the run.
+A clean verify report states that the evidence covers the claims; do not present it as a finding that the code has no defects.
+
 ## Graceful Degradation
 
 | Missing artifact                  | Behavior                                                                  |
@@ -526,7 +551,10 @@ State instead that verification found issues the user explicitly chose not to le
 - Treating SUGGESTION-level issues as blockers, or treating coverage smells as CRITICAL.
 - Skipping graceful degradation — running verify is valid even with incomplete artifacts.
 - Not reading baseline specs for full behavioral context.
-- Checking only that scenarios pass, not whether the implementation honors the broader contract claim (`references/sdd-spec-formats.md` § 1.5 — scenarios are evidence, not definition).
+- Checking only that scenarios pass, not whether the evidence covers the claim's input space (`references/sdd-spec-formats.md` § 1.5 — scenarios are evidence, not definition).
+- Searching for defects beyond the cited evidence: constructing inputs, writing probe scripts, or adding edges to probe or prior-run findings to subagent prompts.
+  That search has no stopping point, and each run's coverage then depends on what the orchestrator wrote, so re-runs on unchanged code keep finding new defects and verify never converges.
+  Report thin evidence as a WARNING and offer the review handoff (Phase 9) instead.
 - Skipping write-site enumeration (the orchestrator step within Phase 4) for ADDED or MODIFIED universal SHALL claims — a passing test on the canonical path is not evidence for a deduplication shortcut, retry branch, or composition step that writes the same contract-asserted value.
 - Narrowing write-site enumeration to the change diff for MODIFIED requirements — pre-existing legacy write-sites the modified contract now applies to are exactly the ones least likely to appear in the diff, and they need coverage too.
 - Pushing write-site enumeration into subagents — subagents operate per-requirement; cross-cutting search is orchestrator work and belongs in Phase 4's enumeration step.
@@ -555,7 +583,7 @@ State instead that verification found issues the user explicitly chose not to le
 - `references/evidence-rules.md` — tiers, sufficiency rule, waivers, provenance check, citation format
 - `references/parallel-subagent-path.md` — availability gate, granularity, dispatch, synthesis
 - `references/verify-subagent.md` — canonical job description for subagents on the parallel path
-- `references/sdd-spec-formats.md` — contract shapes (§ 1.1), scenarios as evidence (§ 1.5), partition heuristic (§ 1.6)
+- `references/sdd-spec-formats.md` — contract shapes (§ 1.1), scenarios as evidence (§ 1.5), partition heuristic (§ 1.6), claims that need generated evidence (§ 1.7)
 - `references/sdd-change-formats.md` — task format (§ 3) and contract-relevant write-site definition (§ 3.1)
 - `references/sdd-schema.md` — schema evidence annotations (§ 1) and lifecycle policy (§ 4)
 - `scripts/check_modified_completeness.py` — deterministic dropped-scenario check (scenario names only, not body sub-clauses); exits non-zero on dropped baseline scenarios, wireable as a pre-commit/CI gate

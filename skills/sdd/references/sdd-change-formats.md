@@ -305,6 +305,11 @@ Record it in the same commit as the code:
 - A `design.md` Decision entry (Chosen, Rationale, Alternatives).
 - A dated line in the proposal's Resolved Questions that ends "Decided with the user".
 
+A change that narrows a requirement also states the behavior the narrowing gives up: the inputs, cases, or guarantees the requirement no longer covers.
+Put that statement in the request for approval and in the Decision entry's Rationale.
+A narrowing proposed after a verify or review finding often makes the finding pass while dropping behavior the user intended.
+The user decides on that behavior, not on the edit alone.
+
 If the change raises what every implementation of an extension point must guarantee (every backend, store, or plugin), also add a contract test that runs against each declared implementation.
 
 When an implementation change forces a spec edit but no caller or operator could observe a difference, the spec was pinning mechanism (`sdd-spec-formats.md` § 1.4).
@@ -354,6 +359,7 @@ The spec-drift check finds every spec edit made since the proposal was committed
 
    - A scenario change needs a `design.md` § Spec Changes entry with a dated `Approved by user` line.
    - A requirement change needs a `design.md` Decision entry and a dated Resolved Questions line.
+     A requirement change that narrows its requirement also needs the Decision entry to state the behavior given up (§ 5.2).
    - A rebase onto another change's synced text (§ 6.2) needs a `design.md` § Spec Changes entry whose **Source** names that change, with a dated `Approved by user` line.
 
 A hunk without its complete record blocks sync.
