@@ -60,9 +60,32 @@ WHEN receiving feedback on a work artifact:
    - If ground truth exists → check feedback against it
    - If no ground truth exists → surface this to the user before proceeding
 4. EVALUATE: Is this feedback sound given the artifact's context and constraints?
-5. RESPOND: Technical acknowledgment, reasoned pushback, or risk escalation
-6. REVISE: One item at a time, verify each
+5. GENERALIZE: For each accepted item, name its cause and class, and search for other instances
+6. RESPOND: Technical acknowledgment, reasoned pushback, or risk escalation
+7. REVISE: One cause at a time, verify each
 ```
+
+## Generalizing From Items
+
+**Hard gate.**
+Treat review items as a sample of the artifact's defects, not a complete list: a reviewer who found one instance seldom found every instance.
+Run this step for every item you will revise for, however you came to accept it, once all unclear items are answered.
+Skip typo and formatting items.
+
+1. Name the cause (the reason the defect exists; list each plausible one) and the class: a predicate as broad as the cause, with no file, line, section, identifier, or heading in it.
+   A location in the predicate anchors the search at that location.
+2. Group items by cause; a shared cause is one finding.
+3. Search for the class in the artifact under review and its neighbors: for code, its callers and callees; for a document section, the sections it cites and the sections that cite it.
+4. Treat each match as a candidate.
+   Rule one out only with named evidence that it differs on purpose: a guard, a contract, a comment, or a test.
+   If most matches share the cited site's form, the cited site follows a convention: present the convention to the user as a decision.
+5. If the cause is upstream of the artifact (an assumption, a design decision, a requirement, or a test gap), name it and let the user decide.
+
+Report each cause with its predicate, the scope searched, the confirmed instances, and the ruled-out candidates with their evidence; one line is enough when nothing else matched.
+Fix a cause with the smallest change that removes every instance; propose a new abstraction, do not build it.
+An instance inside the artifact is not added scope and follows the user's pacing, except a Polish-tier class (Simple fixes, for code): report its count and wait for opt-in.
+An instance in a neighbor is a separate finding.
+A blocking instance can get a local fix first.
 
 ## Pacing: When To Act vs. When To Wait
 
@@ -175,8 +198,8 @@ Name the risk, name the cost, and hand the decision to the user.
 When feedback is correct:
 
 ```text
-"Fixed. [Brief description of what changed]"
-"Good catch — [specific issue]. Fixed in [location]."
+"Fixed. [Brief description of what changed]. [The class: other sites fixed, N other instances found and held for your call, or no other instance]."
+"Good catch — [specific issue]. Fixed in [locations]; [the class and the scope searched]."
 [Just revise and show the result]
 ```
 
@@ -188,8 +211,8 @@ Fixing the problem demonstrates that you heard the feedback.
 When you pushed back and were wrong:
 
 ```text
-"You were right — I checked [X] and it does [Y]. Revising now."
-"Verified and you're correct. My initial understanding was wrong because [reason]. Fixing."
+"You were right — I checked [X] and it does [Y]. Checking the rest of the class before I revise."
+"Verified and you're correct. My initial understanding was wrong because [reason]. The class is [predicate]; searching for other instances."
 ```
 
 State the correction factually and move on.
@@ -202,7 +225,9 @@ No long apologies, no defending why you pushed back.
 | Performative agreement                                 | State the requirement or just act                             |
 | Revising before verifying                              | Check against ground truth first                              |
 | Assuming ground truth exists                           | Surface when it doesn't — ask the user                        |
-| Batch revisions without checking                       | One at a time, verify each                                    |
+| Batch revisions without checking                       | One cause at a time, verify each                              |
+| Fixing only the cited instance                         | Name the cause and class, search the artifact and neighbors   |
+| Searching only near the cited location                 | State the class without its location, then search every site  |
 | Assuming reviewer is right                             | Especially for external feedback — verify                     |
 | Avoiding pushback                                      | Correctness over comfort                                      |
 | Partial revision of related items                      | Clarify all unclear items first                               |

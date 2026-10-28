@@ -14,6 +14,8 @@ Use whatever tools give the most complete picture — graph tools for structural
 - **Check constraints** — platform, version, and compatibility requirements that may not be visible in the diff.
 - **Read surrounding context** — a change that looks wrong in isolation may be correct given the broader module.
   Use structural tools to understand the neighborhood before judging.
+- **Search for siblings** — run the search in `Generalizing From Items` with the tools above: structural tools for callers and callees, text search for the same form at other sites.
+  For code, a class is an input form, an invariant, or a convention.
 
 ## YAGNI Checks
 
@@ -36,5 +38,5 @@ Override the general revision ordering with this code-specific sequence:
    - **Blocking issues** — breaks, security vulnerabilities, data loss risks
    - **Simple fixes** — typos, imports, naming, obvious corrections
    - **Complex fixes** — refactoring, logic changes, architectural adjustments
-3. Test each fix individually
+3. Test each fix individually; for a behavioral fix, test the input form of the class, not only the reported case
 4. Verify no regressions after each change
