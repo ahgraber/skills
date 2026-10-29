@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `code-review` — defect search runs over a list of domain features built before the search, with a small-model explorer per feature, a runner for their inputs, a variant hunt per confirmed defect, and a test adversary. The list is saved per branch so later reviews explore only open or changed features. Reviews run at quick, standard, or deep depth.
 - `receiving-feedback` — treats review items as a sample, not a complete list. For each accepted item, the agent names the cause and a class as broad as the cause, then searches the artifact and its neighbors for other instances. A site is ruled out only with evidence that it differs on purpose, and a class that follows the artifact's convention goes to the user as a decision. Fixes target the cause; instances outside the reviewed artifact are reported as separate findings.
 
+### Fixed
+
+- `sdd`, `sdd-sync`, `sdd-verify` — a `<!-- modified-removes: ... -->` marker can name a baseline scenario whose name contains `,` or `;`. When the whole marker names one scenario, it removes only that scenario; otherwise it is read as a `,`/`;`-separated list as before. Such a name needs its own marker. The rule that scenario names avoid commas and semicolons is gone.
+
 ## [3.6.0] - 2026-10-20
 
 ### Changed

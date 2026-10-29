@@ -98,6 +98,31 @@ def test_allowlisted_drop__passes(tmp_path):
     assert cmc.main([str(tmp_path), "--change", "c"]) == 0
 
 
+def test_allowlisted_drop_of_name_with_separators__passes(tmp_path):
+    name = "Routes answer uncredentialed, and disclose only; what runs"
+    _baseline(tmp_path, "alpha", _baseline_body("Foo", "ScenA", name))
+    _delta(tmp_path, "c", "alpha", _delta_body("Foo", "ScenA", allow=name))
+
+    assert cmc.main([str(tmp_path), "--change", "c"]) == 0
+
+
+def test_allowlist_list_of_plain_names__passes(tmp_path):
+    _baseline(tmp_path, "alpha", _baseline_body("Foo", "ScenA", "ScenB", "ScenC"))
+    _delta(tmp_path, "c", "alpha", _delta_body("Foo", "ScenA", allow="ScenB; ScenC"))
+
+    assert cmc.main([str(tmp_path), "--change", "c"]) == 0
+
+
+def test_allowlist_whole_name_match__does_not_also_allow_its_parts(tmp_path, capsys):
+    _baseline(tmp_path, "alpha", _baseline_body("Foo", "A, B", "A", "B"))
+    _delta(tmp_path, "c", "alpha", _delta_body("Foo", "A", allow="A, B"))
+
+    rc = cmc.main([str(tmp_path), "--change", "c"])
+
+    assert rc == 1
+    assert "absent from MODIFIED delta block: B\n" in capsys.readouterr().out
+
+
 def test_modified_capability_without_baseline__notes_and_passes(tmp_path, capsys):
     _delta(tmp_path, "c", "gamma", _delta_body("Baz", "ScenZ"))
 

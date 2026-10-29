@@ -49,6 +49,10 @@ Intentional scenario removal:
 
       <!-- modified-removes: OldScenarioName, AnotherScenario -->
 
+  A marker whose whole payload names a baseline scenario removes that scenario
+  only, so a name that contains `,` or `;` takes a marker of its own. Otherwise
+  the payload is a `,`/`;`-separated list of names.
+
 Stacked changes:
   A MODIFIED requirement with no matching baseline is a note, not a failure: a
   later change can MODIFY a requirement added by an earlier unsynced change. Re-run
@@ -108,7 +112,7 @@ def _code_line_indices(text: str, lines: list[str]) -> tuple[set[int], bool]:
 class Requirement:
     name: str  # original display name (last seen if duplicated)
     scenarios: list[str] = field(default_factory=list)  # original, stripped
-    allow_drops: set[str] = field(default_factory=set)
+    allow_drops: list[str] = field(default_factory=list)  # raw marker payloads
     has_previously: bool = False
 
 
@@ -163,9 +167,7 @@ def parse_requirements(text: str, *, modified_only: bool) -> ParsedSpec:
             current.has_previously = True
         allow = ALLOW_DROP.search(line)
         if allow:
-            for nm in re.split(r"[;,]", allow.group(1)):
-                if nm.strip():
-                    current.allow_drops.add(nm.strip())
+            current.allow_drops.append(allow.group(1))
     return ParsedSpec(requirements=reqs, duplicate_names=duplicates, unclosed_fence=unclosed)
 
 
@@ -182,6 +184,23 @@ def _read(path: Path) -> tuple[str | None, str | None]:
         return path.read_text(encoding="utf-8"), None
     except (OSError, UnicodeDecodeError) as exc:
         return None, f"{path}: cannot read ({type(exc).__name__})"
+
+
+def _allowed_drops(payloads: list[str], baseline_scenarios: list[str]) -> set[str]:
+    """Resolve `modified-removes` payloads to the normalized scenario names they allow.
+
+    A payload that names a baseline scenario whole allows that scenario only;
+    any other payload is split on `,` and `;`.
+    """
+    baseline_norm = {normalize(s) for s in baseline_scenarios}
+    allowed: set[str] = set()
+    for payload in payloads:
+        whole = normalize(payload)
+        if whole in baseline_norm:
+            allowed.add(whole)
+        else:
+            allowed.update(normalize(nm) for nm in re.split(r"[;,]", payload) if nm.strip())
+    return allowed
 
 
 def _diff_requirement(
@@ -210,7 +229,7 @@ def _diff_requirement(
             "(differ only by case/whitespace) — drop detection uses exact names"
         )
     delta_present = set(delta_req.scenarios)
-    allowed_norm = {normalize(a) for a in delta_req.allow_drops}
+    allowed_norm = _allowed_drops(delta_req.allow_drops, baseline_req.scenarios)
     dropped = [s for s in baseline_req.scenarios if s not in delta_present and normalize(s) not in allowed_norm]
     dropped = list(dict.fromkeys(dropped))  # de-dupe, preserve order
     if dropped:

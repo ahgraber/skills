@@ -349,8 +349,8 @@ Rules:
   Do not drop a scenario by silent omission — `sdd-sync` and `sdd-verify` run a deterministic backstop (`check_modified_completeness.py`) that FAILS on a baseline scenario absent from its MODIFIED block without this marker.
 
   - The marker names the baseline scenario (matched case- and whitespace-insensitively); list several in one marker with comma/semicolon separators (`<!-- modified-removes: A, B -->`), or write one marker each.
-  - Because the payload is comma/semicolon-separated, a scenario name must not contain `,` or `;` (see § 5).
-    A legacy baseline name that does cannot be expressed by the marker — drop it via a Verification Override (`sdd-change-formats.md` § Verification Overrides) instead.
+  - A scenario name that contains `,` or `;` takes a marker of its own that holds the full name (`<!-- modified-removes: Locked, expired account refused -->`).
+    A marker whose whole payload names a baseline scenario removes that scenario only; any other payload is read as a list.
 
 - State prior behavior in a `> Previously: …` provenance line above the requirement text.
   This line is delta-only — `sdd-sync` strips it when writing the baseline.
@@ -381,7 +381,6 @@ Rules:
 - Each scenario MUST have all three labels: GIVEN, WHEN, THEN
 - Labels are bold with no colon: `**GIVEN**`, `**WHEN**`, `**THEN**`
 - Name the scenario as a short label for the case it samples (`Locked account refused`), not as a full sentence — push the expected nuance into the THEN clause, not the heading.
-  Avoid commas and semicolons in the name: the `modified-removes` drop marker (§ 4) treats them as separators and cannot reference a name that contains them.
 - Scenarios sample the contract stated in the requirement — they are evidence, not the contract itself (see § 1.5)
 - Aim for scenarios that span happy path, boundary conditions, and plausible failure modes — not just the happy case
 
