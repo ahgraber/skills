@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `jj` — a skill for repositories that use Jujutsu colocated with git. The agent builds history forward as one described change per logical step, never pushes, never rewrites a change reachable from a remote bookmark, and never writes into the human's changes. One approval gate at finalize runs the repo's hooks explicitly (jj runs none), presents the stack with a diff summary, and signs the unpushed changes with the agent key while the author stays the human. A teach mode, turned on by asking in the session or by a `jj: teach` line in the project instructions, adds a jj section to the final message of each turn listing the commands run, why, and the git analogue; `scripts/jj_turn_log.py` builds that list from the op log so no command is omitted. `scripts/jj_preflight.py` checks setup, the state of `@`, and the teach flag at the start of each turn and stops when `@` holds undescribed edits. References cover commands verified on jj 0.41 with the renamed and removed ones, finalize, recovery and conflicts, parallel agents in jj workspaces, and a setup checklist the human runs.
+
 ### Changed
 
 - `antislop-writing` — flags compressed prose that leaves the reader to unpack it: noun stacks, nouns used as verbs, things given a person's verb, a dropped "that" before a long clause, and a subject far from its verb. The fix restores the small words, so "lean" no longer means cutting them. The guidance follows Clark, Martin & Mahowald (2026), arXiv:2610.29162.
