@@ -122,9 +122,9 @@ def test_teach_flag_detected_only_as_whole_line(repo: Path):
     assert pf.find_teach_flag(repo) is False
 
 
-def test_agent_config_requires_backend_and_existing_key(tmp_path: Path, agent_config: Path, agent_key: Path):
+def test_agent_config_is_optional_but_must_be_valid_when_present(tmp_path: Path, agent_config: Path, agent_key: Path):
     assert pf.check_agent_config(agent_config)[0] == "pass"
-    assert pf.check_agent_config(tmp_path / "missing.toml")[0] == "fail"
+    assert pf.check_agent_config(tmp_path / "missing.toml")[0] == "warn"
 
     no_backend = tmp_path / "no-backend.toml"
     no_backend.write_text(f'[signing]\nkey = "{agent_key}"\n', encoding="utf-8")
@@ -183,10 +183,16 @@ def test_undescribed_edits_need_a_decision(repo: Path, agent_config: Path):
     assert report.working_copy["files"] == ["src/a.py", "src/b.py"]
 
 
-def test_setup_failure_outranks_decision(repo: Path, tmp_path: Path):
-    fake = FakeJJ(repo, working_copy=WC_UNDESCRIBED_FULL)
-    report = pf.collect(fake, repo, tmp_path / "missing.toml")
+def test_setup_failure_outranks_decision(repo: Path, agent_config: Path):
+    fake = FakeJJ(repo, working_copy=WC_UNDESCRIBED_FULL, config={})
+    report = pf.collect(fake, repo, agent_config)
     assert report.status == "setup-required"
+
+
+def test_missing_agent_config_only_warns(repo: Path, tmp_path: Path):
+    report = pf.collect(FakeJJ(repo, config=FULL_CONFIG), repo, tmp_path / "missing.toml")
+    assert report.status == "ok"
+    assert {c.name for c in report.checks if c.status == "warn"} == {"agent-signing-config"}
 
 
 def test_non_colocated_and_default_config_only_warn(repo: Path, agent_config: Path):

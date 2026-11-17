@@ -16,9 +16,9 @@ Add the "jj difference" clause only on the first use of a concept in the session
 - `jj squash --into <rev> -u <paths>` — <why now>. git: <analogue>.
 
 **Finalize**
-- `prek run --files ...` — jj runs no git hooks, so the checks ran by hand.
+- `<the hook command>` — jj runs no git hooks, so the checks ran by hand.
 - `jj describe -r <rev> -m "<final text>"` — <why now>. git: <analogue>.
-- `jj --config-file <agent.toml> sign -r '<base>..@ & ~empty()'` — <why now>. git: <analogue>.
+- `<the configured signing command> -r '<base>..@ & ~empty()'` — <why now>. git: <analogue>.
 
 **Recover** (only if it ran)
 - `jj op log -n 5` — <why now>. git: <analogue>.

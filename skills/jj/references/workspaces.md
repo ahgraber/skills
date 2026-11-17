@@ -39,6 +39,9 @@ The author of every change stays the human in parallel mode too; agents are told
 
 ## Hooks from a workspace: the temp-worktree detour
 
+When jj-hooks is available, use the jj-hooks command in `references/finalize.md` step 3 instead; it finds the primary `.git` from a workspace and builds its own temporary worktree.
+This detour is the fallback without it.
+
 The hook runner needs a git checkout of exactly the commit under test.
 Build one from the default workspace, run the hooks there, and remove it.
 Verified: the default workspace's git index and HEAD are unchanged afterward.

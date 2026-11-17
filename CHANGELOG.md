@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `jj` — a skill for repositories that use Jujutsu colocated with git. The agent builds history forward as one described change per logical step, never pushes, never rewrites a change reachable from a remote bookmark, and never writes into the human's changes. One approval gate at finalize runs the repo's hooks explicitly (jj runs none), presents the stack with a diff summary, and signs the unpushed changes with the agent key while the author stays the human. A teach mode, turned on by asking in the session or by a `jj: teach` line in the project instructions, adds a jj section to the final message of each turn listing the commands run, why, and the git analogue; `scripts/jj_turn_log.py` builds that list from the op log so no command is omitted. `scripts/jj_preflight.py` checks setup, the state of `@`, and the teach flag at the start of each turn and stops when `@` holds undescribed edits. References cover commands verified on jj 0.41 with the renamed and removed ones, finalize, recovery and conflicts, parallel agents in jj workspaces, and a setup checklist the human runs.
+- `jj` — a skill for repositories that use Jujutsu colocated with git. The agent records one described change per logical step and uses the user's jj aliases. It never pushes, rewrites a pushed change, or edits the human's changes. At one approval gate at finalize it runs the repo's hooks (jj runs none), presents the stack, and signs the agent's changes with an agent key when one is configured. A teach mode, turned on in the session or by a `jj: teach` line in the project instructions, ends each turn with the jj commands run, why, and their git analogues.
 
 ### Changed
 

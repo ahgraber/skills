@@ -34,7 +34,7 @@ These admit no exceptions.
 "This case is different" does not license skipping one.
 
 - Agents never push.
-  `jj git push` is the human's command.
+  `jj git push` is the human's command, and so is any alias or tool that pushes, including its dry run.
   The agent prepares the stack and hands it over.
 - Never rewrite a change that is reachable from a remote bookmark.
   Before `squash --into`, `rebase`, `describe -r`, or `abandon` on any revision other than `@`, run the guard: `jj log -r '(<targets>) & ::remote_bookmarks()' --no-graph -T 'change_id.short() ++ "\n"'`.
@@ -99,15 +99,18 @@ Run at the start of every turn that will use jj.
    It reports the jj version, colocation, identity, the agent signing config, the immutability and conflict-marker settings, the teach flag, the state of `@`, the base of the agent's stack, the nearest bookmarks, the trunk, the workspace, and the current operation ID.
 2. Keep `op_id`, `base`, and `workspace`.
    The operation ID is the turn's start marker for `scripts/jj_turn_log.py`; `base` bounds every revset over the agent's own changes; `workspace` filters the turn log.
-3. If the status is `not-a-jj-repo`, stop and tell the user jj does not apply here.
-4. If the status is `setup-required`, stop.
+3. Read the user's aliases: `jj config list aliases`.
+   When an alias wraps a step you are about to run, use the alias.
+   The rules in this skill apply to what an alias expands to, not to its name: an alias that wraps `jj sign` still takes the `-r` range, one that wraps `jj-hooks run` still takes the arguments in `references/finalize.md`, and one that pushes, even as a dry run, is the human's.
+4. If the status is `not-a-jj-repo`, stop and tell the user jj does not apply here.
+5. If the status is `setup-required`, stop.
    Read `references/setup.md` and walk the user through the failed items.
    Do not run them.
-5. If the status is `decision-required`, `@` holds edits with no description.
+6. If the status is `decision-required`, `@` holds edits with no description.
    Stop and report the file list from the preflight output.
    Offer to close the in-flight work in the repo's current native way: `jj describe -m` then `jj new` in a jj repo, or the repo's git commit convention if it is mid-conversion.
    Wait for the answer.
-6. Warnings do not stop the turn.
+7. Warnings do not stop the turn.
    Report them once in the final message.
 
 ### Start
@@ -138,7 +141,7 @@ Run at the start of every turn that will use jj.
 ### Finalize
 
 Read `references/finalize.md` and follow it.
-In short: snapshot, run the rewrite guard over `<base>..@`, run the repo's hooks explicitly because jj runs none, confirm no conflicts, present the stack with its descriptions and a diff summary, offer to squash it coarser, wait for approval, set the final descriptions, sign `<base>..@` with the agent config, and hand over.
+In short: snapshot, run the rewrite guard over `<base>..@`, run the repo's hooks explicitly because jj runs none, confirm no conflicts, present the stack with its descriptions and a diff summary, offer to squash it coarser, wait for approval, set the final descriptions, sign `<base>..@` with the agent key when one is configured, and hand over.
 The human pushes.
 
 ### Recover
@@ -164,7 +167,7 @@ For several agents on one repo, read `references/workspaces.md`: one jj workspac
 - `references/finalize.md`: the finalize gate step by step, and what the human does to push.
 - `references/recovery.md`: op log, undo, revert, restore, conflicts, divergent changes.
 - `references/workspaces.md`: parallel agents in jj workspaces.
-- `references/setup.md`: the human's checklist for a colocated repo and the agent signing config.
+- `references/setup.md`: the human's checklist for a colocated repo and an optional agent signing key.
 - `assets/turn-report.md`: the jj section template for the final message.
 - `scripts/jj_preflight.py`: Orient checks.
   `scripts/jj_turn_log.py`: the turn's jj commands from the op log.

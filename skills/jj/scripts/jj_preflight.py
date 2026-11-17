@@ -12,8 +12,8 @@ JSON object to stdout. Diagnostics go to stderr.
 
 Checks: jj is installed at or above the version floor; the directory is a jj
 repo; the repo is colocated with git; `user.name` and `user.email` are set;
-the agent signing config exists, names a backend, and points at a key that
-exists; `immutable_heads()` includes remote bookmarks; conflict markers are
+the agent signing config, when present, names a backend and points at a key
+that exists; `immutable_heads()` includes remote bookmarks; conflict markers are
 git style; an in-repo `.worktrees/` directory is git-ignored; the teach flag
 is present in a project instruction file; the state of `@`; the base of the
 agent's stack; the nearest bookmarks and trunk; the current workspace and
@@ -162,14 +162,20 @@ def resolve_agent_config(explicit: str | None) -> Path:
 def check_agent_config(path: Path) -> tuple[str, str]:
     """Return (status, detail) for the agent signing config file.
 
-    The file must parse as TOML, name a known `signing.backend`, and name a
-    `signing.key`. A key written as a path must exist on disk; a key written
-    as a key ID (no path separator) is accepted as is.
+    The file is optional: when it is absent the check warns, because the
+    project instructions can name another signing mechanism or none. When it
+    exists it must parse as TOML, name a known `signing.backend`, and name a
+    `signing.key`; a broken file fails, because Finalize would fail on it. A
+    key written as a path must exist on disk; a key written as a key ID (no
+    path separator) is accepted as is.
     """
     try:
         data = tomllib.loads(path.read_text(encoding="utf-8"))
     except FileNotFoundError:
-        return "fail", f"agent signing config not found at {path}; see references/setup.md"
+        return (
+            "warn",
+            f"no agent signing config at {path}; sign with the mechanism the project instructions name, or leave the agent's changes unsigned and say so",
+        )
     except (OSError, tomllib.TOMLDecodeError) as exc:
         return "fail", f"agent signing config at {path} is unreadable: {exc}"
     signing = data.get("signing")

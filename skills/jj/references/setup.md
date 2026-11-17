@@ -16,10 +16,10 @@ The agent does not run them.
    jj config set --user user.email "<your email>"
    ```
 
-3. Create the agent signing config file.
-   The agent passes it per command at Finalize with `--config-file`, so your own config stays unsigned by the agent key.
-   Default path `~/.config/jj/agent.toml`; another path works if `JJ_AGENT_CONFIG` names it.
-   The preflight checks that the backend is named and that the key file exists.
+3. Optional: give agents a signing key of their own, so agent-made changes are marked as such while the author stays you.
+   The agent signs at Finalize with whatever mechanism your project instructions name.
+   One way is a config file the agent passes with `--config-file`, which keeps the agent key out of your own config.
+   The preflight checks `~/.config/jj/agent.toml`, or the path in `JJ_AGENT_CONFIG`, when that file exists.
 
    ```toml
    [signing]
@@ -28,8 +28,9 @@ The agent does not run them.
    behavior = "own"
    ```
 
-   Use the same key your git agent-commit alias signs with.
-   The author of agent-made commits stays you; the key marks them as agent-made, the same split as in git.
+   A jj alias can wrap it, for example `aliases.agent-sign = ["--config-file", "<path>", "sign"]`.
+   Then tell agents in your project instructions to sign with that alias.
+   Without an agent key the agent leaves its changes unsigned and says so.
 
 4. Make pushed history immutable. jj protects only trunk, tags, and untracked remote bookmarks by default; a pushed feature branch stays rewritable and is force-pushed without a flag.
    Add to your user config:
