@@ -16,7 +16,7 @@ Draft a Conventional Commit message from staged changes.
 
 ## Critical Constraints
 
-- Use only staged changes (`--cached` / staged SCM state) as input, unless the user invokes the **Context Override** or **Commit Train** path.
+- Use only staged changes (`--cached` / staged SCM state) as input, unless the user invokes the **Context Override** or **Commit Train** path, or the repository uses Jujutsu (**Jujutsu Change** path).
 - Resolve and use the repository root for all SCM calls.
 - If no staged changes exist after one retry, stop and inform the user (standard workflow only).
 - Always include an `AI-assistant: <AGENT>` footer.
@@ -30,8 +30,9 @@ Draft a Conventional Commit message from staged changes.
 | Staged changes exist and land as one commit                                                                                    | **Workflow**         |
 | The user points at prior conversation work or a working document instead of the diff ("use what we just did", "skip the diff") | **Context Override** |
 | The work is meant to land as several commits                                                                                   | **Commit Train**     |
+| The repository uses Jujutsu (`jj root` succeeds) and the message describes one or more jj changes                              | **Jujutsu Change**   |
 
-Body Discipline governs the body on all three.
+Body Discipline governs the body on all four.
 
 ## Body Discipline
 
@@ -119,6 +120,7 @@ Where the answer already lives in a durable artifact or in the diff's own prose,
 ## Workflow
 
 01. Select the path (see § Paths).
+    If `jj root` succeeds, the repository uses Jujutsu: take the **Jujutsu Change** path.
     If it is not the standard path, follow that path instead of the rest of this workflow.
 
 02. Resolve repository root.
@@ -193,6 +195,29 @@ The staged-changes constraint does not apply; each message is drafted from its o
    Staging and committing remain the user's call.
 
 5. Return each message in its own fenced code block, in commit order.
+
+## Jujutsu Change
+
+Use this path when `jj root` succeeds. jj has no staging area: in a colocated repo git's index mirrors the parent of the working copy, so `git diff --cached` is empty and the standard workflow would stop with nothing staged.
+Each jj change is its own diff, so draft from the change itself.
+Run jj with `--no-pager --color=never`.
+
+1. Identify the change or changes to describe: a change ID or revset the caller gave, or `@` when none was given.
+   For a stack, draft one message per change, oldest first.
+
+2. Retrieve each change's diff with `jj diff --git -r <rev>`.
+   Check it against `jj diff --stat -r <rev>` and page through the remainder before drafting, as in workflow step 3.
+   An empty change gets no message; report it.
+
+3. Calibrate to the repo.
+   Read recent descriptions for the changed paths with `jj log -r '::<rev>-' -n 5 --no-graph -T 'description ++ "\n"' <changed paths>` and match the house convention, as in workflow step 6.
+
+4. Apply workflow steps 5, 7, 8, 9, and 10 to each change's diff.
+   Budget applies per change.
+
+5. Return each message in its own fenced code block, in stack order, each preceded by the change ID it describes.
+   The messages are ready for `jj describe -r <rev> --stdin`.
+   Applying them is the caller's step.
 
 ## References
 

@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sdd-propose` — completes an existing change that is missing artifacts, such as one from `sdd-derive`, `sdd-translate`, or a stubbed proposal. It keeps what the change has, asks only what its artifacts leave open, and writes the missing sections and files.
 - `formal-verification` — covers Aeon, a research language whose refinement types Z3 checks, as a code verifier, and points users who cannot rewrite code for proof toward refinement-type checkers for existing languages. Records go in `.formal/<effort>/` instead of `.verify/<effort>/`, which `sdd-verify` uses for scratch; existing efforts keep their recorded directory.
 - `sdd-verify`, `sdd-sync`, `sdd-archive` — each verify run keeps its log and report in `.verify/<run-id>/` and re-checks the previous run's blocking findings. `sdd-sync` accepts the newest report only from a run on committed code, and only while the code and specs are unchanged since that run, and a run that stops on a failing suite still writes its report. On the first run, `sdd-verify` asks whether git should ignore `.verify/`, which now moves with the change into the archive.
+- `commit-message` — in a Jujutsu repository it drafts from the jj change itself, one message per change in a stack, ready for `jj describe --stdin`. jj has no staging area, so the staged-changes workflow found nothing to draft from there.
 
 ### Removed
 

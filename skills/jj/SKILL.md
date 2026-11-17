@@ -20,7 +20,7 @@ Use Jujutsu well in a colocated jj and git repository, and when teach mode is on
 - A plain git repository with no `.jj` directory: use git.
 - A harness git worktree of a colocated repo: it has `.git` but no `.jj`, so jj commands fail there.
   Use git in that worktree, and tell the user that jj is unavailable in it.
-- Drafting the commit message text itself: use the `commit-message` skill when it is available, then apply the message with `jj describe -m`.
+- Drafting the commit message text itself: use the `commit-message` skill when it is available, then apply the message with `jj describe -r <rev> --stdin`.
 
 ## Invocation Notice
 
