@@ -1,6 +1,6 @@
 ---
 name: sdd-change-formats
-description: SDD change artifact formats — proposal, design, tasks, and the cross-change ORDER.md — and the rules for changing specs during implementation. Referenced by sdd-propose, sdd-derive, sdd-apply, sdd-verify, sdd-sync, and sdd-archive.
+description: SDD change artifact formats — proposal, design, tasks, and the cross-change ORDER.md — the rules for changing specs during implementation, and what makes a verify run stale. Referenced by sdd-propose, sdd-derive, sdd-apply, sdd-verify, sdd-sync, and sdd-archive.
 ---
 
 # SDD Change Formats
@@ -353,7 +353,14 @@ The spec-drift check finds every spec edit made since the proposal was committed
    git diff <proposal-commit> -- .specs/changes/<name>/specs/
    ```
 
-3. Classify each hunk as a scenario change (§ 5.1) or a requirement change (§ 5.2).
+3. Classify each hunk as a scenario change (§ 5.1) or a requirement change (§ 5.2) solely by the text it edits:
+
+   - A hunk that edits a requirement's own text (the lines between its `### Requirement:` heading and its first `#### Scenario:` heading), beyond whitespace and Markdown formatting, is a requirement change.
+   - A hunk that edits only scenario lines is a scenario change, unless it narrows what its requirement guarantees (§ 5.1).
+
+   Classify by the edited text alone; no rationale for the edit changes its class.
+   The exception is a rebase onto another change's synced text (§ 6.2), which step 4 checks against its own record.
+   A hunk is a rebase only when the requirement text it writes equals that requirement's text in the baseline after the named change synced; a hunk that departs from that text is classified by the two rules above.
 
 4. Check each hunk against its record:
 
@@ -504,3 +511,27 @@ Omit any section that has no entries.
 | Any update           | any           | Update **Last reviewed**. Delete the file when no **Starts after** entry, no shared requirement, and no `## Not scheduled` change remains.                                            |
 
 Commit `ORDER.md` together with the change artifacts that caused the update.
+
+## 7. Changes Since a Verify Run
+
+A verify run checks the code and specs at one commit.
+A change to the code or the specs is any change since that commit, committed or not, except these, where `<change-dir>` is `<specs-root>/changes/<name>`:
+
+- any change to `<change-dir>/.verify/`, `<change-dir>/schemas/after/`, or `<specs-root>/.gitignore`, which a verify run writes;
+- a `design.md` hunk that edits only lines inside `## Verification Overrides`;
+- a `tasks.md` hunk that only adds unchecked tasks, such as an override's follow-up task or a remediation task.
+
+The user records overrides and new tasks after a run, and these do not change what the run checked.
+Every other `design.md` or `tasks.md` hunk is a change: waivers, Decisions, Spec Changes records, and task completion all feed the run's verdict.
+`sdd-verify` uses this rule for its `-dirty` suffix, and `sdd-sync` uses it to decide whether the newest report still holds.
+
+To find the changes since `<commit>`, run these commands from the repository root, with `<specs-root>` and `<change-dir>` written relative to that root:
+
+```bash
+git diff --name-only <commit> -- . ':!<change-dir>/.verify' ':!<change-dir>/schemas/after' ':!<specs-root>/.gitignore' ':!<change-dir>/design.md' ':!<change-dir>/tasks.md'
+git ls-files --others --exclude-standard -- . ':!<change-dir>/.verify' ':!<change-dir>/schemas/after' ':!<specs-root>/.gitignore'
+git diff <commit> -- <change-dir>/design.md <change-dir>/tasks.md
+```
+
+Each path the first two commands print is a change.
+Read each hunk the third command prints, and apply the two hunk rules above.

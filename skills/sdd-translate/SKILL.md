@@ -119,7 +119,7 @@ If implementation steps are unclear and `tasks.md` is omitted, mention any order
 
 See `references/sdd-spec-formats.md` for both baseline and delta spec formats.
 
-Add a source attribution blockquote at the top of each generated spec (see format reference Section 2):
+Add a source attribution blockquote at the top of each generated spec (see format reference Section 3):
 
 > Translated from {source tool/format} on {date}
 > Source: {source file or description}
@@ -189,7 +189,6 @@ If `.specs/.sdd/schema-config.yaml` exists:
 
 1. Generate schema snapshots using the configured extraction commands.
 2. Store in `.specs/schemas/` — this establishes the baseline for all future `sdd-verify` conformance checks.
-3. Update `.specs/schemas/.schema-sources.yaml` with the generation date.
 
 If no schema config exists but schema artifacts are detected in the repo (e.g., `openapi.yaml`, `.proto` files, `schema.graphql`), suggest creating `.specs/.sdd/schema-config.yaml` before the first `sdd-verify` run:
 

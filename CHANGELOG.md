@@ -10,18 +10,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `antislop-writing` — flags a second family of AI tells: compressed prose that packs meaning into the fewest words and leaves the reader to unpack it. The new tells are noun stacks, nouns used ad hoc as verbs ("calendar it"), things given a person's verb ("this asymmetry bites"), a dropped optional "that" before a long clause, and a subject far from its verb. These tells are fixed by restoring the small words a reader uses to parse a sentence, so "lean" no longer means cutting those words. The guidance follows Clark, Martin & Mahowald (2026), arXiv:2610.29162.
-- `sdd-verify`, `sdd-propose` — `sdd-verify` checks only whether the evidence covers each claim, so re-runs on unchanged code converge; it no longer hunts for defects and instead offers `code-review` (and `security-scan` for security-boundary changes). Universal claims over uncontrolled inputs with only example tests get a WARNING, and `sdd-propose` plans a property-based or differential test for them. Narrowing a requirement must state the behavior it gives up.
+- `sdd-verify`, `sdd-propose` — `sdd-verify` checks only whether the evidence covers each claim; instead of hunting for defects it offers `code-review`, which receives the specs and the under-tested requirements, and `security-scan` for security-boundary changes. Universal claims tested only by examples get a WARNING, and `sdd-propose` plans a property-based or differential test for them. Narrowing a requirement must state the behavior it gives up.
 - `code-review` — reviews are quick, standard, or deep, and the user picks one. Standard, the default, runs the quality, security, and spec lenses and a test adversary, then a challenger, in about seven subagent dispatches. Deep adds a per-branch list of domain features and hunts variants of each confirmed defect, for at most two rounds. A review can be resumed in a new session, the user rules only on disputed findings of critical or high priority, and a skipped check makes merge readiness unverified.
 - `receiving-feedback` — treats review items as a sample, not a complete list. For each accepted item, the agent names the cause and a class as broad as the cause, then searches the artifact and its neighbors for other instances. A site is ruled out only with evidence that it differs on purpose, and a class that follows the artifact's convention goes to the user as a decision. Fixes target the cause; instances outside the reviewed artifact are reported as separate findings.
+- `sdd-propose` — completes an existing change that is missing artifacts, such as one from `sdd-derive`, `sdd-translate`, or a stubbed proposal. It keeps what the change has, asks only what its artifacts leave open, and writes the missing sections and files.
 - `formal-verification` — covers Aeon, a research language whose refinement types Z3 checks, as a code verifier, and points users who cannot rewrite code for proof toward refinement-type checkers for existing languages. Records go in `.formal/<effort>/` instead of `.verify/<effort>/`, which `sdd-verify` uses for scratch; existing efforts keep their recorded directory.
+- `sdd-verify`, `sdd-sync`, `sdd-archive` — each verify run keeps its log and report in `.verify/<run-id>/` and re-checks the previous run's blocking findings. `sdd-sync` accepts the newest report only from a run on committed code, and only while the code and specs are unchanged since that run, and a run that stops on a failing suite still writes its report. On the first run, `sdd-verify` asks whether git should ignore `.verify/`, which now moves with the change into the archive.
+
+### Removed
+
+- `sdd`, `sdd-sync`, `sdd-translate` — the `.specs/schemas/.schema-sources.yaml` manifest. No step read it, and `schema-config.yaml` and git history hold its contents. Existing manifests can be deleted.
 
 ### Fixed
 
 - `sdd`, `sdd-sync`, `sdd-verify` — a `<!-- modified-removes: ... -->` marker can name a baseline scenario whose name contains `,` or `;`. When the whole marker names one scenario, it removes only that scenario; otherwise it is read as a `,`/`;`-separated list as before. Such a name needs its own marker. The rule that scenario names avoid commas and semicolons is gone.
 - `sdd-derive` — validation checks each spec against the run's output type, so a derive that writes a change directory passes it. Derive then checks the specs where it wrote them, which fails a spec written to the wrong tree.
 - `sdd-sync`, `sdd-propose`, `sdd-translate` — the spec format check is told which format each skill wrote, so a synced baseline that still holds an ADDED section fails it.
+- `sdd-verify` — on the parallel path, subagents are dispatched after the schema snapshot and the write-site enumeration, and each one receives its write-sites, so the write-site coverage check runs.
 - `sdd` — the spec format check fails a requirement placed outside `## Requirements` or a delta section, and a requirement whose own statement has no RFC 2119 keyword; REMOVED entries are exempt. Before, one keyword anywhere in the file passed every requirement.
+- `sdd-sync` — the stale-copy guard continues when the change's MODIFIED block already contains a later baseline edit, so a change rebased onto another change's sync can sync. A new capability is built from ADDED requirements only; MODIFIED, REMOVED, or RENAMED entries against a missing baseline stop sync.
+- `sdd-verify` — with no schema config, verify warns when schema snapshots exist instead of skipping silently. MUST is handled as SHALL.
+- `sdd-verify` — a recorded rebase onto another change's synced text no longer reads as an unapproved requirement change.
 - `code-review`, `simplify` — a worktree review packet includes untracked files, and no packet includes the run files `sdd-verify` keeps in a change's `.verify/` directory.
+- `sdd-archive` — a recorded override's follow-up task no longer counts as incomplete.
 
 ## [3.6.0] - 2026-10-20
 

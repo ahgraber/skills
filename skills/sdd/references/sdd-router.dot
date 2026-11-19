@@ -1,16 +1,20 @@
 digraph sdd_router {
     // Routing flowchart for the SDD parent skill
-    // WHEN: User invokes sdd — classify intent and route to child skill
+    // WHEN: User invokes sdd — locate the specs root, classify intent, and route to a child skill
 
     rankdir=TB;
     node [fontname="Helvetica", fontsize=10];
     edge [fontname="Helvetica", fontsize=9];
 
     start [label="User intent", shape=ellipse];
+    locate_root [label="Locate SPECS_ROOT\n(.specs/ directories)", shape=box];
+    multi_specs [label="Multiple .specs/\nfound?", shape=diamond];
+    ask_which [label="Ask user which\nto use", shape=box];
+
     explore_first [label="Wants to think\nbefore acting?", shape=diamond];
     explore [label="sdd-explore", shape=box];
 
-    has_specs [label=".specs/specs/ exists?", shape=diamond];
+    has_specs [label="SPECS_ROOT/specs/ exists?", shape=diamond];
     confirm_mode [label="Confirm intent\nwith user", shape=box];
 
     translate [label="sdd-translate", shape=box];
@@ -26,7 +30,12 @@ digraph sdd_router {
     sync [label="sdd-sync", shape=box];
     archive [label="sdd-archive", shape=box];
 
-    start -> explore_first;
+    start -> locate_root;
+    locate_root -> multi_specs;
+    multi_specs -> ask_which [label="yes"];
+    multi_specs -> explore_first [label="no (0 or 1)"];
+    ask_which -> explore_first;
+
     explore_first -> explore [label="yes"];
     explore_first -> has_specs [label="no, ready to act"];
 

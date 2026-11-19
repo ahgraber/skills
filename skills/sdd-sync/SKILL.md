@@ -47,7 +47,11 @@ Stop unless the user confirms to proceed.
 Before syncing, confirm verification status and any recorded override trail:
 
 1. `sdd-sync` consumes the latest `sdd-verify` outcome; it does not reconstruct verification from `design.md`.
-2. If the latest verify result is not in context, stop and tell the user to run `sdd-verify` first.
+2. Read `report.md` in the newest run directory under `.specs/changes/<name>/.verify/`.
+   If there is no run directory, or the newest one has no `report.md`, stop and tell the user to run `sdd-verify` first.
+   If its run id ends in `-dirty`, the run checked uncommitted code and is advisory; stop and tell the user to commit and run `sdd-verify` again.
+   If the code or the specs changed since the commit in its run id (`references/sdd-change-formats.md` § 7), stop and tell the user to run `sdd-verify` again.
+   A run id that ends in `-no-git` names no commit; use its report.
 3. If sync is proceeding under override, read `.specs/changes/<name>/design.md` for `## Verification Overrides` and confirm each applicable entry has all required fields (finding, stage, reason, constraints, follow-up task, approved by, recorded).
    Stop if any required field is missing.
 4. Any blocker from the current verify result that is not covered by a recorded override remains blocking.
@@ -63,7 +67,7 @@ List the open tasks with the warning.
 Wait for user confirmation before proceeding.
 
 Then run the spec-drift check (`references/sdd-change-formats.md` § 5.5), even if verify already ran it.
-Specs can change after verify.
+The approval records in `design.md` can change after verify.
 If any spec edit lacks its recorded user approval, stop and list the edits.
 Sync writes the delta specs into the baseline, so an unapproved edit becomes the project's contract.
 If no proposal commit exists, the check cannot run; tell the user and wait for confirmation before proceeding.
@@ -118,7 +122,9 @@ For each capability with a MODIFIED or REMOVED requirement, list the baseline co
 git log -p <proposal-commit>..HEAD -- .specs/specs/<capability>/spec.md
 ```
 
-If a listed commit edited the requirement, stop and surface it:
+For each listed commit that edited the requirement, compare its edit with this change's MODIFIED block.
+If the block already contains the edit, the change was rebased onto it (or the commit is this change's own earlier sync); continue.
+If the block does not contain the edit, stop and surface it:
 
 > "MODIFIED `<name>`: the baseline requirement changed in `<commit>` after this change copied it. Copy the requirement again from the baseline, apply this change's edits to the copy, record the rebase, and run sync again."
 
@@ -141,7 +147,8 @@ These fixes are not part of the change's delta, so keep them separate in the rep
 
 ### Phase 3: Handle New Capabilities
 
-If a delta spec covers a capability with no corresponding main spec:
+If a delta spec covers a capability with no corresponding main spec, the new baseline comes from its ADDED requirements only.
+If the delta also has MODIFIED, REMOVED, or RENAMED entries, stop and tell the user: those entries need a baseline that does not exist, which usually means an earlier change has not synced yet.
 
 1. Create `.specs/specs/<capability>/` directory
 
@@ -163,14 +170,12 @@ If a delta spec covers a capability with no corresponding main spec:
    Purpose is prose, not a requirement; write it by `references/sdd-spec-formats.md` § 3.1.
    The proposal's Intent explains why the change is needed, so use it as a source for the capability's need, but do not copy it: Purpose describes the capability as it stands after the change.
 
-3. Drop the `## ADDED`, `## MODIFIED`, `## REMOVED` section headings and put every requirement beneath them at `### Requirement: {Name}`, with its scenarios at `#### Scenario: {Name}`.
+3. Drop the `## ADDED Requirements` heading and put every requirement beneath it at `### Requirement: {Name}`, with its scenarios at `#### Scenario: {Name}`.
    Check the level; do not just strip the marker.
    If the delta fused the marker to a requirement heading (`## ADDED Requirement: {Name}` — malformed, see `references/sdd-spec-formats.md` § 4), removing the marker leaves the requirement at `##`, where no later change can match it by name.
    Fix the delta too.
 
 See `references/sdd-spec-formats.md` for the baseline spec format.
-
-If the delta spec contains only RENAMED and the old capability does not exist in main specs, create the capability under the new name using the ADDED requirements as baseline content.
 
 ### Phase 4: Update Schema Snapshots (if schemas configured)
 
@@ -178,9 +183,7 @@ If `.specs/.sdd/schema-config.yaml` exists and `schemas/after/` is present in th
 
 1. Copy each schema file from `.specs/changes/<name>/schemas/after/<schema-type>` to `.specs/schemas/<schema-type>` (overwrite).
 
-2. Update `.specs/schemas/.schema-sources.yaml` with the generation date and change name.
-
-3. If the repo contains a committed authored schema (e.g., `docs/openapi.yaml`), surface a reminder — do **not** auto-update it:
+2. If the repo contains a committed authored schema (e.g., `docs/openapi.yaml`), surface a reminder — do **not** auto-update it:
 
    > "Authored schema at `<path>` may need updating to match the implementation.
    > Reference: `.specs/changes/<name>/schemas/after/`"
@@ -269,6 +272,6 @@ List the baseline-error fixes after the change's own edits, under their own head
 
 - `references/sdd-spec-formats.md` — baseline spec format for new capabilities created during sync
 - `references/sdd-change-formats.md` — change directory artifact formats (proposal, design, tasks), spec-drift check (§ 5.5), spec commit format (§ 5.4), and change order (§ 6)
-- `references/sdd-schema.md` — schema lifecycle policy (§ 4) and `.schema-sources.yaml` format (§ 3)
+- `references/sdd-schema.md` — schema config format (§ 3) and schema lifecycle policy (§ 4)
 - `scripts/check_spec_format.py` — checks each synced baseline spec's heading structure; exits non-zero on a malformed spec
 - `scripts/check_modified_completeness.py` — mechanical dropped-scenario check (scenario names only, not body sub-clauses); exits non-zero on dropped baseline scenarios, wireable as a pre-commit/CI gate

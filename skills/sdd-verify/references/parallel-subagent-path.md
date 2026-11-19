@@ -7,6 +7,7 @@ description: Dispatch playbook for running sdd-verify Phases 4–6 across isolat
 
 Phases 4–6 of `sdd-verify` (Evidence, Contract, Coverage) are per-requirement and amenable to context isolation across subagents.
 Phases 2 (Test Suite), 3 (Schema Snapshot), 7 (Conformance), and 8 (Coherence) stay orchestrator-only — they are whole-change checks, not per-requirement.
+So do the Phase 4 subsections that `SKILL.md` marks as orchestrator work: write-site enumeration, scope, value alignment, MODIFIED delta integrity, and spec drift.
 
 These dispatch rules — the availability gate, granularity, the 8-subagent cap, model resolution, and severity/gating — are purpose-built for SDD verification and take precedence over any general subagent skill (e.g. `subagent-patterns`) when verifying an SDD change.
 
@@ -79,6 +80,8 @@ If the dispatch schema does not expose a `model` parameter, skip this step entir
 
 ## 4. Dispatch Protocol
 
+Dispatch only after Phase 3 and the Phase 4 write-site enumeration are done: the template's **Schema diff** and **Implementation write-sites in scope** fields come from them.
+
 Dispatch all subagents in a **single message** with multiple `Agent` tool calls so they run concurrently.
 The canonical job description for each subagent lives at `references/verify-subagent.md`.
 The shared evidence rules live at `references/evidence-rules.md`.
@@ -103,10 +106,11 @@ Your specific scope:
 - Delta spec path(s): <`.specs/changes/<name>/specs/<capability>/spec.md`, …>
 - Baseline spec path(s): <`.specs/specs/<capability>/spec.md`, …>
 - Test suite result: pass | no-test-suite | failing-suite-override
-- Test execution log: <path to captured per-test-ID output produced in Phase 2, e.g. `.specs/changes/<name>/.verify/test-output.log`>
+- Test execution log: <path to captured per-test-ID output produced in Phase 2, e.g. `.specs/changes/<name>/.verify/<run-id>/test-output.log`>
 - Overridden blockers: <explicit list of the known failing tests / audit findings / gate outcomes the user chose not to let block sync, or "none">
 - Test artifact listing: <paths to test source directories or files, e.g. `tests/`, `src/__tests__/`>
 - Schema diff (if any): <path to `.specs/changes/<name>/schemas/after/` or "none">
+- Implementation write-sites in scope: <for each ADDED or MODIFIED universal SHALL in scope, `requirement → [path:line, …]` from the Phase 4 write-site enumeration, or "none">
 - Verification waivers relevant to your scope: <inlined entries from design.md § Verification Waivers, or "none">
 - Skill root: <resolved absolute path>
 
@@ -133,10 +137,10 @@ After all subagents return:
 2. Deduplicate overlapping observations across subagents (e.g., a cross-cutting requirement that appeared in two scopes).
 3. Build the canonical per-requirement evidence table from the deduplicated rows — this becomes the **Evidence** section of the final report.
 4. Re-key each subagent severity tag (`CRITICAL: …`, `WARNING: …`, `SUGGESTION: …`) into the orchestrator's CRITICAL/WARNING/SUGGESTION report sections.
-5. Run Phases 7 and 8 (Conformance, Coherence) on the orchestrator.
+5. Run Phase 4's remaining orchestrator subsections (scope, value alignment, MODIFIED delta integrity, spec drift) if you have not already, then Phases 7 and 8 (Conformance, Coherence).
 6. Assemble the report (Phase 9).
 
-**Do not re-run Phases 4–6 on the orchestrator after subagents have returned** — that defeats the context-isolation benefit.
+**Do not re-run the delegated work (Phase 4 steps 1–5, Phases 5 and 6) on the orchestrator after subagents have returned** — that defeats the context-isolation benefit.
 Spot-check a subagent finding only when:
 
 - A subagent flagged a missing dispatch input (Notes section), or
@@ -145,6 +149,8 @@ Spot-check a subagent finding only when:
 
 ## 6. Common failures specific to this path
 
+- **Dispatching before Phase 3 and the write-site enumeration.**
+  Subagents then report the write-sites as a missing input and treat each universal SHALL as advisory, so the write-site coverage check never runs.
 - **Dispatching without resolving the model.**
   Silent defaulting hides a cost/quality decision from the user.
 - **Adding content outside the template.**

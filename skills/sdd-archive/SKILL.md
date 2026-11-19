@@ -19,7 +19,7 @@ Keep identifiers, commands, paths, and RFC 2119 keywords exact.
 
 ## When to Use
 
-- All tasks in `tasks.md` are complete (`- [x]`)
+- All tasks in `tasks.md` are complete (`- [x]`), except the follow-up tasks of recorded overrides
 - Delta specs have been synced into main specs with `sdd-sync`
 - Ready to close out the change
 
@@ -37,6 +37,7 @@ Keep identifiers, commands, paths, and RFC 2119 keywords exact.
 ## Soft Gate
 
 Check `tasks.md` for unchecked tasks before archiving.
+Do not count a task that a recorded override in `design.md` names as its follow-up task; tell the user that each such task stays open by design.
 
 If incomplete tasks remain:
 
@@ -49,7 +50,7 @@ Wait for user confirmation before proceeding.
 ### Phase 1: Confirm
 
 1. Confirm which change to archive (ask if multiple active changes exist)
-2. Read `tasks.md` — count complete vs. total tasks
+2. Read `tasks.md` — count complete vs. total tasks, leaving out override follow-up tasks (see Soft Gate)
 3. If incomplete tasks: issue soft gate warning, wait for user
 
 ### Phase 2: Check Target
@@ -73,7 +74,8 @@ mv .specs/changes/<name>/ .specs/changes/archive/YYYY-MM-DD-<name>/
 
 Confirm the move succeeded by checking the archive path exists.
 
-The change's `.verify/` scratch (if present) is self-gitignored, so it never enters the archived commit even though `mv` carries it along — leave it or delete it; it is not part of the archived record.
+The change's `.verify/` directory (if present, one directory per verify run) must move with the change; `mv` carries it along, so do not delete it.
+Whether it enters the archived commit follows the user's ignore rule for `.verify/`.
 
 ### Phase 4: Update Change Order
 

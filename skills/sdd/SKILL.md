@@ -153,7 +153,7 @@ digraph sdd_router {
 1. **Resolve SPECS_ROOT first** — locate `.specs/` before routing; ask if multiple exist or user specifies a path
 2. **Classify intent** — explore-or-act, then determine path
 3. **Infer mode from directory state** — check `SPECS_ROOT/specs/` existence — but **always confirm with user** before routing
-4. **One hard gate** — `sdd-apply` requires `tasks.md` at `SPECS_ROOT/changes/<change-name>/tasks.md`; if missing, stop and route to `sdd-propose`
+4. **Hard gates** — `sdd-apply` requires `tasks.md` at `SPECS_ROOT/changes/<change-name>/tasks.md` (if missing, stop and route to `sdd-propose`) and a commit of the change's artifacts; `sdd-sync` requires a verify report on the current code and specs (`references/sdd-change-formats.md` § 7)
 5. **Prefer minimal next step** — don't run the full pipeline unless requested
 6. **Explore is mode-agnostic** — available at every stage, before or after any action
 7. **Multiple active changes** — ask which change before routing to apply/verify/sync/archive.
@@ -161,14 +161,16 @@ digraph sdd_router {
 
 ## Sequence Gates
 
-| Action      | Expected prerequisite                | Warning if missing                                               |
-| ----------- | ------------------------------------ | ---------------------------------------------------------------- |
-| sdd-apply   | `SPECS_ROOT/changes/<name>/tasks.md` | **Hard block** — "No tasks to implement. Run sdd-propose first." |
-| sdd-verify  | Some completed tasks in `tasks.md`   | "No completed tasks yet — verify output will be limited."        |
-| sdd-sync    | Delta specs in change directory      | "No delta specs to sync."                                        |
-| sdd-sync    | All tasks complete                   | "Incomplete tasks remain. Sync anyway?" (ask user)               |
-| sdd-archive | All tasks complete                   | "Incomplete tasks remain. Archive anyway?" (ask user)            |
-| design.md   | `proposal.md` exists                 | "Consider writing a proposal first for context."                 |
+| Action      | Expected prerequisite                          | Warning if missing                                                                          |
+| ----------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| sdd-apply   | `SPECS_ROOT/changes/<name>/tasks.md`           | **Hard block** — "No tasks to implement. Run sdd-propose first."                            |
+| sdd-apply   | A commit of the change's artifacts             | **Hard block** — "Commit the change artifacts before implementing." (the user may override) |
+| sdd-verify  | Some completed tasks in `tasks.md`             | "No completed tasks yet — verify output will be limited."                                   |
+| sdd-sync    | A verify report on the current code and specs  | **Hard block** — "Run sdd-verify first."                                                    |
+| sdd-sync    | Delta specs in change directory                | "No delta specs to sync."                                                                   |
+| sdd-sync    | All tasks complete, except override follow-ups | "Incomplete tasks remain. Sync anyway?" (ask user)                                          |
+| sdd-archive | All tasks complete, except override follow-ups | "Incomplete tasks remain. Archive anyway?" (ask user)                                       |
+| design.md   | `proposal.md` exists                           | "Consider writing a proposal first for context."                                            |
 
 ## Directory Convention
 
@@ -184,7 +186,6 @@ Child skills replace `.specs/` with `SPECS_ROOT` in all paths.
 │   └── <capability>/
 │       └── spec.md
 ├── schemas/                        # Schema snapshots (generated from code)
-│   ├── .schema-sources.yaml        # Manifest: generation date and source per schema
 │   └── <schema-type>               # e.g., openapi.yaml, db-schema.sql, schema.graphql
 ├── changes/
 │   ├── ORDER.md                    # Optional: order and shared requirements across active changes
@@ -192,7 +193,7 @@ Child skills replace `.specs/` with `SPECS_ROOT` in all paths.
 │   │   ├── proposal.md
 │   │   ├── design.md
 │   │   ├── tasks.md
-│   │   ├── .verify/                # Transient verify scratch (self-gitignored) — test log + report; never committed or archived
+│   │   ├── .verify/                # Verify run scratch — one <run-id>/ per run: test log + report; moves with the change; git-ignored if the user chose
 │   │   ├── schemas/                # Schema snapshots scoped to this change
 │   │   │   ├── before/             # Snapshot taken at propose/derive time
 │   │   │   ├── after/              # Snapshot taken at verify time
@@ -216,8 +217,9 @@ It records which active changes must wait for others, and which changes edit the
 `sdd-propose`, `sdd-apply`, `sdd-sync`, and `sdd-archive` maintain it; `references/sdd-change-formats.md` § 6 defines its format.
 
 Everything in a change directory is durable and committed — proposal, design, tasks, delta specs, and schema snapshots all travel into the archive as the change's record.
-The one exception is `.verify/`: run-scoped scratch (the captured test output and any persisted verification report) that `sdd-verify` regenerates on each run.
-It is self-gitignored — `sdd-verify` writes a `.gitignore` containing `*` into the directory — so it never enters a commit or the archive.
+The one exception is `.verify/`: run-scoped scratch that `sdd-verify` writes on each run, one `<run-id>/` directory per run holding the captured test output and the verification report, which the next run reads to re-check the previous findings.
+Whether git tracks it is the user's choice: on the first verify run in a repository, `sdd-verify` asks, and on a yes it adds one `.verify/` rule to `<specs-root>/.gitignore`.
+Either way, `.verify/` moves with its change into the archive.
 A verification report is a derived snapshot, not a source of truth: its durable consequences (waivers, overrides, remediation tasks) are written back into `design.md` and `tasks.md`, which are committed.
 
 `NORTH-STAR.md` is the product elevator pitch — a durable, project-global singleton that names the product's reason for being.

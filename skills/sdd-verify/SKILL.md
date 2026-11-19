@@ -71,6 +71,10 @@ Before starting, check `.specs/changes/<name>/tasks.md`:
 | **WARNING**    | Implementation partially meets a requirement or deviates from design | Should address             |
 | **SUGGESTION** | Minor improvement opportunity                                        | Optional                   |
 
+A classification or severity follows from what the evidence shows.
+When the evidence meets a rule's condition, apply the rule.
+Reasons the deviation exists, its intent, and its possible remedies go in the finding's text; they never lower its classification or severity.
+
 Severity is not the same thing as sync gating.
 A finding can keep its original severity and still be non-blocking when the user explicitly authorizes that exception and it is recorded per `references/sdd-change-formats.md`.
 
@@ -116,6 +120,7 @@ Read all available artifacts (graceful degradation — proceed with what exists)
 - `.specs/changes/<name>/design.md` — design decisions and any `## Spec Changes` / `## Verification Waivers` / `## Verification Overrides` (if exists)
 - `.specs/changes/<name>/specs/` — delta specs (if exist)
 - `.specs/specs/` — baseline specs for full context
+- `.specs/changes/<name>/.verify/<run-id>/report.md` from the newest run directory (if one exists) — the previous run's findings, which Phase 9 re-checks
 
 ### Phase 2: Run Test Suite and Capture Results
 
@@ -134,10 +139,21 @@ Verification claims rest on observed behavior, so a green suite is the baseline 
    Common flags: `pytest -v`, `jest --verbose`, `go test -v`, `nox -- -v`.
    For machine-readable output use `pytest --junit-xml=<path>` and point subagents at the XML.
    If the runner cannot produce per-test-ID output, treat all requirements as INSPECTED and note this as a WARNING.
-   Capture the output to `.specs/changes/<name>/.verify/test-output.log`.
-   `.verify/` is transient run scratch — the first time you create it, write a `.gitignore` containing a single `*` into the directory so the whole thing stays out of git and out of the archive (see the router's **Directory Convention**).
+   Capture the output, and any JUnit XML, in this run's directory: `.specs/changes/<name>/.verify/<run-id>/test-output.log`.
+   The run id is `<YYYY-MM-DD-HHMMSS>-<short HEAD SHA>`, with `-dirty` appended when the working tree holds a change to the code or the specs since `HEAD` (`references/sdd-change-formats.md` § 7), so each report keeps the log it cites and names the code it checked.
+   Outside a git work tree, use `<YYYY-MM-DD-HHMMSS>-no-git`.
+   A `-dirty` run is advisory: the tests ran on uncommitted code that the scope check does not read, so the run reports as usual but cannot clear the change for sync.
+   Commit and run verify again for a result `sdd-sync` accepts.
+   `.verify/` is run scratch; whether git tracks it is the user's choice.
+   Before creating the run directory, run `scripts/check_verify_ignored.py <specs-root>`.
+   When it reports `first_run` (no rule ignores `.verify/`, and no `.verify/` exists under the specs root), ask the user once whether to keep verification runs out of git by adding `.verify/` to `<specs-root>/.gitignore`.
+   On yes, run it again with `--add`.
+   On no, create the directory without a rule; later runs see that `.verify/` exists and do not ask again.
+   When it reports that the specs root is not inside a git work tree, skip the question and create the run directory.
 
 3. **If any tests fail or error**, flag each failure as CRITICAL in the report and **stop the verify run by default** — do not proceed to later phases.
+   Write the report (Phase 9) with these failures before you stop, so that `sdd-sync` and the next run see this run.
+   Do not offer `code-review` or `security-scan` for a stopped run; `code-review` does not review a change whose checks fail.
    A failing suite invalidates Contract, Coverage, and Coherence conclusions, and there is no reliable way to localize "affected area" without a test→requirement map.
    Re-run after fixes.
 
@@ -175,7 +191,9 @@ Checklist — do all four:
    ```
 
 If the gate sends you to single-agent, proceed to Phase 3 yourself.
-If the gate sends you to parallel, wait for user confirmation, then resolve model and dispatch per `references/parallel-subagent-path.md` §§ 3–4.
+If the gate sends you to parallel, wait for user confirmation and resolve the model per `references/parallel-subagent-path.md` § 3.
+Then run Phase 3 and Phase 4's **Enumerate Write-Sites** step yourself, because the schema diff and the write-site enumeration are dispatch inputs.
+Dispatch per § 4 only after both are done.
 These dispatch and gating rules are purpose-built for SDD verification and take precedence over any general subagent skill (e.g. `subagent-patterns`) when verifying an SDD change.
 
 **Failing-suite override and the gate.**
@@ -192,12 +210,13 @@ If `.specs/.sdd/schema-config.yaml` exists, regenerate "after" snapshots **now**
 1. Generate snapshots into `.specs/changes/<name>/schemas/after/`.
 2. Compute the before→after diff and store the diff path for Phase 4 and Phase 7 to consume.
 
-If no schema config exists, skip silently.
+If no schema config exists, apply the missing-config policy in `references/sdd-schema.md` § 4: warn when `.specs/schemas/` holds snapshots, and skip silently when it does not.
 Phase 7 is where the diff is interpreted against the spec; this phase only produces the artifact.
 
 ### Phase 4: Check Completeness and Evidence
 
 This is the first per-requirement phase — eligible for subagent dispatch (see `references/parallel-subagent-path.md`).
+On the parallel path, subagents run steps 1–5 below; the subsections marked as orchestrator work stay with you.
 
 1. Count checked tasks vs. total tasks in `tasks.md`.
 2. For each delta spec requirement, verify a corresponding implementation exists in the codebase.
@@ -254,6 +273,7 @@ It runs at the orchestrator regardless of single-agent vs. parallel path — sub
 1. **Get the code diff** for this change:
 
    - Run `git diff <base-branch>...HEAD` (or `git diff HEAD~1..HEAD` if a single commit), capturing meaningful changes only.
+     Verify judges committed code, so uncommitted changes are out of scope; a run with them is `-dirty` and advisory (Phase 2).
    - If no git context is available, enumerate all files touched by the change from `tasks.md` references or the user.
 
 2. **Identify meaningful changes** — changes that alter observable behavior:
@@ -333,6 +353,7 @@ Run the spec-drift check in § 5.5: diff the delta specs from the proposal commi
 
 - A scenario change with no `design.md` § Spec Changes entry, or with `Approved by user: pending` → **CRITICAL: scenario change `<capability>: <scenario>` has no recorded user approval.**
 - A requirement change with no `design.md` Decision entry or no dated Resolved Questions line → **CRITICAL: requirement change `<capability>: <requirement>` was not approved by the user.**
+  A rebase onto another change's synced text instead needs a § Spec Changes entry whose **Source** names that change, with a dated `Approved by user` line (`references/sdd-change-formats.md` § 5.5).
 - A scenario change that narrows what its requirement guarantees but is recorded only as a scenario change → **CRITICAL: `<capability>: <scenario>` narrows its requirement and needs approval as a requirement change.**
 - A requirement change that narrows its requirement, whose Decision entry does not state the behavior the narrowing gives up (`references/sdd-change-formats.md` § 5.2) → **CRITICAL: `<capability>: <requirement>` narrows its requirement without stating the behavior it gives up.**
 - A § Spec Changes entry whose rationale is only that the code behaves this way → **WARNING: `<capability>: <scenario>` is supported only by the code it describes.**
@@ -360,7 +381,7 @@ For each implemented requirement at TESTED or VERIFIED:
 5. **Check that the evidence covers the claim's input space.**
    For each universal SHALL, compare the inputs the claim quantifies over with the inputs the cited evidence exercises: the write-sites from step 4, the partitions (`references/sdd-spec-formats.md` § 1.6), and generated evidence (§ 1.7).
    For example, a requirement that says "for any query satisfying C, the system SHALL return no relevant results" is not demonstrated by tests that use only the scenario queries.
-   When § 1.7 says the claim needs generated evidence and the evidence is example tests only, flag **WARNING: `<name>` quantifies over `<input space>`, but its evidence samples only `<what the tests exercise>` — add a property or differential test, or use the `formal-verification` skill.**
+   When § 1.7 says the claim needs generated evidence and the evidence is example tests only, flag **WARNING: `<name>` quantifies over `<input space>`, but its evidence samples only `<what the tests exercise>` — add a property or differential test.**
    Read only the cited evidence, the enumerated write-sites, and the code they exercise.
    Do not construct new inputs, write probe scripts, or list edges to probe; that is defect search, and the Phase 9 review handoff owns it.
 6. Flag deviations as CRITICAL (the evidence or code read in this phase contradicts the requirement or a scenario, or a write-site lacks evidence) or WARNING (partially meets the requirement, or the evidence does not cover the claim's input space).
@@ -421,12 +442,25 @@ A decision either is or is not reflected in code; if the decision needs runtime 
 
 ### Phase 9: Produce Report
 
-The report is a derived snapshot, not a committed artifact.
-Present it in chat.
-If you persist it, write it to `.specs/changes/<name>/.verify/report.md` — the transient, self-gitignored zone created in Phase 2 — never the change root, where it would be committed and travel into the archive as if it were a source of truth.
-A committed report goes stale the moment code or specs move.
-Its durable consequences do not live in the report: waivers and overrides are recorded in `design.md`, and remediation tasks in `tasks.md` (both committed).
+The report is a derived snapshot of one run, not a source of truth.
+Present it in chat, and write it to `.specs/changes/<name>/.verify/<run-id>/report.md` on every run, beside the test log it cites.
+The next run reads it to re-check its blocking findings.
+Whether git tracks it follows the user's choice for `.verify/` (Phase 2).
+Never write it to the change root, where it would read as one of the change's authored artifacts.
+A report describes the code and specs of its own run, and goes stale the moment either moves.
+Its durable consequences do not live in the report: waivers and overrides are recorded in `design.md`, and remediation tasks in `tasks.md`.
 The report only echoes them.
+
+**Re-check the previous run.**
+When Phase 1 found a previous report, account for each of its blocking findings in this report as one of:
+
+- **resolved** — cite this run's test, change, or record that resolves it;
+- **still open** — the finding appears in this report;
+- **no longer applies** — state why, such as the code or the spec text it cited no longer exists.
+
+A finding a run does not notice again is not resolved.
+Detection varies between runs, so without this step a later run can pass a change an earlier run blocked, without anything having changed.
+The re-check covers findings only; it does not limit what this run looks for.
 
 Before writing the Summary, classify blocking status:
 
@@ -472,6 +506,10 @@ For each entry in `design.md § Verification Overrides`, carry the audit record 
 
 - {blocking finding or gate outcome} — stage: {stage}; reason: {reason}; constraints: {constraints}; follow-up: {tasks.md task text}; approved by: {approved by}; recorded: {recorded}
 
+## PREVIOUS RUN
+
+- {previous run id}: {finding} — {resolved: citation | still open | no longer applies: reason}
+
 ## SCOPE
 
 - {Change description} — {file:line} · {related | unspecified} (CRITICAL/WARNING/SUGGESTION)
@@ -490,6 +528,7 @@ Omit empty sections (e.g., omit CONFORMANCE if no schema config exists; omit WAI
 
 If Phase 2 proceeded under a failing-suite override, the Summary must say so explicitly and recommend fixing or isolating the failing tests before treating the verify run as complete.
 If any blocking findings are overridden for sync, the Summary must say that the run is not a clean pass and that `sdd-sync` is permitted only under the recorded overrides.
+If the run id ends in `-dirty`, the Summary must say that the run is advisory and that `sdd-sync` needs a run on committed code; do not use the clean-pass template below.
 
 If no issues found:
 
@@ -515,14 +554,24 @@ State instead that verification found issues the user explicitly chose not to le
 #### Offer the Review Handoff
 
 Verify checks evidence; it does not search for defects.
-After the report, on every run, offer `code-review` in one line.
+After the report, on every run that did not stop on a failing suite, offer `code-review` in one line.
 When the change touches a security boundary, also offer `security-scan`.
 A change touches a security boundary when it parses or classifies untrusted input, makes an authorization, sandbox, or policy decision, or handles secrets or credentials.
 
-For each skill you offer, state what you will pass to it:
+For `code-review`, offer a review of the branch against `<base-branch>` (the branch the change will merge into), the commits this run judged, and state what you will give it.
+`code-review` builds its packet and starts the review itself, after its own checks; do not run its scripts from this skill.
+It refuses a branch review while a changed file differs from `HEAD`, so first ask the user to commit or set aside any uncommitted edits, including override and task records in `design.md` and `tasks.md`.
+A `-no-git` run has no branch to review; do not offer `code-review`.
 
-- The change's delta specs and `design.md` as the source of truth (for `code-review`, through `build_review_packet.py --include`).
-- The universal SHALL claims this run flagged because their evidence does not cover their input space, as the areas to examine first.
+- The source of truth: the absolute path of each `specs/<capability>/spec.md` and of `design.md`, one packet `--include` each.
+  The Verification Waivers and Verification Overrides in `design.md` record decisions about this run's evidence, not the author's intent for the code; say so to the reviewer.
+- The intent: the proposal's Intent, for the user to confirm.
+- The flagged requirements: each universal SHALL that got the Phase 5 step 5 WARNING, as the requirement's name, its text, and the input space it quantifies over, in the spec's words.
+  Do not pass write-sites or this run's finding text.
+  A standard review gives them to the test adversary, and a deep review also to the list builders; never pass them to inspectors.
+  A quick review keeps no review state, so add them to its intent for the reviewer to check.
+
+For `security-scan`, pass the change's branch diff as its target.
 
 Run neither skill without the user's approval.
 If the user declines, end the run.
@@ -564,7 +613,9 @@ A clean verify report states that the evidence covers the claims; do not present
 - Marking a requirement VERIFIED or TESTED without a checkable citation, or accepting a waiver without checkable manual evidence — both fall back to INSPECTED / CRITICAL per `evidence-rules.md`.
 - Skipping the waiver provenance check (`evidence-rules.md` § 4) — waivers added in the same branch as the implementation, especially after a failed verify, need to be surfaced.
 - Recording an override in `design.md` but failing to carry its context into the OVERRIDES section or Summary, which breaks the audit trail for later verify/sync work.
-- Persisting the verification report into the committed change directory (or anywhere but `.verify/`) — it is a derived snapshot that goes stale the moment code or specs move; write it only to the transient, self-gitignored `.verify/`, and rely on `design.md`/`tasks.md` for the durable record.
+- Persisting the verification report into the change root (or anywhere but `.verify/`) — it is a derived snapshot that goes stale the moment code or specs move; write it only to this run's directory in `.verify/`, and rely on `design.md`/`tasks.md` for the durable record.
+- Overwriting the previous run's report or test log — the report's citations then point at another run's evidence; give each run its own `.verify/<run-id>/` directory.
+- Treating a previous blocking finding that this run did not notice as resolved — re-check each one (Phase 9) and state its outcome.
 - Treating an override as a severity downgrade, or honoring a chat-only override without recording it in `design.md` and `tasks.md`.
 - Proceeding to Phase 3 without evaluating the parallel-subagent gate (the required step within Phase 2) — the gate is mandatory; if no gate-outcome announcement appears in the run, you skipped it.
   Single-agent execution is a gate result, not a default.
@@ -584,6 +635,7 @@ A clean verify report states that the evidence covers the claims; do not present
 - `references/parallel-subagent-path.md` — availability gate, granularity, dispatch, synthesis
 - `references/verify-subagent.md` — canonical job description for subagents on the parallel path
 - `references/sdd-spec-formats.md` — contract shapes (§ 1.1), scenarios as evidence (§ 1.5), partition heuristic (§ 1.6), claims that need generated evidence (§ 1.7)
-- `references/sdd-change-formats.md` — task format (§ 3) and contract-relevant write-site definition (§ 3.1)
+- `references/sdd-change-formats.md` — task format (§ 3), contract-relevant write-site definition (§ 3.1), spec-drift check (§ 5.5), and changes since a verify run (§ 7)
 - `references/sdd-schema.md` — schema evidence annotations (§ 1) and lifecycle policy (§ 4)
 - `scripts/check_modified_completeness.py` — deterministic dropped-scenario check (scenario names only, not body sub-clauses); exits non-zero on dropped baseline scenarios, wireable as a pre-commit/CI gate
+- `scripts/check_verify_ignored.py` — reports whether git ignores `.verify/` and whether this is the repository's first verify run; `--add` writes the `.verify/` rule to `<specs-root>/.gitignore`

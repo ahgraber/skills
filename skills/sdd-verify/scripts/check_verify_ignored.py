@@ -1,0 +1,1 @@
+../../sdd/scripts/check_verify_ignored.py

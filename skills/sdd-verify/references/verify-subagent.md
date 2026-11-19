@@ -40,12 +40,12 @@ If any are missing or insufficient, **say so explicitly** in your Notes (prefix 
 - **Baseline spec path(s)** — `.specs/specs/<capability>/spec.md` (read for context, not as the contract under test).
 - **Test suite result** — `pass`, `no-test-suite`, or `failing-suite-override`.
   When the result is `failing-suite-override`, treat downstream conclusions as advisory rather than a clean verification pass.
-- **Test execution log** — path to the captured Phase 2 output (e.g., `.specs/changes/<name>/.verify/test-output.log`).
+- **Test execution log** — path to the captured Phase 2 output (e.g., `.specs/changes/<name>/.verify/<run-id>/test-output.log`).
   Use this to confirm a cited test was actually executed and passed.
 - **Overridden blockers** — explicit list of the known failing tests / audit findings / gate outcomes the user chose not to let block sync.
   If `Test suite result` is `failing-suite-override` and this list is missing, that is a `MISSING-INPUT`.
 - **Test artifact listing** — paths to test source files you may need to read (e.g., `tests/`).
-- **Implementation write-sites in scope** — for each ADDED or MODIFIED universal SHALL in scope, the orchestrator provides a per-requirement list of contract-relevant write-sites (`requirement → [path:line, …]`) produced by Phase 4.5.
+- **Implementation write-sites in scope** — for each ADDED or MODIFIED universal SHALL in scope, the orchestrator provides a per-requirement list of contract-relevant write-sites (`requirement → [path:line, …]`) produced by the Phase 4 write-site enumeration.
   This list is the authoritative scope for write-site coverage checks; do not narrow it, do not extend it from your own search.
   If a requirement's enumeration is missing when its requirement text is universal, that is a `MISSING-INPUT`.
 - **Schema diff (if any)** — path to `.specs/changes/<name>/schemas/after/` or a generated diff file.
@@ -94,9 +94,8 @@ Then apply the SHALL/INSPECTED → CRITICAL hard rule (`evidence-rules.md` § 2)
 
 ### Operational rules specific to subagents
 
-You inherit Read access from the parent.
-You do not have shell access.
-You cannot run `pytest --collect-only`, `git`, or any other command.
+Do not run tests, builds, `pytest --collect-only`, `git`, or any command that changes a file.
+Read files with your file-read tool; if your harness reads files only through a shell, use read-only commands such as `cat`, `rg`, and `ls`.
 
 1. **Confirm test execution from the captured log, not by running anything.**
    Search the test execution log for the test name.
@@ -131,7 +130,7 @@ For each requirement:
      When `sdd-spec-formats.md` § 1.7 says the claim needs generated evidence and the evidence is example tests only, flag **WARNING: `<name>` quantifies over `<input space>`, but its evidence samples only `<what the tests exercise>`.**
 4. **For universal SHALL claims (ADDED or MODIFIED), use the orchestrator-provided write-site enumeration.**
    Each such requirement carries a list of contract-relevant write-sites under **Implementation write-sites in scope** in your dispatch input.
-   Do not enumerate write-sites yourself — that is orchestrator work (Phase 4.5).
+   Do not enumerate write-sites yourself — that is orchestrator work (the Phase 4 write-site enumeration).
    Steps:
    1. For each write-site listed for this requirement, search the test execution log for at least one cited test that exercises the contract _through that write-site_ (not just through the canonical path).
    2. If a write-site has no covering test in the log, flag **CRITICAL: partition-incomplete evidence — write-site `<path:line>` for SHALL `<requirement name>` has no test coverage.**
@@ -167,14 +166,13 @@ Downgrade to **SUGGESTION** if the requirement is genuinely narrow (e.g., "the r
 
 You can:
 
-- Read any file in the repository (Read access is inherited).
+- Read any file in the repository.
 - Read the listed test files to inspect their assertions.
 - Read schema files, the test execution log, and captured outputs at the paths the orchestrator provided.
 
 You cannot:
 
-- Execute commands.
-  No `pytest`, no `npm test`, no `git`, no shell.
+- Run tests, builds, `git`, or any command other than the read-only ones above.
 - Open network connections.
 - Write or modify any file.
 
@@ -205,7 +203,7 @@ If any item fails, fix it before returning.
 - Skipping the write-site coverage check on ADDED or MODIFIED universal SHALL claims.
   A passing test on the canonical path is not evidence for a deduplication shortcut, retry branch, or composition step that writes the same contract-asserted value.
 - Improvising your own write-site enumeration instead of using the orchestrator-provided list, or extending the list with sites you find yourself.
-  Enumeration is orchestrator work (Phase 4.5).
+  Enumeration is orchestrator work (the Phase 4 write-site enumeration).
   Your job is to check coverage of what was provided.
   Missing enumeration → `MISSING-INPUT:`, not improvisation.
 - Flagging coverage smells as CRITICAL.

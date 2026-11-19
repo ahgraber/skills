@@ -23,7 +23,8 @@ VERIFIED vs TESTED, in one line: **VERIFIED = an artifact survives the test run 
 
 ## 2. Hard rule — Evidence sufficiency
 
-Apply after assigning a tier:
+Apply after assigning a tier.
+MUST is handled as SHALL; `sdd-spec-formats.md` § 2 gives them the same meaning.
 
 | Level  | Tier                                               | Finding                                                                |
 | ------ | -------------------------------------------------- | ---------------------------------------------------------------------- |

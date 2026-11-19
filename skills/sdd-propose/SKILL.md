@@ -1,7 +1,7 @@
 ---
 name: sdd-propose
 description: |-
-  Use when creating a new change with all SDD artifacts — proposal, delta specs, design, and tasks. Triggers: "propose a change", "create a change for X", "I want to implement feature Y", "start a new change", "let's build X".
+  Use when creating a new change with all SDD artifacts — proposal, delta specs, design, and tasks — or completing a partial change. Triggers: "propose a change", "create a change for X", "I want to implement feature Y", "start a new change", "let's build X", "finish the proposal".
 ---
 
 # SDD Propose
@@ -22,13 +22,13 @@ Keep identifiers, commands, paths, and RFC 2119 keywords exact.
 
 - Starting a new feature or behavioral change
 - User knows what they want to build and is ready to create a full change
-- No active change exists for this work
+- No active change exists for this work, or an existing change is missing artifacts (from `sdd-derive`, `sdd-translate`, or a stubbed proposal)
 
 ## When Not to Use
 
 - Existing specs to convert from another tool — use `sdd-translate`
 - Deriving specs from code analysis — use `sdd-derive`
-- A change already exists and needs implementation — use `sdd-apply`
+- A change has its complete artifact set and needs implementation — use `sdd-apply`
 - Need to think before speccing — use `sdd-explore` first
 
 ## Invocation Notice
@@ -38,6 +38,9 @@ Keep identifiers, commands, paths, and RFC 2119 keywords exact.
   A phrase from this skill's own trigger list is not a name — naming the work is not naming the skill.
 
 ## Process
+
+If the change directory already exists (from `sdd-derive`, `sdd-translate`, or a stubbed proposal), build on it.
+Keep what it has, ask in Phase 1 only what its artifacts leave open, fill missing sections in existing files, and write the missing files.
 
 ### Phase 1: Understand the Change
 
