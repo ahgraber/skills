@@ -22,11 +22,9 @@ carries what the change is judged against. When neither is supplied the packet
 says so loudly and the JSON sets has_source_of_truth=false, so the calling
 skill can refuse to dispatch a spec-compliance reviewer on an invented spec.
 
-Review state: code-review keeps a partition list across runs in a JSON file
-beside the packet, one file per repo, branch, and base. This script names that
-file and, when it exists, reports which closed partitions have changed since
-they were last explored, so a later run knows what to reopen. The review skill
-writes the file; this script only reads it.
+Index: the JSON output gives the line range of each packet section and of each
+file's hunks, so a caller can point a reader at the part it needs instead of
+the whole packet. `packet_tokens` estimates the packet's size (bytes / 4).
 """
 
 from __future__ import annotations
@@ -45,7 +43,7 @@ DEFAULT_MAX_DIFF_BYTES = 400_000
 OUTPUT_DIRS = (".review", "._scratch", ".scratch")
 
 
-def git(repo: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
+def git(repo: Path, *args: str, check: bool = True, stdin: str | None = None) -> subprocess.CompletedProcess[str]:
     """Run a git subcommand in `repo` and capture its output."""
     # Args are git subcommands chosen by this script, not untrusted input.
     return subprocess.run(  # noqa: S603
@@ -53,7 +51,16 @@ def git(repo: Path, *args: str, check: bool = True) -> subprocess.CompletedProce
         capture_output=True,
         text=True,
         check=check,
+        input=stdin,
     )
+
+
+# The whole repository, without the `.verify/` directory of an SDD change, active
+# or archived: `sdd-verify` keeps its run logs and reports there, and they are not
+# part of the change under review. A `.verify/` directory elsewhere, such as a
+# formal-verification effort's records, stays in. Both patterns are relative to
+# the repository root, so `--repo` may name a subdirectory.
+PATHSPEC = (":/", ":(top,exclude,glob)**/changes/**/.verify/**")
 
 
 def is_git_repo(repo: Path) -> bool:
@@ -94,61 +101,6 @@ def _slug(text: str) -> str:
     return re.sub(r"[^A-Za-z0-9._-]+", "-", text).strip("-") or "none"
 
 
-def state_path_for(out_dir: Path, repo_root: Path, branch: str, base: str | None, head: str) -> Path:
-    """Name the review-state file for this repo, branch, and base.
-
-    The repo name is part of the key because the TMPDIR fallback is shared
-    across repositories. A detached HEAD is keyed by its commit.
-    """
-    branch_key = branch or f"detached-{head[:12]}"
-    name = f"review-state-{_slug(repo_root.name)}--{_slug(branch_key)}--{_slug(base or 'none')}.json"
-    return out_dir / name
-
-
-def stale_closed_partitions(repo: Path, state: dict[str, object]) -> list[str]:
-    """Return the ids of closed partitions whose files changed since their last exploration.
-
-    A closed partition is stale when any of its paths differ between its last
-    explored head and the working tree, when it lists no paths, or when that
-    head no longer exists (after an amend or rebase and garbage collection).
-    Each case means the closing evidence can no longer be assumed to cover it.
-    """
-    partitions = state.get("partitions", [])
-    if not isinstance(partitions, list):
-        return []
-    return [
-        str(part.get("id", "?"))
-        for part in partitions
-        if isinstance(part, dict) and part.get("status") == "closed" and _closed_partition_is_stale(repo, part)
-    ]
-
-
-def _closed_partition_is_stale(repo: Path, part: dict[str, object]) -> bool:
-    explored = part.get("explored") or []
-    paths = [p for p in part.get("paths") or [] if isinstance(p, str)]
-    last = explored[-1] if isinstance(explored, list) and explored else None
-    last_head = last.get("head") if isinstance(last, dict) else None
-    if not paths or not isinstance(last_head, str) or not last_head:
-        return True
-    if git(repo, "cat-file", "-e", f"{last_head}^{{commit}}", check=False).returncode != 0:
-        return True
-    changed = git(repo, "diff", "--name-only", last_head, "--", *paths, check=False)
-    return changed.returncode != 0 or bool(changed.stdout.strip())
-
-
-def read_state(repo: Path, path: Path) -> dict[str, object]:
-    """Summarize the review-state file at `path` for the packet JSON."""
-    if not path.exists():
-        return {"state_exists": False, "stale_closed_partitions": []}
-    try:
-        state = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
-        return {"state_exists": True, "stale_closed_partitions": [], "state_error": str(exc)}
-    if not isinstance(state, dict):
-        return {"state_exists": True, "stale_closed_partitions": [], "state_error": "state is not a JSON object"}
-    return {"state_exists": True, "stale_closed_partitions": stale_closed_partitions(repo, state)}
-
-
 def detect_scope(repo: Path, args: argparse.Namespace) -> str:
     """Pick the diff scope. Explicit flags win; --auto falls back staged > branch > worktree."""
     if args.staged:
@@ -158,7 +110,7 @@ def detect_scope(repo: Path, args: argparse.Namespace) -> str:
     if args.worktree:
         return "worktree"
     # --auto (default)
-    if git(repo, "diff", "--cached", "--quiet", check=False).returncode != 0:
+    if git(repo, "diff", "--cached", "--quiet", "--", *PATHSPEC, check=False).returncode != 0:
         return "staged"
     base = resolve_base(repo, None)
     if base:
@@ -166,9 +118,59 @@ def detect_scope(repo: Path, args: argparse.Namespace) -> str:
         head = git(repo, "rev-parse", "HEAD", check=False).stdout.strip()
         if merge_base.returncode == 0 and merge_base.stdout.strip() and merge_base.stdout.strip() != head:
             return "branch"
-    if git(repo, "diff", "--quiet", "HEAD", check=False).returncode != 0:
+    if git(repo, "diff", "--quiet", "HEAD", "--", *PATHSPEC, check=False).returncode != 0 or untracked_files(repo):
         return "worktree"
     return "empty"
+
+
+def untracked_files(repo: Path) -> list[str]:
+    """Return the files git does not track and does not ignore, relative to the repository root."""
+    out = git(repo, "ls-files", "-z", "--others", "--exclude-standard", "--full-name", "--", *PATHSPEC).stdout
+    return [p for p in out.split("\0") if p]
+
+
+def untracked_diff(repo: Path) -> tuple[str, str]:
+    """Return the name-status lines and the diff that show each untracked file as a new file."""
+    paths = untracked_files(repo)
+    root = Path(git(repo, "rev-parse", "--show-toplevel").stdout.strip())
+    name_status = "".join(f"A\t{p}\n" for p in paths)
+    # --no-index exits 1 when the files differ, which they always do here.
+    diff = "".join(
+        git(root, "diff", "--no-index", "--no-color", "--", "/dev/null", p, check=False).stdout for p in paths
+    )
+    return name_status, diff
+
+
+def content_ids(repo: Path, scope: str, paths: list[str]) -> dict[str, str]:
+    """Return each changed file's blob id in the content the scope reviews; a file absent there maps to "".
+
+    The staged scope reviews the index, the branch scope ``HEAD``, and the
+    worktree scope the files on disk, where a symlink's id is that of its link
+    text, as git stores it. ``review_state.py`` compares these ids
+    with the content at the time it starts the review and dispatches each role.
+    """
+    ids = dict.fromkeys(paths, "")
+    if not paths:
+        return ids
+    if scope in ("staged", "branch"):
+        command = ("ls-files", "-s", "-z") if scope == "staged" else ("ls-tree", "-r", "-z", "HEAD")
+        field = 1 if scope == "staged" else 2
+        for line in git(repo, *command, "--", *paths, check=False).stdout.split("\0"):
+            if "\t" in line:
+                meta, path = line.split("\t", 1)
+                if path in ids:
+                    ids[path] = meta.split()[field]
+        return ids
+    return {path: _disk_id(repo, path) for path in paths}
+
+
+def _disk_id(repo: Path, path: str) -> str:
+    """Return the blob id git would store for `path` on disk, or "" when it is absent."""
+    if (repo / path).is_symlink():
+        return git(repo, "hash-object", "--stdin", stdin=str((repo / path).readlink())).stdout.strip()
+    if (repo / path).is_file():
+        return git(repo, "hash-object", "--", path).stdout.strip()
+    return ""
 
 
 def diff_range(repo: Path, scope: str, base: str | None) -> tuple[list[str], dict[str, str]]:
@@ -191,8 +193,8 @@ def diff_range(repo: Path, scope: str, base: str | None) -> tuple[list[str], dic
     return ["diff", "--cached"], {"scope": "empty", "range": "no changes detected"}
 
 
-def render_source_of_truth(intent: str | None, includes: list[Path]) -> tuple[str, bool]:
-    """Render the source-of-truth section. Returns (markdown, has_source_of_truth).
+def render_source_of_truth(intent: str | None, includes: list[Path]) -> tuple[str, bool, list[str]]:
+    """Render the source-of-truth section. Returns (markdown, has_source_of_truth, missing includes).
 
     has_source_of_truth is true only when real content was captured — a stated
     intent, or at least one include that actually read. Includes that are
@@ -208,40 +210,143 @@ def render_source_of_truth(intent: str | None, includes: list[Path]) -> tuple[st
     )
 
     parts: list[str] = []
+    missing: list[str] = []
     has = bool(intent and intent.strip())
     if intent and intent.strip():
         parts.append("### Stated intent\n\n" + intent.strip())
     for path in includes:
         if not path.exists():
             parts.append(f"### Missing include: `{path}`\n\n> File not found at packet build time.")
+            missing.append(str(path))
             continue
         try:
             body = path.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError) as exc:
             parts.append(f"### Unreadable include: `{path}`\n\n> {exc}")
+            missing.append(str(path))
             continue
         parts.append(f"### Included: `{path}`\n\n```\n{body}\n```")
         has = True
 
     if not has:
-        return (warning + ("\n\n" + "\n\n".join(parts) if parts else "")), False
-    return "\n\n".join(parts), True
+        return (warning + ("\n\n" + "\n\n".join(parts) if parts else "")), False, missing
+    return "\n\n".join(parts), True, missing
+
+
+PACKET_SECTIONS = ("Metadata", "Changed files (name-status)", "Diff", "Source of truth")
+
+
+def index_packet(packet: str) -> dict[str, dict[str, list[int]]]:
+    """Return 1-based, inclusive line ranges for each packet section and each file's hunks in the diff."""
+    lines = packet.split("\n")
+    sections = _section_ranges(lines)
+    diff = sections.get("Diff")
+    files = _file_ranges(lines, diff[0], diff[1]) if diff else {}
+    return {"sections": sections, "files": files}
+
+
+def _section_ranges(lines: list[str]) -> dict[str, list[int]]:
+    """Find the packet's own headings, in their fixed order; headings inside included files are content."""
+    starts: list[tuple[int, str]] = []
+    position = 0
+    for name in PACKET_SECTIONS:
+        heading = f"## {name}"
+        found = next((n for n in range(position, len(lines)) if lines[n] == heading), None)
+        if found is not None:
+            starts.append((found + 1, name))
+            position = found + 1
+    sections: dict[str, list[int]] = {}
+    for i, (start, name) in enumerate(starts):
+        end = starts[i + 1][0] - 1 if i + 1 < len(starts) else len(lines)
+        while end > start and not lines[end - 1].strip():
+            end -= 1
+        sections[name] = [start, end]
+    return sections
+
+
+_C_ESCAPES = {"a": 7, "b": 8, "t": 9, "n": 10, "v": 11, "f": 12, "r": 13, '"': 34, "\\": 92}
+
+
+def _unquote_c(text: str, start: int) -> tuple[str, int]:
+    """Decode git's C-style quoted path starting at the quote at `start`; return it and the index after."""
+    out = bytearray()
+    i = start + 1
+    while i < len(text) and text[i] != '"':
+        char = text[i]
+        if char == "\\" and i + 1 < len(text):
+            following = text[i + 1]
+            if following in "01234567":
+                out.append(int(text[i + 1 : i + 4], 8))
+                i += 4
+                continue
+            out.append(_C_ESCAPES.get(following, ord(following)))
+            i += 2
+            continue
+        out.extend(char.encode("utf-8"))
+        i += 1
+    return out.decode("utf-8", errors="replace"), i + 1
+
+
+def diff_header_path(rest: str) -> str:
+    """Return the new-side path from the part of a `diff --git` header after `diff --git `.
+
+    Git quotes a path that holds a quote, a backslash, a control character, or
+    (by default) a non-ASCII byte. An unquoted header is ambiguous when a path
+    holds " b/", so the equal-halves form is tried first.
+    """
+    if rest.startswith('"'):
+        _, after = _unquote_c(rest, 0)
+        rest_b = rest[after:].lstrip(" ")
+    else:
+        size = (len(rest) - 5) // 2
+        if rest == f"a/{rest[2 : 2 + size]} b/{rest[2 : 2 + size]}":
+            return rest[2 : 2 + size]
+        quoted = rest.find(' "b/')
+        rest_b = rest[quoted + 1 :] if quoted != -1 else rest[rest.rfind(" b/") + 1 :]
+    if rest_b.startswith('"'):
+        path, _ = _unquote_c(rest_b, 0)
+    else:
+        path = rest_b
+    return path.removeprefix("b/")
+
+
+def _file_ranges(lines: list[str], first: int, last: int) -> dict[str, list[int]]:
+    """Find each file's hunks between lines `first` and `last` of the packet."""
+    files: dict[str, list[int]] = {}
+    current: str | None = None
+    for number in range(first, last + 1):
+        line = lines[number - 1]
+        if line.startswith("diff --git "):
+            current = diff_header_path(line[len("diff --git ") :])
+            files[current] = [number, number]
+        elif line == "```":
+            current = None
+        elif current is not None and line.strip():
+            files[current][1] = number
+    return files
 
 
 def build_packet(args: argparse.Namespace) -> dict[str, object]:
     """Resolve scope, write the packet file, and return its summary metadata."""
     repo = Path(args.repo).resolve()
     if not is_git_repo(repo):
-        raise SystemExit(json.dumps({"error": f"not a git repository: {repo}"}))
+        raise SystemExit(
+            json.dumps({"error": f"not a git repository: {repo}; pass --repo <a directory inside the repository>"})
+        )
 
     base = resolve_base(repo, args.base) if (args.base or args.auto_needs_base()) else None
     scope = detect_scope(repo, args)
     if scope == "branch" and base is None:
-        raise SystemExit(json.dumps({"error": "branch scope requested but no base ref could be resolved"}))
+        msg = "branch scope requested but no base ref could be resolved; pass --base <the branch this one merges into>"
+        raise SystemExit(json.dumps({"error": msg}))
 
     args_list, range_meta = diff_range(repo, scope, base)
-    name_status = git(repo, *args_list, "--name-status").stdout.strip()
-    diff = git(repo, *args_list, "--no-color").stdout
+    name_status = git(repo, *args_list, "--name-status", "--", *PATHSPEC).stdout
+    diff = git(repo, *args_list, "--no-color", "--", *PATHSPEC).stdout
+    if scope == "worktree":
+        new_status, new_diff = untracked_diff(repo)
+        name_status, diff = name_status + new_status, diff + new_diff
+    name_status = name_status.strip()
 
     truncated = False
     if len(diff.encode("utf-8")) > args.max_diff_bytes:
@@ -251,8 +356,8 @@ def build_packet(args: argparse.Namespace) -> dict[str, object]:
     changed_files = [line for line in name_status.splitlines() if line.strip()]
     head = git(repo, "rev-parse", "HEAD", check=False).stdout.strip()
     branch = current_branch(repo)
-    sot_md, has_sot = render_source_of_truth(args.intent, [Path(p) for p in args.include])
-    generated = _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds")
+    sot_md, has_sot, missing_includes = render_source_of_truth(args.intent, [Path(p) for p in args.include])
+    generated = _dt.datetime.now(_dt.UTC).isoformat(timespec="seconds")
 
     meta_lines = [
         f"- scope: {range_meta['scope']}",
@@ -268,11 +373,12 @@ def build_packet(args: argparse.Namespace) -> dict[str, object]:
     packet = (
         "# Review Packet\n\n"
         "## Metadata\n\n" + "\n".join(meta_lines) + "\n\n"
-        "## Source of truth\n\n" + sot_md + "\n\n"
         "## Changed files (name-status)\n\n"
         + (f"```\n{name_status}\n```" if changed_files else "_No changes in scope._")
         + "\n\n## Diff\n\n"
         + (f"```diff\n{diff}\n```" if diff.strip() else "_Empty diff._")
+        + "\n\n## Source of truth\n\n"
+        + sot_md
         + "\n"
     )
 
@@ -280,22 +386,19 @@ def build_packet(args: argparse.Namespace) -> dict[str, object]:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(packet, encoding="utf-8")
 
-    toplevel = git(repo, "rev-parse", "--show-toplevel", check=False).stdout.strip()
-    repo_root = Path(toplevel) if toplevel else repo
-    state_base = range_meta.get("base") or resolve_base(repo, None)
-    state_path = state_path_for(out_path.parent, repo_root, branch, state_base, head)
-
+    index = index_packet(packet)
     return {
         "packet_path": str(out_path),
-        "output_dir_is_tmp": out_path.parent.resolve() == Path(tempfile.gettempdir()).resolve(),
-        "state_path": str(state_path),
-        **read_state(repo, state_path),
+        "index": index,
+        "content": content_ids(repo, range_meta["scope"], list(index["files"])),
+        "packet_tokens": len(packet.encode("utf-8")) // 4,
         "scope": range_meta["scope"],
         "base": range_meta.get("base", ""),
         "branch": branch,
         "head": head,
         "changed_files": len(changed_files),
         "has_source_of_truth": has_sot,
+        "missing_includes": missing_includes,
         "diff_truncated": truncated,
         "bytes": out_path.stat().st_size,
     }
@@ -306,7 +409,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build a review packet for reviewers/subagents.")
     scope = parser.add_mutually_exclusive_group()
     scope.add_argument("--staged", action="store_true", help="review staged changes (index vs HEAD)")
-    scope.add_argument("--worktree", action="store_true", help="review all uncommitted changes (working tree vs HEAD)")
+    scope.add_argument(
+        "--worktree",
+        action="store_true",
+        help="review all uncommitted changes (working tree vs HEAD), with untracked files git does not ignore",
+    )
     scope.add_argument("--base", metavar="REF", help="review this branch against base REF (merge-base...HEAD)")
     parser.add_argument(
         "--include",
@@ -337,7 +444,14 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 def main(argv: list[str]) -> int:
     """Build the packet and print its summary JSON to stdout."""
     args = parse_args(argv)
-    result = build_packet(args)
+    try:
+        result = build_packet(args)
+    except subprocess.CalledProcessError as exc:
+        command = " ".join(exc.cmd[3:]) if isinstance(exc.cmd, list) else str(exc.cmd)
+        detail = (exc.stderr or "").strip()
+        hint = " Check that --base names an existing ref." if args.base else ""
+        print(json.dumps({"error": f"git {command} failed: {detail}.{hint}"}), file=sys.stderr)
+        return 1
     print(json.dumps(result, indent=2))
     return 0
 

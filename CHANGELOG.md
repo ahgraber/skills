@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `sdd`, `sdd-sync`, `sdd-verify` — a `<!-- modified-removes: ... -->` marker can name a baseline scenario whose name contains `,` or `;`. When the whole marker names one scenario, it removes only that scenario; otherwise it is read as a `,`/`;`-separated list as before. Such a name needs its own marker. The rule that scenario names avoid commas and semicolons is gone.
+- `code-review`, `simplify` — a worktree review packet includes untracked files, and no packet includes the run files `sdd-verify` keeps in a change's `.verify/` directory.
 
 ## [3.6.0] - 2026-10-20
 

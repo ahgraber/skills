@@ -8,9 +8,11 @@
 """Tests for scripts/build_review_packet.py."""
 
 import importlib.util
+import itertools
 import json
 from pathlib import Path
 import subprocess
+import sys
 
 import pytest
 
@@ -34,7 +36,7 @@ def _git(repo: Path, *args: str) -> None:
 def _init_repo(tmp_path: Path) -> Path:
     repo = tmp_path / "repo"
     repo.mkdir()
-    _git(repo, "init", "-q")
+    _git(repo, "init", "-q", "-b", "main")
     _git(repo, "config", "user.email", "test@example.com")
     _git(repo, "config", "user.name", "Test")
     # Isolate from the developer's global config (commit signing would fail here).
@@ -160,107 +162,230 @@ def test_branch_is_reported_in_json_and_packet(tmp_path):
     assert "- branch: feature/x" in out.read_text()
 
 
-def test_state_path_sits_beside_packet_and_is_keyed_by_repo_and_branch(tmp_path):
+def test_state_fields_are_not_in_the_packet_json(tmp_path):
     repo = _init_repo(tmp_path)
-    _git(repo, "checkout", "-qb", "feature/x")
+    (repo / "a.txt").write_text("changed\n")
+    result = _run(repo, "--worktree", out=tmp_path / "packet.md")
+    for key in ("state_path", "state_exists", "needs_exploring", "output_dir_is_tmp"):
+        assert key not in result
+
+
+def test_index_gives_line_ranges_for_sections_and_files(tmp_path):
+    repo = _init_repo(tmp_path)
+    (repo / "a.txt").write_text("one\ntwo\n")
+    (repo / "b.txt").write_text("bee\n")
+    _git(repo, "add", "a.txt", "b.txt")
+    out = tmp_path / "packet.md"
+    result = _run(repo, "--staged", "--intent", "the intent", out=out)
+    lines = out.read_text().split("\n")
+    sections = result["index"]["sections"]
+    assert list(sections) == ["Metadata", "Changed files (name-status)", "Diff", "Source of truth"]
+    for name, (first, last) in sections.items():
+        assert lines[first - 1] == f"## {name}"
+        assert first <= last <= len(lines)
+    files = result["index"]["files"]
+    assert set(files) == {"a.txt", "b.txt"}
+    for path, (first, last) in files.items():
+        assert lines[first - 1] == f"diff --git a/{path} b/{path}"
+        assert sections["Diff"][0] < first <= last <= sections["Diff"][1]
+    assert files["a.txt"][1] < files["b.txt"][0]
+
+
+def test_headings_inside_an_included_spec_are_not_packet_sections(tmp_path):
+    repo = _init_repo(tmp_path)
+    (repo / "a.txt").write_text("changed\n")
+    spec = tmp_path / "spec.md"
+    spec.write_text("# Spec\n\n## Requirements\n\nThe system SHALL work.\n\n## Diff\n\nnot the packet's diff\n")
+    out = tmp_path / "packet.md"
+    result = _run(repo, "--worktree", "--include", str(spec), out=out)
+    lines = out.read_text().split("\n")
+    sections = result["index"]["sections"]
+    assert list(sections) == ["Metadata", "Changed files (name-status)", "Diff", "Source of truth"]
+    first, last = sections["Source of truth"]
+    assert "The system SHALL work." in "\n".join(lines[first - 1 : last])
+    assert "a.txt" in result["index"]["files"]
+
+
+def test_index_decodes_quoted_paths_and_keeps_ranges_apart(tmp_path):
+    repo = _init_repo(tmp_path)
+    names = ["café.txt", "tab\tname.txt", 'quote"name.txt', "line\nname.txt", "with space.txt", "z.txt"]
+    for name in names:
+        (repo / name).write_text(f"content of {name!r}\n")
+    _git(repo, "add", "--", *names)
+    out = tmp_path / "packet.md"
+    result = _run(repo, "--staged", out=out)
+    lines = out.read_text().split("\n")
+    files = result["index"]["files"]
+    assert set(files) == set(names)
+    spans = sorted(files.values())
+    for (_, last), (next_first, _) in itertools.pairwise(spans):
+        assert last < next_first
+    for name, (first, last) in files.items():
+        assert lines[first - 1].startswith("diff --git ")
+        assert any(repr(name) in line for line in lines[first - 1 : last])
+
+
+def test_index_keys_a_renamed_file_by_its_new_path(tmp_path):
+    repo = _init_repo(tmp_path)
+    _git(repo, "mv", "a.txt", "renamed a.txt")
+    result = _run(repo, "--staged", out=tmp_path / "packet.md")
+    assert list(result["index"]["files"]) == ["renamed a.txt"]
+
+
+def test_packet_tokens_estimates_the_packet_size(tmp_path):
+    repo = _init_repo(tmp_path)
+    (repo / "a.txt").write_text("changed\n")
+    out = tmp_path / "packet.md"
+    result = _run(repo, "--worktree", out=out)
+    assert result["packet_tokens"] == len(out.read_bytes()) // 4
+
+
+def test_diff_comes_before_the_source_of_truth(tmp_path):
+    repo = _init_repo(tmp_path)
     (repo / "a.txt").write_text("changed\n")
     _git(repo, "add", "a.txt")
-    out = tmp_path / "out" / "packet.md"
-    result = _run(repo, "--staged", out=out)
-    state = Path(result["state_path"])
-    assert state.parent == out.parent
-    assert "repo" in state.name
-    assert "feature-x" in state.name
-    assert result["state_exists"] is False
-    assert result["stale_closed_partitions"] == []
+    out = tmp_path / "packet.md"
+    _run(repo, "--staged", "--intent", "the intent", out=out)
+    text = out.read_text()
+    assert text.index("## Diff") < text.index("## Source of truth")
 
 
-def _write_state(path: Path, partitions: list[dict]) -> None:
-    path.write_text(json.dumps({"version": 1, "partitions": partitions}))
+def test_a_missing_include_is_reported_even_with_an_intent(tmp_path):
+    repo = _init_repo(tmp_path)
+    (repo / "a.txt").write_text("changed\n")
+    _git(repo, "add", "a.txt")
+    missing = tmp_path / "absent.md"
+    result = _run(repo, "--staged", "--intent", "the intent", "--include", str(missing), out=tmp_path / "packet.md")
+    assert result["has_source_of_truth"] is True
+    assert result["missing_includes"] == [str(missing)]
 
 
-def _head(repo: Path) -> str:
+def test_an_unknown_base_ref_is_an_error_that_names_it(tmp_path, capsys):
+    repo = _init_repo(tmp_path)
+    code = brp.main(["--base", "no-such-ref", "--repo", str(repo), "--out", str(tmp_path / "packet.md")])
+    assert code == 1
+    err = json.loads(capsys.readouterr().err)["error"]
+    assert "no-such-ref" in err
+    assert "--base" in err
+
+
+def test_a_worktree_packet_includes_untracked_files(tmp_path):
+    repo = _init_repo(tmp_path)
+    (repo / "a.txt").write_text("changed\n")
+    (repo / "new_parser.py").write_text("def parse():\n    return 1\n")
+    (repo / ".gitignore").write_text("ignored.log\n")
+    (repo / "ignored.log").write_text("noise\n")
+    out = tmp_path / "packet.md"
+    result = _run(repo, "--worktree", out=out)
+    assert set(result["index"]["files"]) == {"a.txt", "new_parser.py", ".gitignore"}
+    text = out.read_text()
+    assert "A\tnew_parser.py" in text
+    assert "+def parse():" in text
+    assert "noise" not in text
+
+
+def test_untracked_files_alone_make_a_worktree_scope(tmp_path):
+    repo = _init_repo(tmp_path)
+    (repo / "new_parser.py").write_text("x = 1\n")
+    result = _run(repo, out=tmp_path / "packet.md")
+    assert result["scope"] == "worktree"
+    assert "new_parser.py" in result["index"]["files"]
+
+
+VERIFY_FILE = ".specs/changes/add-foo/.verify/2026-11-17-120000-abc1234/test-output.log"
+
+
+def test_a_worktree_packet_leaves_out_verify_run_files(tmp_path):
+    repo = _init_repo(tmp_path)
+    (repo / "a.txt").write_text("changed\n")
+    (repo / VERIFY_FILE).parent.mkdir(parents=True)
+    (repo / VERIFY_FILE).write_text("PASSED test_foo\n")
+    out = tmp_path / "packet.md"
+    result = _run(repo, "--worktree", out=out)
+    assert list(result["index"]["files"]) == ["a.txt"]
+    assert ".verify" not in out.read_text()
+
+
+def test_a_staged_packet_leaves_out_verify_run_files(tmp_path):
+    repo = _init_repo(tmp_path)
+    (repo / "a.txt").write_text("changed\n")
+    (repo / VERIFY_FILE).parent.mkdir(parents=True)
+    (repo / VERIFY_FILE).write_text("PASSED test_foo\n")
+    _git(repo, "add", "a.txt", VERIFY_FILE)
+    result = _run(repo, "--staged", out=tmp_path / "packet.md")
+    assert list(result["index"]["files"]) == ["a.txt"]
+    assert result["changed_files"] == 1
+
+
+def test_a_change_to_verify_run_files_alone_is_no_change(tmp_path):
+    repo = _init_repo(tmp_path)
+    (repo / VERIFY_FILE).parent.mkdir(parents=True)
+    (repo / VERIFY_FILE).write_text("PASSED test_foo\n")
+    assert _run(repo, out=tmp_path / "packet.md")["scope"] == "empty"
+
+
+def test_a_packet_from_a_subdirectory_leaves_out_verify_run_files(tmp_path):
+    repo = _init_repo(tmp_path)
+    (repo / "src").mkdir()
+    (repo / "src" / "b.txt").write_text("new\n")
+    (repo / VERIFY_FILE).parent.mkdir(parents=True)
+    (repo / VERIFY_FILE).write_text("PASSED test_foo\n")
+    result = _run(repo / "src", "--worktree", out=tmp_path / "packet.md")
+    assert list(result["index"]["files"]) == ["src/b.txt"]
+
+
+def test_a_branch_packet_leaves_out_verify_run_files(tmp_path):
+    repo = _init_repo(tmp_path)
+    _git(repo, "checkout", "-qb", "feature")
+    (repo / "a.txt").write_text("changed\n")
+    (repo / VERIFY_FILE).parent.mkdir(parents=True)
+    (repo / VERIFY_FILE).write_text("PASSED test_foo\n")
+    _git(repo, "add", "a.txt", VERIFY_FILE)
+    _git(repo, "commit", "-qm", "change")
+    result = _run(repo, "--base", "main", out=tmp_path / "packet.md")
+    assert list(result["index"]["files"]) == ["a.txt"]
+
+
+def test_a_packet_keeps_a_verify_directory_outside_a_change(tmp_path):
+    repo = _init_repo(tmp_path)
+    record = repo / ".verify" / "queue-safety" / "alignment.md"
+    record.parent.mkdir(parents=True)
+    record.write_text("# Alignment\n")
+    result = _run(repo, "--worktree", out=tmp_path / "packet.md")
+    assert ".verify/queue-safety/alignment.md" in result["index"]["files"]
+
+
+def _blob(repo: Path, *args: str) -> str:
     return subprocess.run(  # noqa: S603
-        ["git", "-C", str(repo), "rev-parse", "HEAD"], check=True, capture_output=True, text=True
+        ["git", "-C", str(repo), *args], check=True, capture_output=True, text=True
     ).stdout.strip()
 
 
-def _state_run(repo: Path, tmp_path: Path, partitions_for_head) -> dict:
-    out = tmp_path / "out" / "packet.md"
-    out.parent.mkdir(exist_ok=True)
-    first = _run(repo, "--worktree", out=out)
-    _write_state(Path(first["state_path"]), partitions_for_head(_head(repo)))
-    return first
-
-
-def test_closed_partition_with_unchanged_paths_is_not_stale(tmp_path):
+def test_a_staged_packet_records_the_staged_content_of_each_changed_file(tmp_path):
     repo = _init_repo(tmp_path)
-    (repo / "b.txt").write_text("other\n")
-    _state_run(
-        repo,
-        tmp_path,
-        lambda head: [{"id": "P1", "status": "closed", "paths": ["a.txt"], "explored": [{"head": head}]}],
-    )
-    result = _run(repo, "--worktree", out=tmp_path / "out" / "packet.md")
-    assert result["state_exists"] is True
-    assert result["stale_closed_partitions"] == []
-
-
-def test_closed_partition_whose_path_changed_is_stale(tmp_path):
-    repo = _init_repo(tmp_path)
-    _state_run(
-        repo,
-        tmp_path,
-        lambda head: [
-            {"id": "P1", "status": "closed", "paths": ["a.txt"], "explored": [{"head": head}]},
-            {"id": "P2", "status": "open", "paths": ["a.txt"], "explored": [{"head": head}]},
-        ],
-    )
-    (repo / "a.txt").write_text("edited after the partition closed\n")
-    result = _run(repo, "--worktree", out=tmp_path / "out" / "packet.md")
-    assert result["stale_closed_partitions"] == ["P1"]
-
-
-@pytest.mark.parametrize(
-    "partition",
-    [
-        {"id": "P1", "status": "closed", "paths": [], "explored": [{"head": "HEAD"}]},
-        {"id": "P1", "status": "closed", "paths": ["a.txt"], "explored": []},
-        {"id": "P1", "status": "closed", "paths": ["a.txt"], "explored": [{"head": "0" * 40}]},
-    ],
-    ids=["no-paths", "never-explored", "head-missing"],
-)
-def test_closed_partition_without_usable_history_is_stale(tmp_path, partition):
-    repo = _init_repo(tmp_path)
-    (repo / "b.txt").write_text("other\n")
-    _state_run(repo, tmp_path, lambda _head: [partition])
-    result = _run(repo, "--worktree", out=tmp_path / "out" / "packet.md")
-    assert result["stale_closed_partitions"] == ["P1"]
-
-
-def test_malformed_state_is_reported_not_raised(tmp_path):
-    repo = _init_repo(tmp_path)
-    (repo / "a.txt").write_text("changed\n")
-    out = tmp_path / "out" / "packet.md"
-    out.parent.mkdir()
-    first = _run(repo, "--worktree", out=out)
-    Path(first["state_path"]).write_text("{not json")
-    result = _run(repo, "--worktree", out=out)
-    assert result["state_exists"] is True
-    assert "state_error" in result
-
-
-def test_output_dir_is_tmp_flags_the_fallback(tmp_path, monkeypatch):
-    repo = _init_repo(tmp_path)
-    (repo / "a.txt").write_text("changed\n")
+    (repo / "a.txt").write_text("staged\n")
     _git(repo, "add", "a.txt")
-    tmp = tmp_path / "tmp"
-    tmp.mkdir()
-    monkeypatch.setattr(brp.tempfile, "tempdir", str(tmp))
-    args = brp.parse_args(["--staged", "--repo", str(repo)])
-    assert brp.build_packet(args)["output_dir_is_tmp"] is True
-    (repo / ".review").mkdir()
-    assert brp.build_packet(args)["output_dir_is_tmp"] is False
+    (repo / "a.txt").write_text("unstaged on top\n")
+    result = _run(repo, "--staged", out=tmp_path / "packet.md")
+    assert result["content"] == {"a.txt": _blob(repo, "rev-parse", ":a.txt")}
+
+
+def test_a_worktree_packet_records_the_content_on_disk(tmp_path):
+    repo = _init_repo(tmp_path)
+    (repo / "a.txt").write_text("on disk\n")
+    (repo / "new.txt").write_text("untracked\n")
+    result = _run(repo, "--worktree", out=tmp_path / "packet.md")
+    assert result["content"] == {name: _blob(repo, "hash-object", name) for name in ("a.txt", "new.txt")}
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="symlinks need privileges on Windows")
+@pytest.mark.parametrize("target", ["a.txt", "missing.txt"])
+def test_a_worktree_packet_records_a_symlink_as_git_stores_it(tmp_path, target):
+    repo = _init_repo(tmp_path)
+    (repo / "link.txt").symlink_to(target)
+    result = _run(repo, "--worktree", out=tmp_path / "packet.md")
+    _git(repo, "add", "link.txt")
+    assert result["content"]["link.txt"] == _blob(repo, "rev-parse", ":link.txt")
 
 
 if __name__ == "__main__":
