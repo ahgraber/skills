@@ -83,7 +83,8 @@ If `.specs/.sdd/schema-config.yaml` exists:
 1. Generate current schema snapshots and store in `.specs/changes/<name>/schemas/before/`.
 2. Add a `## Schema Impact` section to `proposal.md` describing expected schema changes — new endpoints, new or modified models, removed operations.
    See `references/sdd-schema.md` § 2 for the format.
-3. Create `.specs/changes/<name>/schemas/expected.md` with a prose description of the expected schema diff. `sdd-verify` uses this to cross-check actual changes at verify time.
+3. Create `.specs/changes/<name>/schemas/expected.md` with a prose description of the expected schema diff.
+   `sdd-verify` uses this to cross-check actual changes at verify time.
 
 If no schema config exists but `.specs/schemas/` contains files, emit a visible warning:
 
@@ -220,7 +221,7 @@ Rules:
 - [ ] `scripts/check_spec_format.py` passes on every delta spec:
 
   ```text
-  uv run --quiet <skill_root>/scripts/check_spec_format.py .specs/changes/<name>/specs/
+  uv run --quiet <skill_root>/scripts/check_spec_format.py --type delta .specs/changes/<name>/specs/
   ```
 
 - [ ] Each requirement is a contract statement — a property about observable state that stands on its own without its scenarios (see `references/sdd-spec-formats.md` § 1)

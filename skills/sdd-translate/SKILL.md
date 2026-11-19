@@ -163,8 +163,11 @@ Source docs frequently capture only the happy-path acceptance criterion; if the 
 - [ ] `scripts/check_spec_format.py` passes on every translated spec — heading levels, the `## Requirements` container, delta sections, bold GIVEN/WHEN/THEN, and RFC 2119 keywords:
 
   ```text
-  uv run --quiet <skill_root>/scripts/check_spec_format.py <specs-dir>
+  uv run --quiet <skill_root>/scripts/check_spec_format.py --type delta .specs/changes/<name>/specs/
+  uv run --quiet <skill_root>/scripts/check_spec_format.py --type baseline .specs/specs/<capability>/spec.md...
   ```
+
+  Run the first line for change directory output and the second, naming each spec you wrote, for baseline output.
 
 - [ ] Each requirement is a contract statement in one of the shapes from `references/sdd-spec-formats.md` § 1.1 — a property about observable state that stands on its own without its scenarios
 

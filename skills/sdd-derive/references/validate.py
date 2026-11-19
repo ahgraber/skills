@@ -23,19 +23,27 @@ Two modes:
   Catches format failures at write time (no orchestrator round-trip).
   Format check + YAML parse check + per-capability surface coverage.
 
-      uv run --quiet validate.py --single <observations.yaml> <spec.md>
+      uv run --quiet validate.py --single <observations.yaml> <spec.md> --type baseline|delta
 
 - **Aggregate mode** — used by the orchestrator at Phase 5 across the whole run.
   All capabilities at once; cross-capability totals; final report.
 
-      uv run --quiet validate.py <observations_dir> <specs_dir>
+      uv run --quiet validate.py <observations_dir> <specs_dir> --type baseline|delta
 
-Exit code is non-zero if any spec fails format or any YAML fails to parse.
+`--type` is required in both modes and may come anywhere on the command line. It
+names the format every spec is checked against: `baseline` for specs bound for
+`.specs/specs/`, `delta` for specs bound for a change directory (the run's output
+type, sdd-derive SKILL.md § Determine Output Type). The specs sit in scratch
+while they are checked, so their paths do not show the format.
+
+Exit code is 1 if any spec fails format or any YAML fails to parse, and 2 on a
+usage error or a missing input.
 Surface gaps and uncertainties are informational; they do not fail the run.
 """
 
 from __future__ import annotations
 
+import argparse
 from dataclasses import dataclass, field
 import importlib.util
 import json
@@ -285,8 +293,10 @@ def check_coverage(yaml_path: Path, spec_path: Path) -> CoverageResult:
 # --- Driver -----------------------------------------------------------------
 
 
-def run_single(yaml_path: Path, spec_path: Path) -> int:
+def run_single(yaml_path: Path, spec_path: Path, output_type: str) -> int:
     """Validate one capability — used by the lifter before returning.
+
+    `output_type` is "baseline" or "delta": the format the spec is checked against.
 
     Output is tight and actionable: lists exact failures or prints PASS.
     Exit code is non-zero on any format or YAML failure.
@@ -306,7 +316,7 @@ def run_single(yaml_path: Path, spec_path: Path) -> int:
         failures.append(f"YAML parse error in {yaml_path.name}: {yr.error}")
 
     # Format
-    fr = check_format(spec_path, output_type="baseline")
+    fr = check_format(spec_path, output_type=output_type)
     if not fr.passed:
         failures.extend(fr.failures)
 
@@ -332,27 +342,27 @@ def run_single(yaml_path: Path, spec_path: Path) -> int:
 
 def main() -> int:
     """Parse argv, dispatch to single or aggregate mode, return exit code."""
-    args = sys.argv[1:]
+    parser = argparse.ArgumentParser(
+        prog="validate.py",
+        usage=(
+            "uv run --quiet validate.py <observations_dir> <specs_dir> --type baseline|delta\n"
+            "       uv run --quiet validate.py --single <observations.yaml> <spec.md> --type baseline|delta"
+        ),
+    )
+    parser.add_argument("--single", action="store_true")
+    parser.add_argument("--type", required=True, choices=("baseline", "delta"), dest="output_type")
+    parser.add_argument("observations", type=Path)
+    parser.add_argument("specs", type=Path)
+    try:
+        args = parser.parse_args(sys.argv[1:])
+    except SystemExit as exc:
+        return 2 if exc.code else 0
 
-    if len(args) >= 1 and args[0] == "--single":
-        if len(args) != 3:
-            print(
-                "Usage: uv run --quiet validate.py --single <observations.yaml> <spec.md>",
-                file=sys.stderr,
-            )
-            return 2
-        return run_single(Path(args[1]), Path(args[2]))
+    if args.single:
+        return run_single(args.observations, args.specs, args.output_type)
 
-    if len(args) != 2:
-        print(
-            "Usage: uv run --quiet validate.py <observations_dir> <specs_dir>\n"
-            "       uv run --quiet validate.py --single <observations.yaml> <spec.md>",
-            file=sys.stderr,
-        )
-        return 2
-
-    obs_dir = Path(args[0])
-    spec_dir = Path(args[1])
+    obs_dir = args.observations
+    spec_dir = args.specs
 
     if not obs_dir.is_dir():
         print(f"observations dir not found: {obs_dir}", file=sys.stderr)
@@ -375,7 +385,7 @@ def main() -> int:
         sp = spec_dir / cap / "spec.md"
         yaml_results.append(check_yaml(yp))
         if sp.exists():
-            format_results.append(check_format(sp, output_type="baseline"))
+            format_results.append(check_format(sp, output_type=args.output_type))
             coverage_results.append(check_coverage(yp, sp))
         else:
             # Spec missing — record a synthetic failure

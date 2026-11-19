@@ -64,6 +64,10 @@ digraph output_type {
 **Greenfield check:** when `.specs/specs/` does not exist, run discovery (Phase 2) before deciding.
 If discovery finds no relevant implementation, generate a change directory with ADDED-only delta specs — never assert behavior in `.specs/specs/` that has not been built.
 
+One run has one output type.
+A change directory holds delta specs, so its output type is `delta`; baseline specs have output type `baseline`.
+Pass that word to every lifter and to every `validate.py` and `check_spec_format.py` run as `--type`.
+
 ## Workflow
 
 ### Checklist
@@ -105,6 +109,8 @@ Output path: `<literal absolute path>` \
 
 After writing, run `ls -la <path>` and report byte count.
 ```
+
+A lifter prompt also carries the other inputs `references/lifter.md` § Inputs lists, including the output type.
 
 **Return decision-relevant data, not artifact content.**
 Full artifacts live on disk; the orchestrator reads the file when it needs detail.
@@ -243,7 +249,7 @@ digraph phase_4_per_capability {
     lift_work [label="Lifter consumes observations\n+ verifies source as needed", shape=box];
     lift_out [label="Lifter writes spec.md", shape=box];
 
-    validate [label="uv run validate.py --single\n<observations> <spec>", shape=plaintext];
+    validate [label="uv run validate.py --single\n<observations> <spec> --type <type>", shape=plaintext];
     pass [label="PASS?", shape=diamond];
     fix [label="Lifter fixes failures in spec", shape=box];
 
@@ -269,7 +275,7 @@ Validation runs in two places.
 **Per-capability** — each lifter runs the validator before returning:
 
 ```bash
-uv run --quiet <skill_root>/references/validate.py --single <observations.yaml> <spec.md>
+uv run --quiet <skill_root>/references/validate.py --single <observations.yaml> <spec.md> --type <baseline|delta>
 ```
 
 If FAIL, the lifter fixes and re-runs until PASS — catching format drift at write time avoids round-tripping a corrective dispatch.
@@ -278,7 +284,7 @@ See `references/lifter.md` § Self-check.
 **Aggregate** — the orchestrator runs across the whole run:
 
 ```bash
-uv run --quiet <skill_root>/references/validate.py <observations_dir> <specs_dir>
+uv run --quiet <skill_root>/references/validate.py <observations_dir> <specs_dir> --type <baseline|delta>
 ```
 
 The aggregate report covers format, YAML parse, kind-aware surface coverage diff, and uncertainty review.
@@ -296,6 +302,14 @@ Add a generation note at the top:
 
 > Generated from code analysis on {date}, as-of commit {sha}
 
+Check the specs where you wrote them, with the run's output type:
+
+```bash
+uv run --quiet <skill_root>/scripts/check_spec_format.py --type delta .specs/changes/<name>/specs/
+uv run --quiet <skill_root>/scripts/check_spec_format.py --type baseline .specs/specs/<capability>/spec.md...
+```
+
+A failure here means a spec went to the wrong tree or changed after Phase 5; fix it before you continue.
 Clear ephemeral observations once specs are written.
 The commit SHA is the canonical anchor for re-derivation.
 

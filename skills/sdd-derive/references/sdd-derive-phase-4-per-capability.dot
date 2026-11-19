@@ -11,7 +11,7 @@ digraph phase_4_per_capability {
     lift_work [label="Lifter consumes observations\n+ verifies source as needed", shape=box];
     lift_out [label="Lifter writes spec.md", shape=box];
 
-    validate [label="uv run validate.py --single\n<observations> <spec>", shape=plaintext];
+    validate [label="uv run validate.py --single\n<observations> <spec> --type <type>", shape=plaintext];
     pass [label="PASS?", shape=diamond];
     fix [label="Lifter fixes failures in spec", shape=box];
 

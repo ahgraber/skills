@@ -201,7 +201,7 @@ If no schema config exists and `.specs/schemas/` is empty or absent, skip silent
 - [ ] `scripts/check_spec_format.py` passes on every synced baseline spec
 
 ```bash
-uv run --quiet <skill_root>/scripts/check_spec_format.py .specs/specs/<capability>/spec.md
+uv run --quiet <skill_root>/scripts/check_spec_format.py --type baseline .specs/specs/<capability>/spec.md
 ```
 
 Fix any failure before reporting.

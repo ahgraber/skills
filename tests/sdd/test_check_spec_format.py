@@ -197,6 +197,41 @@ def test_missing_rfc2119_fails():
     assert "RFC 2119" in _messages(text)
 
 
+SECOND_REQUIREMENT = (
+    "\n### Requirement: Bar\n\n{statement}\n\n#### Scenario: BarPath\n\n- **GIVEN** a\n- **WHEN** b\n- **THEN** c\n"
+)
+
+
+def test_requirement_without_keyword_fails_beside_one_with_keyword():
+    text = BASELINE + SECOND_REQUIREMENT.format(statement="The system bars.")
+
+    assert "'### Requirement: Bar' states no RFC 2119 keyword" in _messages(text)
+
+
+def test_requirement_with_two_keywords_passes():
+    text = BASELINE + SECOND_REQUIREMENT.format(statement="The system SHALL bar and MAY log it.")
+
+    assert _check(text).passed
+
+
+def test_requirement_under_later_section_fails():
+    text = BASELINE + "\n## Technical Notes\n" + SECOND_REQUIREMENT.format(statement="The system SHALL bar.")
+
+    assert "'### Requirement: Bar' is under '## Technical Notes'" in _messages(text)
+
+
+def test_delta_requirement_under_non_delta_section_fails():
+    text = DELTA + "\n## Notes\n" + SECOND_REQUIREMENT.format(statement="The system SHALL bar.")
+
+    assert "'### Requirement: Bar' is under '## Notes'" in _messages(text)
+
+
+def test_removed_requirement_needs_no_keyword():
+    text = DELTA + "\n## REMOVED Requirements\n\n### Requirement: Old\n\nRemoved because: replaced by Foo.\n"
+
+    assert _check(text).passed
+
+
 # --- remaining delta rules ---------------------------------------------------
 
 
@@ -254,6 +289,18 @@ def test_detect_output_type_reads_markers_not_path():
     assert csf.detect_output_type(BASELINE, PATH) == "baseline"
 
 
+def test_a_baseline_inside_a_directory_named_changes_is_a_baseline():
+    path = Path("/work/changes/repo/.specs/specs/foo/spec.md")
+
+    assert csf.detect_output_type(BASELINE, path) == "baseline"
+
+
+def test_a_spec_without_markers_in_a_change_is_a_delta():
+    path = Path("/work/repo/.specs/changes/add-foo/specs/foo/spec.md")
+
+    assert csf.detect_output_type(BASELINE, path) == "delta"
+
+
 def test_malformed_delta_is_still_detected_as_delta():
     text = DELTA.replace("## ADDED Requirements\n\n### Requirement: DoesFoo", "## ADDED Requirement: DoesFoo")
 
@@ -305,6 +352,25 @@ def test_cli_returns_zero_on_pass(tmp_path, monkeypatch, capsys):
 
     assert csf.main() == 0
     assert "PASS" in capsys.readouterr().out
+
+
+def test_cli_takes_the_type_after_the_paths(tmp_path, monkeypatch, capsys):
+    spec = tmp_path / "foo" / "spec.md"
+    spec.parent.mkdir()
+    spec.write_text(DELTA, encoding="utf-8")
+    monkeypatch.setattr(sys, "argv", ["check_spec_format.py", str(spec), "--type", "baseline"])
+
+    assert csf.main() == 1
+    assert "[baseline]" in capsys.readouterr().out
+
+
+def test_cli_rejects_an_unknown_type(tmp_path, monkeypatch):
+    spec = tmp_path / "foo" / "spec.md"
+    spec.parent.mkdir()
+    spec.write_text(BASELINE, encoding="utf-8")
+    monkeypatch.setattr(sys, "argv", ["check_spec_format.py", "--type", "change", str(spec)])
+
+    assert csf.main() == 2
 
 
 if __name__ == "__main__":

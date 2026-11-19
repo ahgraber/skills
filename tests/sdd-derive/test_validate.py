@@ -10,8 +10,7 @@
 
 Behavior-level: exercise the public check functions against fixture specs and
 observation YAMLs in a tmp dir, asserting the recorded failures / parse results
-/ coverage classification. `main()` reads sys.argv, so the lower-level
-functions (and run_single) are tested directly rather than the CLI shell.
+/ coverage classification. CLI tests patch sys.argv and call `main()`.
 
 Run: uv run tests/sdd-derive/test_validate.py
 """
@@ -312,7 +311,7 @@ def test_run_single_well_formed_returns_0(tmp_path, capsys):
     spec = _spec_file(tmp_path, WELL_FORMED_BASELINE)
     yml = _yaml_file(tmp_path, "observations:\n  - id: o1\n")
 
-    rc = validate.run_single(yml, spec)
+    rc = validate.run_single(yml, spec, "baseline")
 
     assert rc == 0
     assert "PASS" in capsys.readouterr().out
@@ -322,13 +321,98 @@ def test_run_single_format_failure_returns_1(tmp_path):
     spec = _spec_file(tmp_path, WELL_FORMED_BASELINE.replace("## Purpose\n\nHandles foo.\n\n", ""))
     yml = _yaml_file(tmp_path, "observations:\n  - id: o1\n")
 
-    assert validate.run_single(yml, spec) == 1
+    assert validate.run_single(yml, spec, "baseline") == 1
+
+
+DELTA_ADDED = f"""# Delta for Foo
+
+{GEN_NOTE}
+
+## ADDED Requirements
+
+### Requirement: DoesFoo
+
+The system SHALL foo.
+
+#### Scenario: HappyPath
+
+- **GIVEN** a precondition
+- **WHEN** an action
+- **THEN** an outcome
+"""
+
+
+def _scratch_run(tmp_path: Path, text: str) -> tuple[Path, Path]:
+    """Lay out one capability as a lifter does: observations and spec in scratch."""
+    obs_dir = tmp_path / "scratch" / "observations"
+    specs_dir = tmp_path / "scratch" / "specs"
+    _write(obs_dir / "foo.yaml", "observations:\n  - id: o1\n")
+    _write(specs_dir / "foo" / "spec.md", text)
+    return obs_dir, specs_dir
+
+
+def _main(monkeypatch, *argv: str) -> int:
+    monkeypatch.setattr(sys, "argv", ["validate.py", *argv])
+    return validate.main()
+
+
+def test_run_single_checks_a_delta_in_scratch_as_the_type_it_is_given(tmp_path):
+    obs_dir, specs_dir = _scratch_run(tmp_path, DELTA_ADDED)
+
+    assert validate.run_single(obs_dir / "foo.yaml", specs_dir / "foo" / "spec.md", "delta") == 0
+
+
+def test_run_single_fails_a_delta_checked_as_a_baseline(tmp_path):
+    obs_dir, specs_dir = _scratch_run(tmp_path, DELTA_ADDED)
+
+    assert validate.run_single(obs_dir / "foo.yaml", specs_dir / "foo" / "spec.md", "baseline") == 1
+
+
+def test_single_mode_takes_the_output_type_from_the_command_line(tmp_path, monkeypatch, capsys):
+    obs_dir, specs_dir = _scratch_run(tmp_path, DELTA_ADDED)
+    args = ["--single", str(obs_dir / "foo.yaml"), str(specs_dir / "foo" / "spec.md")]
+
+    assert _main(monkeypatch, *args, "--type", "delta") == 0, capsys.readouterr().out
+
+
+def test_the_type_may_come_before_the_paths(tmp_path, monkeypatch, capsys):
+    obs_dir, specs_dir = _scratch_run(tmp_path, DELTA_ADDED)
+    args = ["--single", str(obs_dir / "foo.yaml"), str(specs_dir / "foo" / "spec.md")]
+
+    assert _main(monkeypatch, "--type", "delta", *args) == 0, capsys.readouterr().out
+
+
+def test_aggregate_mode_checks_deltas_in_scratch_as_the_given_type(tmp_path, monkeypatch, capsys):
+    obs_dir, specs_dir = _scratch_run(tmp_path, DELTA_ADDED)
+
+    assert _main(monkeypatch, str(obs_dir), str(specs_dir), "--type", "delta") == 0, capsys.readouterr().out
+
+
+def test_aggregate_mode_fails_a_delta_checked_as_a_baseline(tmp_path, monkeypatch):
+    obs_dir, specs_dir = _scratch_run(tmp_path, DELTA_ADDED)
+
+    assert _main(monkeypatch, str(obs_dir), str(specs_dir), "--type", "baseline") == 1
+
+
+@pytest.mark.parametrize("single", [True, False])
+def test_a_missing_type_is_a_usage_error(tmp_path, monkeypatch, single):
+    obs_dir, specs_dir = _scratch_run(tmp_path, DELTA_ADDED)
+    spec = specs_dir / "foo" / "spec.md"
+    args = ["--single", str(obs_dir / "foo.yaml"), str(spec)] if single else [str(obs_dir), str(specs_dir)]
+
+    assert _main(monkeypatch, *args) == 2
+
+
+def test_an_unknown_type_is_a_usage_error(tmp_path, monkeypatch):
+    obs_dir, specs_dir = _scratch_run(tmp_path, DELTA_ADDED)
+
+    assert _main(monkeypatch, str(obs_dir), str(specs_dir), "--type", "change") == 2
 
 
 def test_run_single_missing_file_returns_2(tmp_path):
     spec = _spec_file(tmp_path, WELL_FORMED_BASELINE)
 
-    assert validate.run_single(tmp_path / "missing.yaml", spec) == 2
+    assert validate.run_single(tmp_path / "missing.yaml", spec, "baseline") == 2
 
 
 if __name__ == "__main__":

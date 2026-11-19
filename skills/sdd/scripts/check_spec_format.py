@@ -12,18 +12,21 @@ headings, scenario nesting, and bold GIVEN/WHEN/THEN.
 Owned by the `sdd` skill and symlinked into the scripts/ directory of
 sdd-propose, sdd-derive, sdd-sync, and sdd-translate.
 
-    uv run --quiet check_spec_format.py <path>...
-    uv run --quiet check_spec_format.py --type delta <path>...
+    uv run --quiet check_spec_format.py --type baseline|delta <path>...
 
 Paths may be `spec.md` files or directories (searched for `**/spec.md`).
-Baseline or delta is detected per file unless `--type` forces one.
-Exit code is non-zero when any file fails.
+`--type` may come anywhere on the command line and checks every file against
+that format. Without it, the format is detected per file: any delta marker makes
+a file a delta, so a baseline that still holds an ADDED section passes as a
+delta. A caller that knows which format it wrote passes `--type`.
+Exit code is 1 when any file fails, and 2 on a usage error or no specs found.
 
 Structure only; § 1 contract shape is left to the calling skill.
 """
 
 from __future__ import annotations
 
+import argparse
 from dataclasses import dataclass, field
 from pathlib import Path
 import re
@@ -109,7 +112,8 @@ def detect_output_type(text: str, path: Path | None = None) -> str:
     """Classify a spec as "delta" or "baseline" from its own content.
 
     Any delta marker makes it a delta, including one fused to a requirement
-    heading, so a malformed delta is checked against the delta rules.
+    heading, so a malformed delta is checked against the delta rules. A spec
+    without markers is a delta only at `changes/<name>/specs/<cap>/spec.md`.
     """
     for heading in parse_headings(text):
         if DELTA_SECTION.match(heading.text) or RENAMED_SECTION.match(heading.text):
@@ -118,7 +122,8 @@ def detect_output_type(text: str, path: Path | None = None) -> str:
             return "delta"
         if heading.level == 1 and heading.text.lower().startswith("delta"):
             return "delta"
-    if path is not None and "changes" in path.parts:
+    parts = path.parts if path is not None else ()
+    if len(parts) >= 5 and parts[-5] == "changes" and parts[-3] == "specs":
         return "delta"
     return "baseline"
 
@@ -198,9 +203,7 @@ def _check_baseline(headings: list[Heading], result: SpecFormatResult) -> None:
 
     _check_orphan_scenarios(headings, failures)
     _check_scenario_bodies(headings, failures)
-
-    if not RFC_2119.search("\n".join(h.body for h in headings)):
-        failures.append("no RFC 2119 keywords (SHALL/MUST/SHOULD/MAY) found (§ 2)")
+    _check_requirements(headings, failures, lambda text: text == "Requirements")
 
 
 def _check_delta(headings: list[Heading], result: SpecFormatResult) -> None:
@@ -247,10 +250,35 @@ def _check_delta(headings: list[Heading], result: SpecFormatResult) -> None:
 
     _check_orphan_scenarios(headings, failures)
     _check_scenario_bodies(headings, failures)
+    _check_requirements(headings, failures, lambda text: bool(DELTA_SECTION.match(text)))
 
-    covered = [h for h in sections if DELTA_SECTION.match(h.text) and not h.text.startswith("REMOVED")]
-    if covered and not RFC_2119.search("\n".join(h.body for h in headings)):
-        failures.append("no RFC 2119 keywords (SHALL/MUST/SHOULD/MAY) found (§ 2)")
+
+def _check_requirements(headings: list[Heading], failures: list[str], is_container) -> None:
+    """Require each requirement under a container section, stating an RFC 2119 keyword.
+
+    A requirement under a later non-container section is reported here; one above
+    the first container is reported by the caller. REMOVED entries carry a reason,
+    not a contract, so they need no keyword.
+    """
+    section: Heading | None = None
+    seen_container = False
+    for heading in headings:
+        if heading.level == 2:
+            section = heading
+            seen_container = seen_container or is_container(heading.text)
+            continue
+        if not REQUIREMENT.match(heading.text):
+            continue
+        if seen_container and section is not None and not is_container(section.text):
+            failures.append(
+                f"line {heading.line}: '{heading.marked}' is under '{section.marked}', not a requirements section (§ 3, § 4)"
+            )
+        if section is not None and section.text.startswith("REMOVED"):
+            continue
+        if not RFC_2119.search(heading.body):
+            failures.append(
+                f"line {heading.line}: '{heading.marked}' states no RFC 2119 keyword (SHALL/MUST/SHOULD/MAY) (§ 2)"
+            )
 
 
 def _check_orphan_scenarios(headings: list[Heading], failures: list[str]) -> None:
@@ -304,21 +332,18 @@ def collect_specs(paths: list[Path]) -> list[Path]:
 
 def main() -> int:
     """Parse argv, check every named spec, and report."""
-    args = sys.argv[1:]
-    output_type = "auto"
+    parser = argparse.ArgumentParser(
+        prog="check_spec_format.py", usage="check_spec_format.py [--type baseline|delta] <path>..."
+    )
+    parser.add_argument("--type", choices=("baseline", "delta"), default="auto", dest="output_type")
+    parser.add_argument("paths", nargs="+", type=Path)
+    try:
+        args = parser.parse_args(sys.argv[1:])
+    except SystemExit as exc:
+        return 2 if exc.code else 0
+    output_type = args.output_type
 
-    if args and args[0] == "--type":
-        if len(args) < 3 or args[1] not in ("baseline", "delta"):
-            print("Usage: check_spec_format.py [--type baseline|delta] <path>...", file=sys.stderr)
-            return 2
-        output_type = args[1]
-        args = args[2:]
-
-    if not args:
-        print("Usage: check_spec_format.py [--type baseline|delta] <path>...", file=sys.stderr)
-        return 2
-
-    specs = collect_specs([Path(a) for a in args])
+    specs = collect_specs(args.paths)
     if not specs:
         print("no spec.md files found in the given paths", file=sys.stderr)
         return 2

@@ -14,15 +14,20 @@ Check generated specs against three signals: surface coverage, uncertainty count
 
 ```bash
 # Lifter mode (single capability; Phase 4)
-uv run --quiet <skill_root>/references/validate.py --single <observations.yaml> <spec.md>
+uv run --quiet <skill_root>/references/validate.py --single <observations.yaml> <spec.md> --type <baseline|delta>
 
 # Aggregate mode (whole run; Phase 5)
-uv run --quiet <skill_root>/references/validate.py <observations_dir> <specs_dir>
+uv run --quiet <skill_root>/references/validate.py <observations_dir> <specs_dir> --type <baseline|delta>
 ```
+
+`--type` is required in both modes and may come anywhere on the command line.
+Exit code is 1 when a spec fails format or a YAML fails to parse, and 2 on a usage error or a missing input.
 
 ## Inputs
 
 - Generated spec(s) — delta or baseline format.
+  `--type` sets the expected format for every spec: the run's output type (`SKILL.md` § Determine Output Type).
+  The specs are in scratch when checked, so their paths do not show the format.
 - Surface inventory (per capability, from observer YAML).
 - `## Uncertainties` section content (per spec, when present).
 

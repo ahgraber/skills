@@ -405,13 +405,16 @@ These are not a checklist to audit against — they are illustrations of the art
 It is a `uv` script with no dependencies, shipped in `sdd` and symlinked into `sdd-propose`, `sdd-derive`, `sdd-sync`, and `sdd-translate`.
 
 ```bash
-uv run --quiet <skill_root>/scripts/check_spec_format.py <path>...
+uv run --quiet <skill_root>/scripts/check_spec_format.py --type baseline <path>...
 uv run --quiet <skill_root>/scripts/check_spec_format.py --type delta <path>...
 ```
 
 Paths may be `spec.md` files or directories, which are searched for `**/spec.md`.
-Baseline or delta is detected per file from its own markers; `--type` forces one.
-Exit code is non-zero when any file fails.
+`--type` checks every file against that format, and may come anywhere on the command line.
+Pass it whenever you know which format you wrote.
+Without it, the format is detected per file: any delta marker makes a file a delta, and a file without markers at `changes/<name>/specs/<capability>/spec.md` is a delta.
+Detection therefore lets a baseline that still holds an ADDED section pass as a delta.
+Exit code is 1 when any file fails, and 2 on a usage error or when no spec is found.
 
 Run it after writing or rewriting a spec.
 It checks structure only — § 1 contract shape is a judgment call and stays with the skill.

@@ -173,16 +173,20 @@ Never emit `## Uncertainties\\n\\nNone identified.`
 After writing the spec, run the deterministic validator:
 
 ```bash
-uv run --quiet <skill_root>/references/validate.py --single <observations_yaml_path> <spec_md_path>
+uv run --quiet <skill_root>/references/validate.py --single <observations_yaml_path> <spec_md_path> --type <output type>
 ```
 
-`<skill_root>` is the absolute path the orchestrator provided — the directory containing this file.
+`<output type>` is your **Output type** input, `baseline` or `delta`.
+The validator checks the spec against that format only.
+If it reports failures that belong to the other format, such as a missing `## Purpose` on a delta, fix the `--type` in the command, not the spec.
+`<skill_root>` is the absolute path the orchestrator provided — the skill's root directory, which contains `SKILL.md`.
 
 Outcomes:
 
 - `PASS  <capability>  reqs=N scenarios=N uncertainties=N surface_gaps=N acknowledged=N` (exit 0) — done.
 - `FAIL  <capability>` (exit 1) — fix each listed failure and re-run.
   Iterate until PASS.
+- Exit 2 — a usage error or a missing file; correct the command or the path and re-run.
 
 You are the cheapest place to fix format drift; a corrective dispatch costs an entire round-trip.
 

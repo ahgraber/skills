@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `sdd`, `sdd-sync`, `sdd-verify` — a `<!-- modified-removes: ... -->` marker can name a baseline scenario whose name contains `,` or `;`. When the whole marker names one scenario, it removes only that scenario; otherwise it is read as a `,`/`;`-separated list as before. Such a name needs its own marker. The rule that scenario names avoid commas and semicolons is gone.
+- `sdd-derive` — validation checks each spec against the run's output type, so a derive that writes a change directory passes it. Derive then checks the specs where it wrote them, which fails a spec written to the wrong tree.
+- `sdd-sync`, `sdd-propose`, `sdd-translate` — the spec format check is told which format each skill wrote, so a synced baseline that still holds an ADDED section fails it.
+- `sdd` — the spec format check fails a requirement placed outside `## Requirements` or a delta section, and a requirement whose own statement has no RFC 2119 keyword; REMOVED entries are exempt. Before, one keyword anywhere in the file passed every requirement.
 - `code-review`, `simplify` — a worktree review packet includes untracked files, and no packet includes the run files `sdd-verify` keeps in a change's `.verify/` directory.
 
 ## [3.6.0] - 2026-10-20
