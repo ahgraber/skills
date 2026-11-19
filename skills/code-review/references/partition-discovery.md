@@ -1,16 +1,29 @@
 # Partition Discovery
 
-Defect discovery in `code-review` runs over a **partition list**: the features of the domain that the changed code handles.
-The list is built before anyone looks for defects, so the search covers the domain instead of the neighborhood of the last defect found.
-Each review explores the open partitions, follows every confirmed defect to its siblings, and saves the list so the next review starts where this one stopped.
-
-## 1. Build the Partition List (triage)
-
-The orchestrator builds the list during Step 1 triage, with a strong model.
-A partition is one feature of the domain, stated in the domain's own terms: "here-documents feeding a pipeline", "options that change what `cd` resolves", "URLs with an IPv6 literal host".
+A **partition** is one feature of the domain that the changed code handles, stated in the domain's own terms: "here-documents feeding a pipeline", "options that change what `cd` resolves", "URLs with an IPv6 literal host".
 A partition never names a file, a line, a defect, or an example input.
+Each partition carries **input forms**: the kinds of input the domain allows for that feature, including state the code reads and settings an earlier call changed.
+An input form names a kind of input ("an option given more than once"), never a concrete value; a concrete value ("`-o a -o b`") is an example input, and inspectors never get those.
 
-Take partitions from these sources, in this order:
+A deep review searches for defects over the **partition list**, built before anyone looks for defects, so the search covers the domain instead of the neighborhood of the last defect found.
+A standard review does not use the partition list, so this file applies only to a deep review.
+The list belongs to the repository, not to a branch: each review inspects only what earlier reviews did not, and the next review starts where this one stopped.
+
+This file covers the list: how it is built, inspected, refined, and saved.
+`deep-review.md` covers the review procedure that uses it, including how claims are judged and how hunters search for more instances of a confirmed failure mode.
+`glossary.md` defines the words both use.
+
+## 1. Build the Partition List
+
+Two roles build the list, both on a strong model:
+
+- A **list builder** proposes partitions for one component of the change.
+  Dispatch one per component when the change has parts that do not depend on each other (a component is a set of changed files that call each other, or that the same tests cover); dispatch one for the whole change otherwise.
+  Template: `assets/prompt-list-builder.md`.
+- The **partition keeper** merges the builders' proposals with the saved list (§ 6), and merges partitions that name the same feature.
+  Template: `assets/prompt-keeper.md`.
+
+A list builder takes partitions from these origins:
 
 1. **The domain's reference.**
    Name the domain the changed code models: a language, a protocol, a file format, a program's command line.
@@ -21,171 +34,127 @@ Take partitions from these sources, in this order:
    Example: for each allowlisted program, "arguments that make it read or run another file".
 3. **The spec's input spaces.**
    For each universal requirement in the source of truth, add a partition per input-space partition (`sdd-spec-formats.md` § 1.6 in the `sdd` skill, when the project uses it).
+   Universal requirements that an `sdd-verify` run flagged belong here, as origins for the list builders; never pass them to inspectors.
 4. **Generic constructs in the diff.**
    Error and exception paths, concurrency and shared state, resource lifetimes, boundary values, and data-structure invariants: add one partition for each construct the diff uses.
-5. **Security, when the change touches a security boundary.**
-   A change touches a security boundary when it parses or classifies untrusted input, makes an authorization, sandbox, or policy decision, or handles secrets or credentials.
-   Add partitions from the trust-boundary and STRIDE sections of `securing-code` `references/tier3-threat-modeling.md`, from the OWASP Top 10:2025 categories that apply (`references/owasp-2025.md`), and from the matching tier3 domain checklists.
-   Copy the checklist items a partition comes from into that partition's explorer prompt as its feature description; subagents cannot invoke skills.
 
-On a later review, load the saved list first (§ 6), then add partitions for code the earlier list does not reach.
-Do not rewrite or merge saved partitions to fit a new reading of them.
+Each partition records its origin, because § 3 admits a new partition only when an origin names it.
 
-**Rank** the open partitions by risk: security boundary first, then partitions touched by the diff, then the rest.
-Depth (§ 5) decides how many run.
+**Paths.**
+Each partition lists its paths: the files that handle the feature, and the files its behavior reads, such as templates, configuration, schemas, and generated tables.
+An inspection counts only while those files keep the content it saw (§ 6), so a file the behavior reads but the list leaves out can change without sending the partition back.
+When a saved partition already names a feature the builder finds, the builder proposes it again with the component's paths that handle it, so a new file that implements an existing feature joins its partition.
 
-## 2. Breadth Pass
+**Input forms.**
+For each partition, the builder lists the forms of input the domain allows for that feature, taken from the reference and the spec, not from the code.
+They include the forms a reader of the code does not see: an argument left out so that a default applies; an argument present but empty, null, or given more than once; data the code reads that the caller did not pass in; and settings that an earlier command or call changed.
+Inspectors check the forms against the code, the forms checker checks them against the tests, and later reviews reuse them.
 
-Dispatch one **partition explorer** per open partition, on a small, fast model.
-Give each explorer only the fields in the template below.
-Do not add prior findings, prior verdicts, example inputs, edges to probe, or notes.
-Prior content steers an explorer toward known defects and lowers what it finds elsewhere.
-A small scope per explorer raises its hit rate, so list only the files that handle the partition.
+Do not take partitions from the last review's findings.
 
-```text
-You are a partition explorer in a code review.
-Do not edit any file.
+## 2. Inspect
 
-## Partition
-<one sentence: the domain feature>
+Dispatch one **inspector** per partition in `pending.inspect`, on a small, fast model, in batches of at most 8.
+Template: `assets/prompt-inspector.md`.
 
-## Files in scope
-<the files that handle this feature>
+The script fills the template's slots; dispatch the prompt unchanged.
+Do not add prior findings, prior verdicts, example inputs (concrete values), edges to probe, or notes.
+Prior content steers an inspector toward known defects and lowers what it finds elsewhere.
+A small scope per inspector raises its hit rate, so list only the files that handle the partition.
+`review_state.py dispatch inspector --partition <partition_id>` writes the inspector's input: the packet's line ranges for its files' hunks and for the source of truth, not the whole packet, and only the partition's `pending_input_forms`.
+Those are every form for a partition never inspected or whose files changed, and only the unchecked forms for a partition reopened by new forms.
+Forms an earlier inspection already checked lead an inspector back to the findings already filed.
 
-## Review packet
-<packet_path> — the diff and the source of truth. Read callers and tests as needed.
+The inspector reports a status for each form: `handled`, `claims`, or `not checked`.
+Only the forms it checked count as inspected; a form it did not check stays unchecked, so the next round or review checks it, and the pieces of a split inherit only what was checked.
+Each claim it returns names the input form it tests, the source of its expected result, and a proposed failure mode; `deep-review.md` sends every claim to the judges.
 
-## Task
-1. Decide whether the implementation handles this feature as the domain defines it.
-2. For each way it does not, give one distinguishing input and the expected result.
-   An input distinguishes when the correct implementation and this one give different results.
-3. If the implementation handles the feature, say so and name the code that handles it.
+## 3. Refine
 
-## Output
-For each candidate: file:line, the distinguishing input, the expected result, the result you predict this implementation gives, and one sentence on why.
-Then one line: `handled` or `candidates: <N>`.
-```
+The partition keeper refines the list after each round's hunters.
+Its suspected input forms are the forms the hunters named, and the input form of each record confirmed in or moved into a failure mode after that mode's hunter was dispatched.
+It takes each one, with the failure mode it may trigger:
 
-The architecture, spec-compliance, quality, test-adversary, and security subagents run in the same pass (see `parallel-subagent-review.md`).
-Send at most 8 subagents in one message; batch the rest in rounds of 8.
+- **It falls under one or more partitions.**
+  Add it to each of them as an input form, in domain terms, without a file, a line, or a defect.
+  A partition with a form no inspection checked needs inspecting (§ 6).
+- **It does not fall under any partition.**
+  Add a partition only when one of the origins in § 1 names the feature it belongs to, and record that origin.
+  Otherwise, add it as an input form on the closest partition.
+- **An inspector reported its partition too coarse, or a partition holds more input forms than one inspector can check.**
+  Split it along the sections of its origin, and divide its input forms among the pieces, which the parent lists in `child_ids`.
+  The pieces inherit the parent's inspections, so a piece is inspected only for forms its parent never checked.
 
-## 3. Judge Candidates
+The list stays bounded: a new partition needs an origin that names it, and the origins are finite.
 
-A candidate is not a finding until it is judged.
+## 4. Rounds
 
-1. **Run what can be run.**
-   Dispatch one **runner** subagent with every runnable candidate.
-   The runner writes each distinguishing input as a probe script under `$TMPDIR`, runs it with the project's own runner or interpreter, and compares the result with the expected result.
-   It never edits a repository file.
-   A candidate whose run gives the wrong result is a **confirmed finding**.
-   A candidate whose run gives the expected result is refuted; drop it.
-2. **Challenge what cannot be run.**
-   Candidates that need a service, a race, or a design judgment go to the challenge pass (`parallel-subagent-review.md`, Step E) with the other lens findings.
+A round is one dispatch of inspectors, then judging, hunting, and refinement.
+Inspect every new or split partition, and every partition with an unchecked input form, in the next round.
+Stop when a round does not add a partition, a split, or an input form.
 
-Judge before the variant hunt.
-A false positive that reaches the variant hunt adds partitions that later reviews explore again and again.
+**Convergence.**
+From round 2 on, when a round has inspected every partition it started with, and half or more of its inspector claims are duplicates of records grouped in an earlier batch, the search has converged, and the plan freezes: no further round starts.
+The keeper's `submit` at the end of the round records the freeze; until then, a runner that splits a repeat back out can undo it.
+`review_state.py status --review <review_id>` reports the count as `convergence`; duplicates within one batch do not count, and a duplicate whose run disagrees with its primary's is split back out and does not count either.
+The count is only as good as the consolidator's test for the same defect: the same operation and the same kind of input, judged by meaning, not by wording or cited line.
+The converged round still finishes its own work, so the review ends with nothing it took on left undone: its records are judged and hunted, the keeper splits the partitions it reported too coarse, and inspectors check the pieces.
+The hunters' suspected input forms still reach the keeper, which saves them as additions to the plan; later reviews inspect them, and the forms checker covers those on the partitions this change touches.
 
-## 4. Variant Hunt
+Count rounds across the whole review, including rounds that a defect found after the loop reopens.
+A deep review inspects in at most two rounds: when round 2 is inspected, the plan freezes, and later reviews inspect what this one leaves.
 
-Run the variant hunt on confirmed findings only, with a strong model.
-At standard depth, hunt only critical and high findings; at deep, hunt every confirmed finding.
+## 5. Coverage
 
-```text
-You are running variant analysis on a confirmed defect.
-Do not edit any file.
+A review does the full work, so that later reviews build on it instead of repeating it.
 
-## Defect
-<file:line, the distinguishing input, the expected and actual results>
+- **When no partition has been inspected yet** (the first review in the repository, or of a component the list does not cover), inspect every partition.
+  State the number of partitions and the expected number of dispatches before starting.
+  The scope rule is in `deep-review.md`, "Before Step A".
+- **When the list exists**, inspect the partitions that need it (§ 6), the partitions the keeper adds, and the new and split partitions from § 3.
+- **A quick review** does not use partitions; see `quick-review.md`.
 
-## Review packet
-<packet_path>
+## 6. Review State
 
-## Task
-1. List every plausible contributing cause.
-   A defect often has more than one; do not commit to one reading.
-2. State each cause as a domain feature the implementation does not handle, in one sentence.
-   Make it more specific than "validate input" and less specific than one line of code.
-3. For each cause, search vertically (every path that reaches the same code) and horizontally (sibling sites that handle the same feature).
-4. Report each new instance as a candidate: file:line, distinguishing input, expected result.
+The partition list belongs to the repository, not to a branch.
+A partition describes a feature of the domain, so every branch's review reads and extends the same list, and every linked worktree shares it.
+`scripts/review_state.py` keeps two files, and is the only writer of both; never edit them by hand:
 
-## Output
-The causes, each marked `new partition` or `already listed: <partition>`, then the candidates.
-```
+- The **state file** (`review-state.json` in the review directory) holds the partition list and its inspections for the whole repository, and the finished reviews.
+- The **review file** (`reviews/<review_id>/review.json`) holds one review's dispatches, records, and failure modes.
+  Beside it are the packet copy (`packet.md`, `packet.json`) and the roles' input files (`in/`), output files (`out/`), and filled prompts (`prompts/`).
 
-Add each `new partition` to the list, judge the new candidates (§ 3), and run a breadth pass on the new partitions only.
-The loop ends when a round adds no partition, or when the depth's round cap is reached.
-When the cap ends the loop, leave the unexplored partitions open; the next review explores them first.
+| When                                      | Command                                                                                                                                                   |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Step 0                                    | `status --scope <scope>`: the review directory, `pending.inspect` with reasons, and this branch's last review                                             |
+| After the packet is built                 | `start-review --scope <scope> --packet-json <file> --passed-checks <command>... --intent <text> --how-to-run <text>`: the `review_id`                     |
+| To correct a value that fills the prompts | `update-review --review <review_id> --how-to-run <text>`, or another value's flag                                                                         |
+| Before each subagent is dispatched        | `dispatch --review <review_id>` for the next step's dispatches, or `dispatch <role> ...` for one: the input file, the filled prompt, and `submit_command` |
+| When a subagent has written its output    | `submit <dispatch_id> --review <review_id>`, run by the subagent itself; the synthesizer's records the finished review                                    |
+| To decide what to dispatch next           | `status --review <review_id>`                                                                                                                             |
+| When the user rules on a disputed record  | `rule <record_id> --review <review_id> --verdict upheld\|refuted --reason <reason>`                                                                       |
+| Between rounds                            | `start-round --review <review_id>`                                                                                                                        |
+| To see a role's output format             | `schema <role>`                                                                                                                                           |
 
-## 5. Depth
+An inspector's `dispatch` records the content hash (git blob id) of each of the partition's files as they are on disk, because inspectors read from disk and the files can change while one runs; it keeps them on the dispatch, in the review file.
+The inspector's `submit` writes the finished inspection, with the status the inspector reports for each input form, to the state file, so the state file holds only finished inspections.
+Two reviews that inspect the same partition at the same time therefore each record the content they saw, and an abandoned review does not leave anything in the state file.
+A partition's files are the `paths` the list gives it.
+New partitions arrive from the keeper as `new-<n>`; the keeper's `submit` assigns their `partition_id`s, and maps a new partition whose feature matches an existing one onto it.
 
-State the depth and the number of subagents before dispatch, so the user can lower either.
+A partition needs inspecting when it was never inspected, when one of its files differs from the content its inspections saw, or when it has an input form no inspection checked.
+`status` compares the recorded file hashes with the content its scope reviews: the index for `staged`, `HEAD` for `branch`, the working tree for `worktree`.
+A branch review checks the commit it started on, so a later commit on the branch does not change what the review checks or send an inspected partition back.
+Because the comparison is by file content, an inspection still counts after the inspected change is committed, on another branch, and after a rebase.
+An inspection counts only for the content it saw: a form checked on an earlier version of a file is checked again once the file changes, and the pieces of a split inherit only the checks of the current content.
+Roles read and run the files on disk, so `start-review` refuses a staged or branch review whose files on disk differ from the content it reviews.
+During the review, `dispatch` refuses each role that reads or runs the files while a changed file on disk differs from that content; an inspector's `dispatch` also checks its partition's files.
+The keeper, the consolidator, and the synthesizer read only the review's records, so their `dispatch` does not check.
+When a later commit changes a reviewed file, the refusal names the commit to check out again; `review-dispatch.md` says how to go on in a separate checkout of that commit.
 
-| Depth    | Partitions explored                                      | Variant hunt                         | Rounds                        |
-| -------- | -------------------------------------------------------- | ------------------------------------ | ----------------------------- |
-| quick    | single-agent path; the reviewer checks partitions itself | none                                 | 1                             |
-| standard | the 8 highest-ranked open partitions                     | critical and high confirmed findings | 2 (one variant round)         |
-| deep     | every partition, closed ones included                    | every confirmed finding              | until no new partition, max 3 |
+Writers hold an operating-system lock on each file, re-read it, merge, and replace it atomically, so parallel calls do not lose an update, and a crashed writer does not leave a lock held.
+The keeper's `submit` keeps every partition, takes the union of input forms and paths, and records splits; a split partition is no longer inspected.
 
-Default to standard.
-Use quick when the user asks for a quick or sanity check, and deep when the user asks for a deep or exhaustive review.
-To cut cost, explore fewer partitions; do not widen the files per explorer.
-
-## 6. Closing Partitions and Review State
-
-A partition **closes** when a property-based or differential test covers it: the test's generator spans the feature, or the test compares results with an oracle over generated inputs.
-An example test does not close a partition.
-Before a partition closes, the test adversary checks its property test the same way it checks any test: "What wrong implementation would still pass this property?"
-
-A review explores open partitions, plus closed partitions whose files changed since they were last explored.
-`build_review_packet.py` reports those as `stale_closed_partitions`.
-A deep review explores every partition.
-
-Save the list to the `state_path` that `build_review_packet.py` prints, as JSON:
-
-```json
-{
-  "version": 1,
-  "repo": "<repo name>",
-  "branch": "<branch>",
-  "base": "<base ref>",
-  "partitions": [
-    {
-      "id": "P1",
-      "feature": "here-documents feeding a pipeline",
-      "source": "domain-reference | implementation-table | spec-input-space | generic-construct | security | variant of F3",
-      "paths": [
-        "src/lexer.py"
-      ],
-      "status": "open | closed",
-      "closed_by": "tests/test_lexer.py::test_heredoc_pipeline_matches_bash",
-      "explored": [
-        {
-          "head": "<sha>",
-          "depth": "standard",
-          "date": "<ISO date>"
-        }
-      ]
-    }
-  ],
-  "runs": [
-    {
-      "head": "<sha>",
-      "depth": "standard",
-      "date": "<ISO date>",
-      "report": "<report path>"
-    }
-  ]
-}
-```
-
-- `paths` lists the files the partition's explorer read; the script compares them with the last explored head.
-- Append to `explored` each time a partition runs.
-- Record findings in the report, never in the state file.
-  The state file feeds triage, and triage must not see prior findings.
-
-## 7. Relation to `security-deep-scan`
-
-The two skills prevent different failures.
-Partitions prevent "nobody looked there": each feature of the domain gets its own explorer.
-`security-deep-scan` runs repeated passes with the same brief and forbids themed lanes, to reduce "someone looked and missed it by chance".
-When a change touches a security boundary and the user needs more than a review, offer `security-scan` or `security-deep-scan`.
+The state file does not hold findings.
+It feeds the partition keeper and the inspectors, and inspectors must not see prior findings.
+The review file holds the findings, and only the roles that judge or report them read it.

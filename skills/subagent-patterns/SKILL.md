@@ -1,7 +1,7 @@
 ---
 name: subagent-patterns
 description: |-
-  Use when dispatching development work to one or more subagents and deciding how to shape each dispatch. Triggers: "use subagents", "orchestrate subagents", "delegate to a cheaper/stronger model", "big:little" / "little:big", "verifier / adversary / explorer / oracle subagent", "run this with subagents", "get an independent second opinion". Not for: the parallel code-review path (use `code-review`), or driving a separate agent CLI non-interactively.
+  Use when dispatching development work to one or more subagents and deciding how to shape each dispatch. Triggers: "use subagents", "orchestrate subagents", "delegate to a cheaper/stronger model", "big:little" / "little:big", "verifier / adversary / explorer / oracle subagent", "run this with subagents", "get an independent second opinion". Not for: the parallel code-review procedure (use `code-review`), or driving a separate agent CLI non-interactively.
 ---
 
 # Subagent Patterns
@@ -32,7 +32,7 @@ Resolve the five decisions in order, then apply the rules that hold for every di
   Without an explicit instruction (or an active skill like `sdd-apply` that already prescribes delegation), do the work in your own context.
   If you judge it would help, propose it and wait for a permission grant.
 - **Parallel code review.**
-  The `code-review` skill already owns that path (`references/parallel-subagent-review.md`); invoke it instead of rebuilding it here.
+  The `code-review` skill already owns that procedure (`references/standard-review.md` and `references/deep-review.md`); invoke it instead of rebuilding it here.
 - **Driving another agent CLI non-interactively** (shelling out to Codex, Gemini, `llm`, Pi, and the like).
   A child harness's permission prompts can't surface back to the user, so its actions escape human oversight.
   Keep every dispatch inside your own harness, where approvals still reach the person running it.
@@ -185,4 +185,4 @@ A subagent can't reach the user, so it raises blocks and decisions to you; you d
 ## References
 
 - `references/review-loop.md` — the general verify/gate/fix loop for any deliverable: scoping the check to the delta against its source of truth, treating reports as unverified, no pre-judging, severity gating, the fix loop, and human arbitration (code review defers to `code-review`).
-- `code-review` skill (`references/parallel-subagent-review.md`) — the parallel-reviewer dispatch templates and `build_review_packet.py`, reused by the big:little verify step.
+- `code-review` skill (`references/standard-review.md`, `references/deep-review.md`, `references/review-dispatch.md`, `assets/prompt-*.md`) — the parallel-review procedure, its prompt templates, and `build_review_packet.py`, reused by the big:little verify step.
