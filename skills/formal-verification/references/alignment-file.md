@@ -6,7 +6,8 @@ Any stage can be entered in a new session, so the file, not the conversation, ca
 ## Location
 
 Ask the user where to keep verification artifacts the first time you create an alignment file.
-Recommend `.verify/<effort>/`, where `<effort>` is a short kebab-case name for the effort.
+Recommend `.formal/<effort>/`, where `<effort>` is a short kebab-case name for the effort.
+Do not recommend `.verify/`: `sdd-verify` keeps run scratch there, which the user may have git ignore.
 Record the chosen directory in the file.
 
 All verification artifacts stay outside source directories and outside prose-spec directories (`specs/`, `openspec/`, `.specify/`, or the repo's equivalent).
@@ -18,7 +19,7 @@ The exception is inline contracts, which live where the tool requires them.
 | Saved checker output                                                                                                              | `<dir>/output/`                                                                                                 |
 | Standalone model (TLA+, Alloy, P, Quint)                                                                                          | The repo's existing location for models, if it has one outside source and prose specs; otherwise `<dir>/model/` |
 | Separate statement file for a code-level proof (Lean statements, SPARK `.ads` specs, Dafny abstract modules, C headers with ACSL) | Where the tool and the build require it; list the path in the alignment file                                    |
-| Inline contracts (Verus, Dafny, SPARK, ACSL)                                                                                      | In the source file, where the tool requires them; list the paths in the alignment file                          |
+| Inline contracts (Verus, Dafny, SPARK, ACSL, Aeon refinements)                                                                    | In the source file, where the tool requires them; list the paths in the alignment file                          |
 
 Keep the alignment file in its own directory even when the repo uses SDD, OpenSpec, or Spec Kit.
 A change directory is archived when the change closes, and maintenance needs the file after that.
@@ -27,6 +28,7 @@ A change directory is archived when the change closes, and maintenance needs the
 
 - If the repo has prose specs (SDD, OpenSpec, Spec Kit, or similar), the requirements are those specs.
   Cite each requirement by its ID or heading and path.
+  For an SDD change, cite the capability and the requirement name; when `sdd-sync` moves the requirement into `specs/<capability>/spec.md`, update the path.
   Do not copy requirement text into the alignment file.
   Do not edit the prose specs.
 - If the repo has no prose specs, write the requirements in prose in the alignment file's Requirements section, and get the user's approval of that list.

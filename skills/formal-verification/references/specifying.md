@@ -12,12 +12,12 @@ Gap: user:spec.
 
 ## What you write depends on the kind of work
 
-| Kind of work                 | Tools                             | What you write                                                                    | The hard decision                                                              |
-| ---------------------------- | --------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Design model checking        | TLA+, Alloy, P, Quint, Spin       | A state machine, a type invariant, properties, a configuration with finite bounds | What to leave out, how coarse each atomic step is, which actions get fairness  |
-| SMT-backed code verification | Dafny, Verus, SPARK, F\*, Frama-C | Contracts, loop invariants, ghost code, lemmas                                    | How strong a property to prove, over how much of the code                      |
-| Interactive proof            | Lean, Rocq, Isabelle              | Theorem statements, an executable intermediate specification, refinement layers   | Which layers to introduce, and how to shape the code so the proof is tractable |
-| Refinement methods           | B, Event-B                        | An abstract machine and refinement steps                                          | The order of refinement steps                                                  |
+| Kind of work                 | Tools                                   | What you write                                                                    | The hard decision                                                              |
+| ---------------------------- | --------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Design model checking        | TLA+, Alloy, P, Quint, Spin             | A state machine, a type invariant, properties, a configuration with finite bounds | What to leave out, how coarse each atomic step is, which actions get fairness  |
+| SMT-backed code verification | Dafny, Verus, SPARK, F\*, Frama-C, Aeon | Contracts, loop invariants, ghost code, lemmas, refinement types                  | How strong a property to prove, over how much of the code                      |
+| Interactive proof            | Lean, Rocq, Isabelle                    | Theorem statements, an executable intermediate specification, refinement layers   | Which layers to introduce, and how to shape the code so the proof is tractable |
+| Refinement methods           | B, Event-B                              | An abstract machine and refinement steps                                          | The order of refinement steps                                                  |
 
 ## Procedure
 
@@ -73,7 +73,7 @@ The freeze in stage 3 is a whole-file comparison, so each statement and every de
 | SPARK                 | Contracts in the package spec (`.ads`); bodies in `.adb`                                                                                                |
 | Frama-C               | ACSL contracts in headers                                                                                                                               |
 | Dafny                 | Specification in an abstract module, refined by an implementation module                                                                                |
-| Verus                 | No separation known. The freeze for these statements is the user's review of the diff, and the report says so                                           |
+| Verus, Aeon           | No separation known. The freeze for these statements is the user's review of the diff, and the report says so                                           |
 
 The Lean and TLA+ rows are documented in published practice.
 Confirm the other rows against the tool's documentation and the project's build before relying on them.

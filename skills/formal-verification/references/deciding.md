@@ -49,9 +49,10 @@ If neither, record user:spec as open before you continue, and tell the user what
 5. **Can the code be written or reshaped for proof?**
    Some teams rewrite the code in a verification language first, or verify a model and test the production code against it.
    - No: use bounded model checking (Kani, CBMC, ESBMC), property-based testing, or fuzzing.
+     Also tell the user that refinement-type checkers add contracts to some existing languages without a rewrite; see the last item under Aeon in `tools.md`.
    - Yes: go to question 6.
 6. **Is SMT automation enough?**
-   - Yes: an SMT-backed verifier (Dafny, Verus, SPARK, Frama-C WP, F\*).
+   - Yes: an SMT-backed verifier (Dafny, Verus, SPARK, Frama-C WP, F\*, Aeon).
      Choose the level of rigor per component; SPARK's Bronze, Silver, and Gold levels are the clearest ladder.
    - No: interactive proof (Lean, Rocq, Isabelle).
 
@@ -73,7 +74,7 @@ Apply these when the branch leaves two or more candidate tools.
   See "Layout for the freeze" in `specifying.md`.
   If the user wants assurance, prefer a tool where that layout is possible.
 - **Is the code's language supported?**
-  Code-level tools are bound to a language: Verus and Kani to Rust, SPARK to Ada, Frama-C and CBMC to C, Dafny to its own language with compilation to several targets.
+  Code-level tools are bound to a language: Verus and Kani to Rust, SPARK to Ada, Frama-C and CBMC to C, Dafny to its own language with compilation to several targets, Aeon to its own language with a Python FFI.
   Design-level tools are language-neutral and need stage 5 to say anything about code.
 
 ## Signals from a spec-driven workflow

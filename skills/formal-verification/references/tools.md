@@ -74,6 +74,36 @@ Escape-hatch lists are not complete; the freeze and the assumption listing are t
 - Escape hatches: axioms in `axiomatic` blocks, `admit` annotations † (confirm the annotation kinds in the installed version).
 - Layout: ACSL contracts in headers.
 
+### Aeon
+
+Every item in this section comes from Aeon's own documentation, not from the research behind this skill.
+Aeon is a research language; confirm each item against the installed version.
+
+- Aeon is a functional language with refinement types: contracts are predicates in function signatures, and Z3 checks them at compile time.
+  The code must be written in Aeon; it runs on a Python interpreter and calls Python through an FFI.
+- Statements: the decidable fragment is quantifier-free linear arithmetic and equality with uninterpreted functions.
+  It suits bounds, ranges, and non-negativity; full functional correctness often needs a tool with quantifiers.
+- Assumption listing: `aeon --trust-report <file>.ae`; add `--trust-for main` to list only what `main` reaches.
+  The report lists `axiom` declarations and refined `native` bindings.
+  An empty report does not mean that the Python dependencies are verified.
+- Gate: `--strict-decidable` turns obligations outside the decidable fragment (for example, nonlinear arithmetic) into errors.
+  Without it they are warnings, and the solver is incomplete on them.
+  No documented flag rejects axioms, native bindings, or open holes; review the trust report.
+- Escape hatches: `axiom`, `native`, `native_import`, uninterpreted functions and predicates, opaque types, and open `?hole`s.
+  `--runtime-verification` checks refinements while the program runs; its result is test evidence, not proof.
+- Vacuity: no documented check.
+  A contradictory refinement on a parameter lets any body pass; confirm that a wrong body is rejected.
+- Layout: refinements sit inline in signatures, and no separation is known.
+  The freeze is the user's review of the signature diff.
+- Synthesis: a `?hole` asks a synthesizer (genetic, enumerative, SMT-guided, or LLM) for a body that type-checks.
+  The refinement type is the statement and the body is code, so constraint 2 in `SKILL.md` lets a hole be filled without approval.
+  `@example` and `@property` give test evidence, and objectives such as `@minimize_size` are not verified.
+- Verified object: the Aeon program when Aeon runs it.
+  Python produced by `--export` is a translation, and its relation to the checked program is not documented.
+- Refinement types also exist for languages people already use: LiquidHaskell for Haskell, Flux for Rust, and LiquidJava for Java.
+  They check contracts on existing code without a rewrite, but the research behind this skill did not cover them.
+  When the user cannot rewrite code in a verification language, name them as a starting point for the user's own research.
+
 ### Bounded model checkers for code (CBMC, ESBMC, Kani)
 
 - Bounds: results hold up to the unwinding bound.
