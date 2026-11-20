@@ -68,6 +68,10 @@ They exist because each one blocks a failure observed in agent-led verification.
 7. **State what the evidence establishes; the user judges whether it is enough.**
    Do not call evidence weak, strong, sufficient, or insufficient.
    Say what was checked, how, within which bounds, and what it does not cover.
+8. **Check a recommendation before you make it.**
+   A fix, a statement change, or a tool choice that looks reasonable has not been shown to work.
+   Show that it solves the problem with checker output or a replayed counterexample, and trace what it changes next: the other properties, the requirements, and the code that depends on the changed part.
+   Label a recommendation you could not check as unchecked.
 
 These instructions admit no exceptions.
 "This is a quick model" or "I followed the intent" does not license skipping a step.

@@ -42,6 +42,10 @@ Before blaming the prover, run the code with assertions enabled or replay the co
 An SMT-backed tool usually reports "unknown" or a timeout with no counterexample, so first separate a false claim from one this solver cannot prove.
 Check the requirement before deciding the statement is wrong: if the requirement supports the statement, the code or design is the suspect.
 
+After a fix to the code, the design, or a proof, run the full check again, not only the failing property.
+The fix counts only when the counterexample no longer reproduces and every property that passed before still passes.
+For a code or design fix, also trace what else depends on the changed part (other callers, other requirements in the trace, the model's other actions) and name each new problem the fix causes.
+
 Repair loops stop improving after three to five rounds.
 Feedback that does not point at the failing part makes the agent oscillate.
 After five rounds with no progress, stop and report to the user.

@@ -61,8 +61,9 @@ WHEN receiving feedback on a work artifact:
    - If no ground truth exists → surface this to the user before proceeding
 4. EVALUATE: Is this feedback sound given the artifact's context and constraints?
 5. GENERALIZE: For each accepted item, name its cause and class, and search for other instances
-6. RESPOND: Technical acknowledgment, reasoned pushback, or risk escalation
-7. REVISE: One cause at a time, verify each
+6. CHECK: For each revision you will propose, show it removes the defect and trace what it changes next
+7. RESPOND: Technical acknowledgment, reasoned pushback, or risk escalation
+8. REVISE: One cause at a time, verify each
 ```
 
 ## Generalizing From Items
@@ -86,6 +87,24 @@ Fix a cause with the smallest change that removes every instance; propose a new 
 An instance inside the artifact is not added scope and follows the user's pacing, except a Polish-tier class (Simple fixes, for code): report its count and wait for opt-in.
 An instance in a neighbor is a separate finding.
 A blocking instance can get a local fix first.
+
+## Checking a Revision Before You Propose It
+
+**Hard gate.**
+A revision that looks reasonable has not been shown to work.
+This applies to your own revision and to a fix the reviewer proposes.
+Before you propose or apply a revision:
+
+1. Show that it removes the defect.
+   Cite evidence: a run, a test, a replayed input, or a trace through the artifact.
+   An argument that the revision should work is not evidence until you check it against the artifact.
+2. Trace what it changes next.
+   Find what depends on the part the revision touches: for code, callers, other platforms, specs, and tests; for a document, the sections that cite it and the decisions built on it.
+   Find the follow-on edits it forces.
+   Name each new problem it causes.
+
+State which checks you ran with the revision you propose.
+When a check cannot run, label the revision unchecked and say what would check it.
 
 ## Pacing: When To Act vs. When To Wait
 
@@ -234,6 +253,7 @@ No long apologies, no defending why you pushed back.
 | Acting on risky feedback silently                      | Surface externalities, let user decide                        |
 | Jumping to revision before user signals                | Present assessment, calibrate pace from response              |
 | Rejecting a finding because its proposed fix is flawed | Judge the defect and the fix separately                       |
+| Proposing a fix because it looks reasonable            | Show it removes the defect; trace what it changes next        |
 | Citing your own prior ruling as ground truth           | Prior decisions are context; re-read the source contract cold |
 
 ## References

@@ -145,6 +145,19 @@ Clarify author intent with the user before a standard or deep review dispatches 
 
 Present the review as a prioritized list of issues.
 
+**Check each suggested change.**
+A suggested change that looks right has not been shown to work.
+Before you present the report, check the suggested change of every blocking finding:
+
+1. Show that it removes the defect: the changed code gives the finding's expected result on its distinguishing input.
+   Run the input when the code can run; otherwise trace it through the changed code line by line.
+2. Trace what the change touches next: the callers of the changed code, other code that reads the same data, the tests, and the spec.
+   Name each new defect the change causes, or name what you checked.
+
+State the result under the finding's suggested change, in the chat report and in the report file.
+When a check cannot run, label the change unchecked and say what would check it.
+Check a non-blocking finding's change the same way when the user asks for its fix.
+
 **Persist the report.**
 Write the full report to a file so it outlives the conversation and can be handed to another agent or to the `refactor` skill.
 Write it in the review directory from Step 0 (for a quick review, beside the packet), unless the user, a brief, or project instructions (AGENTS.md, CLAUDE.md, or the equivalent) name another path.
@@ -180,7 +193,9 @@ If the user asks the reviewer to fix them anyway:
 1. Apply only changes discussed in the review.
 2. Make minimal, targeted edits.
 3. Do not introduce additional refactors without user approval.
-4. After editing, summarize what changed and why, mapping back to the original review items, and recommend a fresh review of the fixes.
+4. Run each fixed finding's distinguishing input against the changed code, then run the test suite.
+   A fix counts as done only when the input gives the expected result and the suite passes.
+5. After editing, summarize what changed and why, mapping back to the original review items, and recommend a fresh review of the fixes.
 
 ## Scope Note
 
