@@ -4,7 +4,7 @@ description: |-
   Use when tasks require current, source-backed technical information from MCP tools. Apply for library/API questions, dependency version checks, third-party integration work, framework- or SDK-specific debugging, and any case where stale model knowledge could cause incorrect guidance.
 ---
 
-# MCP Docs and Research (Context7, Exa, Jina)
+# MCP Docs and Research
 
 ## Overview
 
@@ -27,16 +27,18 @@ Use MCP-provided tools to retrieve current, verifiable information instead of re
 ## Tool Selection
 
 Inventory the docs and research tools present at runtime and match on capability, not on an exact tool name.
+Any server with the capability qualifies: Context7, Exa, Jina, Perplexity, Tavily, Brave Search, and others.
+A server bundled with a plugin is not preferred over one the user installed.
 The same server is named differently depending on how it is installed — user scope gives `mcp__jina__read_url`, a plugin-bundled copy gives `mcp__plugin_<plugin>_jina__read_url`, and other harnesses namespace differently again.
 If tools are deferred or hidden, discover and load them first.
 
-| Capability need           | What to look for (examples, not an exhaustive list)                                          |
-| ------------------------- | -------------------------------------------------------------------------------------------- |
-| Library / API docs        | a docs tool with library-id resolution (e.g. Context7 resolve-library-id, then query-docs)   |
-| Code-centric examples     | a code-context search tool (e.g. Exa get-code-context) across docs, GitHub, and Q&A sites    |
-| Broad current web context | a web-search tool (e.g. Exa web-search, Jina search-web) for announcements and release notes |
-| Clean page extraction     | a reader that returns full page text (e.g. Jina read-url)                                    |
-| Papers / PDFs             | academic search or PDF extraction (e.g. Jina search-arxiv, extract-pdf)                      |
+| Capability need           | What to look for (examples, not an exhaustive list)                                                             |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Library / API docs        | a docs tool with library-id resolution (e.g. Context7 resolve-library-id, then query-docs)                      |
+| Code-centric examples     | a code-context search tool (e.g. Exa get-code-context) across docs, GitHub, and Q&A sites                       |
+| Broad current web context | a web-search tool (e.g. Exa web-search, Jina search-web, Perplexity search) for announcements and release notes |
+| Clean page extraction     | a reader that returns full page text (e.g. Jina read-url)                                                       |
+| Papers / PDFs             | academic search or PDF extraction (e.g. Jina search-arxiv, extract-pdf)                                         |
 
 Use the papers/PDF row only when the task needs paper-level or PDF-structured research.
 When none of these is available, fall back to native web search and fetch, and say so in the answer.
