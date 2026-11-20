@@ -7,9 +7,9 @@
 # ///
 """Render the plugins declared in plugins.yaml into the Claude Code plugin layout.
 
-Writes `plugins/<plugin>/.claude-plugin/plugin.json` and a copy of each listed skill
-per plugin, plus the repo-root `.claude-plugin/marketplace.json` catalog. Claude Code,
-Codex, and Copilot CLI all install from these files.
+Writes `plugins/<plugin>/.claude-plugin/plugin.json`, a README, the shared icon, and a
+copy of each listed skill per plugin, plus the repo-root `.claude-plugin/marketplace.json`
+catalog. Claude Code, Codex, and Copilot CLI all install from these files.
 """
 
 from __future__ import annotations
@@ -20,6 +20,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -41,6 +42,13 @@ MANIFEST_FIELDS = ("name", "version", "description", "author", "homepage", "repo
 # against a fresh clone.
 SKIP_NAMES = frozenset({"__pycache__", ".DS_Store", ".pytest_cache", ".ruff_cache", ".ipynb_checkpoints"})
 SKIP_SUFFIXES = (".pyc", ".pyo")
+
+# The first sentence of a skill description, which states when to use the skill. A
+# period followed by a lowercase word, as in "e.g. this", does not end the sentence.
+FIRST_SENTENCE = re.compile(r"(.+?[.!?])(?=\s+[^a-z]|$)")
+
+# Claude Code finds a plugin's icon at this path without a manifest field.
+ICON_PATH = Path(".claude-plugin") / "icon.png"
 
 GENERATED_README = """\
 # Generated plugins
@@ -228,12 +236,98 @@ def claude_plugin_manifest(meta: dict, spec: dict) -> dict:
         out["userConfig"] = claude["userConfig"]
     if spec.get("mcp"):
         out["mcpServers"] = claude_mcp_servers(spec["mcp"], claude.get("mcpServers") or {})
+    if spec.get("privacy"):
+        out["privacyPolicyUrl"] = spec["privacy"]
     return out
 
 
 def marketplace_entry(meta: dict, plugin: str) -> dict:
     """Build one `plugins[]` entry for the marketplace catalog."""
     return {**_ordered(meta, MANIFEST_FIELDS), "source": f"./plugins/{plugin}", **_ordered(meta, ("category",))}
+
+
+# --- plugin README ----------------------------------------------------------
+
+
+def skill_summary(skill_md: Path) -> str:
+    """Return the first sentence of a skill's description."""
+    parts = skill_md.read_text(encoding="utf-8").split("---", 2)
+    front = yaml.safe_load(parts[1]) if len(parts) == 3 and not parts[0].strip() else None
+    description = " ".join(str((front or {}).get("description", "")).split())
+    match = FIRST_SENTENCE.match(description)
+    return match.group(1) if match else description
+
+
+def _marketplace_source(manifest: dict) -> str:
+    """Name the marketplace as `plugin marketplace add` takes it: owner/repo on GitHub, else the URL."""
+    repository = str((manifest.get("defaults") or {}).get("repository", ""))
+    return repository.removeprefix("https://github.com/") or manifest["marketplace"]["name"]
+
+
+def plugin_readme(manifest: dict, plugin: str, spec: dict, skills_root: Path) -> str:
+    """Build a plugin's README: what it holds, how to install it, and any MCP setup."""
+    market = manifest["marketplace"]["name"]
+    source = _marketplace_source(manifest)
+    dependencies = list(spec.get("dependencies") or [])
+    lines = [f"# {plugin}", ""]
+    if spec.get("description"):
+        lines += [spec["description"], ""]
+    lines += [f"A plugin from the `{market}` marketplace for Claude Code, Codex, and GitHub Copilot.", ""]
+
+    lines += ["## Skills", ""]
+    lines += [f"- `{skill}`: {skill_summary(skills_root / skill / 'SKILL.md')}" for skill in sorted(spec["skills"])]
+    lines.append("")
+
+    lines += ["## Install", ""]
+    if dependencies:
+        named = ", ".join(f"`{name}`" for name in dependencies)
+        lines += [
+            f"Skills in this plugin call on the skills in {named}.",
+            "Claude Code installs them with this plugin; in Codex and Copilot, install them yourself as shown.",
+            "",
+        ]
+    lines += [
+        "```bash",
+        "# Claude Code",
+        f"claude plugin marketplace add {source}",
+        f"claude plugin install {plugin}@{market}",
+        "",
+        "# Codex",
+        f"codex plugin marketplace add {source}",
+        *[f"codex plugin add {name}@{market}" for name in [*dependencies, plugin]],
+        "",
+        "# GitHub Copilot CLI; VS Code picks up plugins installed this way",
+        f"copilot plugin marketplace add {source}",
+        *[f"copilot plugin install {name}@{market}" for name in [*dependencies, plugin]],
+        "```",
+        "",
+    ]
+
+    if spec.get("mcp"):
+        lines += ["## MCP servers", "", "This plugin registers these MCP servers:", ""]
+        lines += [
+            f"- `{name}`: {server.get('url', server.get('command', ''))}" for name, server in spec["mcp"].items()
+        ]
+        lines.append("")
+        if spec.get("privacy"):
+            lines += [f"Privacy policy of the server provider: {spec['privacy']}", ""]
+        settings = ((spec.get("claude") or {}).get("userConfig")) or {}
+        if settings:
+            lines += [
+                f"In Claude Code, set these options in the `/plugin` menu or with `claude plugin configure {plugin}@{market}`:",
+                "",
+            ]
+            lines += [
+                f"- `{key}`: {option.get('description', option.get('title', ''))}" for key, option in settings.items()
+            ]
+            lines.append("")
+
+    if manifest["marketplace"].get("docs"):
+        lines += [
+            f"See the [plugin install guide]({manifest['marketplace']['docs']}) for skill names, updates, and API keys.",
+            "",
+        ]
+    return "\n".join(lines)
 
 
 # --- rendering --------------------------------------------------------------
@@ -250,6 +344,9 @@ def render(manifest: dict, root: Path, out_plugins: Path, out_marketplace: Path)
     skills_root = root / "skills"
     tracked = tracked_paths(root)
     license_file = root / "LICENSE"
+    icon_file = root / manifest["icon"] if manifest.get("icon") else None
+    if icon_file is not None and not icon_file.is_file():
+        raise RenderError(f"icon not found: {manifest['icon']}")
     entries = []
 
     for plugin, spec in manifest["plugins"].items():
@@ -259,6 +356,9 @@ def render(manifest: dict, root: Path, out_plugins: Path, out_marketplace: Path)
             copy_skill(skills_root / skill, plugin_dir / "skills" / skill, tracked)
 
         _write_json(plugin_dir / ".claude-plugin" / "plugin.json", claude_plugin_manifest(meta, spec))
+        (plugin_dir / "README.md").write_text(plugin_readme(manifest, plugin, spec, skills_root), encoding="utf-8")
+        if icon_file is not None:
+            shutil.copyfile(icon_file, plugin_dir / ICON_PATH)
         if license_file.is_file():
             shutil.copy2(license_file, plugin_dir / "LICENSE")
         entries.append(marketplace_entry(meta, plugin))

@@ -33,5 +33,6 @@
         "Authorization": "Bearer ${user_config.jina_api_key}"
       }
     }
-  }
+  },
+  "privacyPolicyUrl": "https://jina.ai/legal/#privacy-policy"
 }

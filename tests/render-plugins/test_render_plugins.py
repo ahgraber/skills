@@ -301,6 +301,80 @@ def test_plugin_without_mcp_has_no_mcp_servers(workspace: Path):
     assert not (plugin / ".mcp.json").exists()
 
 
+# --- README and icon --------------------------------------------------------
+
+
+def _describe(root: Path, name: str, description: str) -> None:
+    (root / "skills" / name / "SKILL.md").write_text(
+        yaml.safe_dump({"name": name, "description": description}).join(["---\n", "---\n\nstub\n"]), encoding="utf-8"
+    )
+
+
+def test_readme_lists_each_skill_by_its_first_sentence(workspace: Path):
+    _describe(workspace, "alpha", "Use when testing alpha (e.g. a unit test). Triggers: 'alpha', 'first'.")
+    _write_manifest(workspace, ALL)
+    assert _render(workspace) == 0
+
+    readme = (workspace / "plugins" / "one" / "README.md").read_text(encoding="utf-8")
+    assert readme.startswith("# one\n")
+    assert "- `alpha`: Use when testing alpha (e.g. a unit test).\n" in readme
+    assert "Triggers" not in readme
+    assert "- `beta`:" in readme
+
+
+def test_readme_installs_dependencies_where_the_harness_does_not(workspace: Path):
+    _write_manifest(
+        workspace, {"base": {"skills": ["alpha"]}, "one": {"skills": ["beta", "gamma"], "dependencies": ["base"]}}
+    )
+    assert _render(workspace) == 0
+
+    readme = (workspace / "plugins" / "one" / "README.md").read_text(encoding="utf-8")
+    assert "claude plugin install base@" not in readme
+    assert "codex plugin add base@test-market\ncodex plugin add one@test-market" in readme
+    assert "copilot plugin install base@test-market\ncopilot plugin install one@test-market" in readme
+    assert "dependencies" not in (workspace / "plugins" / "base" / "README.md").read_text(encoding="utf-8")
+
+
+def test_readme_describes_mcp_servers_and_settings(workspace: Path):
+    _write_manifest(workspace, MCP_PLUGIN)
+    assert _render(workspace) == 0
+
+    readme = (workspace / "plugins" / "one" / "README.md").read_text(encoding="utf-8")
+    assert "- `remote`: https://example.test/mcp" in readme
+    assert "- `token`: D" in readme
+
+
+def test_privacy_policy_reaches_manifest_and_readme(workspace: Path):
+    url = "https://example.test/privacy"
+    _write_manifest(workspace, {"one": {**MCP_PLUGIN["one"], "privacy": url}})
+    assert _render(workspace) == 0
+
+    plugin_dir = workspace / "plugins" / "one"
+    manifest = json.loads((plugin_dir / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))
+    assert manifest["privacyPolicyUrl"] == url
+    assert url in (plugin_dir / "README.md").read_text(encoding="utf-8")
+
+
+def test_icon_is_copied_into_each_plugin(workspace: Path):
+    (workspace / "assets").mkdir()
+    (workspace / "assets" / "icon.png").write_bytes(b"\x89PNG fake")
+    path = _write_manifest(workspace, {"one": {"skills": ["alpha"]}, "two": {"skills": ["beta", "gamma"]}})
+    manifest = yaml.safe_load(path.read_text(encoding="utf-8"))
+    path.write_text(yaml.safe_dump({**manifest, "icon": "assets/icon.png"}), encoding="utf-8")
+    assert _render(workspace) == 0
+
+    for plugin in ("one", "two"):
+        assert (workspace / "plugins" / plugin / ".claude-plugin" / "icon.png").read_bytes() == b"\x89PNG fake"
+
+
+def test_missing_icon_is_reported(workspace: Path, capsys):
+    path = _write_manifest(workspace, ALL)
+    manifest = yaml.safe_load(path.read_text(encoding="utf-8"))
+    path.write_text(yaml.safe_dump({**manifest, "icon": "assets/nope.png"}), encoding="utf-8")
+    assert _render(workspace) == 1
+    assert "icon not found: assets/nope.png" in capsys.readouterr().err
+
+
 # --- drift check ------------------------------------------------------------
 
 

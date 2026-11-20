@@ -3,6 +3,8 @@
 # `scripts/render_plugins.py` renders this file into the Claude Code plugin layout:
 #   - .claude-plugin/marketplace.json            the catalog, one entry per plugin
 #   - plugins/<plugin>/.claude-plugin/plugin.json
+#   - plugins/<plugin>/.claude-plugin/icon.png   a copy of `icon`
+#   - plugins/<plugin>/README.md                 skills, install commands, MCP setup
 #   - plugins/<plugin>/skills/                   copies of the listed skills
 # Codex and Copilot CLI install from the same files.
 #
@@ -17,9 +19,14 @@
 # (`just tag-skills` refuses a tag that disagrees with it).
 version: 4.0.0
 
+# Copied into every plugin as its listing icon: a square PNG, 512 to 2048 px, under 2 MB.
+icon: assets/plugin-icon.png
+
 marketplace:
   name: ahgraber-skills
   description: Agent skills for spec-driven development, code work, prose, security, and research.
+  # Linked from each plugin README.
+  docs: https://github.com/ahgraber/skills/blob/main/docs/install/plugins.md
   owner:
     name: ahgraber
     url: https://github.com/ahgraber
@@ -137,6 +144,8 @@ plugins:
     skills:
       - deep-research
       - mcp-research
+    # The MCP provider's privacy policy, linked from the README and the Claude manifest.
+    privacy: https://jina.ai/legal/#privacy-policy
     # Authored in harness-neutral form; the renderer maps it to each harness.
     mcp:
       jina:
