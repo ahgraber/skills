@@ -1,6 +1,6 @@
 {
   "name": "security",
-  "version": "3.6.0",
+  "version": "4.0.0",
   "description": "Scan repositories, pull requests, and supplied findings for vulnerabilities, then triage and fix what proves real.",
   "author": {
     "name": "ahgraber",

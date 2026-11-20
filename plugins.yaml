@@ -15,7 +15,7 @@
 # Stamped into every rendered manifest. A plugin with a version only updates for its
 # users when this changes, so bump it with each skills-v<X.Y.Z> tag
 # (`just tag-skills` refuses a tag that disagrees with it).
-version: 3.6.0
+version: 4.0.0
 
 marketplace:
   name: ahgraber-skills

@@ -1,6 +1,6 @@
 {
   "name": "python",
-  "version": "3.6.0",
+  "version": "4.0.0",
   "description": "Python house-style audit, docstrings, notebook event loops, and demo notebooks.",
   "author": {
     "name": "ahgraber",

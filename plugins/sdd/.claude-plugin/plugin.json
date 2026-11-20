@@ -1,6 +1,6 @@
 {
   "name": "sdd",
-  "version": "3.6.0",
+  "version": "4.0.0",
   "description": "Spec-driven development: explore, propose, apply, verify, sync, and archive changes against versioned specs, with formal verification where a design needs proof.",
   "author": {
     "name": "ahgraber",
