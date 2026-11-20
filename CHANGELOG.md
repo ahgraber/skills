@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Plugins — each plugin has a README that lists its skills, gives its install commands for Claude Code, Codex, and Copilot, and describes its MCP servers and settings, and each plugin has a listing icon. `research` links Jina's privacy policy from its README and manifest.
 
+### Fixed
+
+- `agent-bridge` — the description has no angle brackets, so claude.ai no longer reports it as containing XML tags or strips the brackets from its trigger examples.
+
 ## [4.0.0] - 2026-11-20
 
 ### Added

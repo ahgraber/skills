@@ -1,7 +1,7 @@
 ---
 name: agent-bridge
 description: |-
-  Use when an agent in one harness must create, observe, or steer one or more agents in another harness through a tmux session the user can watch. Triggers: "use an agent in another harness", "bridge to <agent>", "run <agent> in tmux", "use a different harness", "check on the external agent". Not for subagents or delegation inside the current harness (use `subagent-patterns`).
+  Use when an agent in one harness must create, observe, or steer one or more agents in another harness through a tmux session the user can watch. Triggers: "use an agent in another harness", "bridge to another agent", "run an agent CLI in tmux", "use a different harness", "check on the external agent". Not for subagents or delegation inside the current harness (use `subagent-patterns`).
 ---
 
 # Agent Bridge
