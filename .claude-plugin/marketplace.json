@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "core",
-      "version": "4.0.0",
+      "version": "4.0.1",
       "description": "Skills the other plugins call on: subagent dispatch, assessing feedback, and commit messages.",
       "author": {
         "name": "ahgraber",
@@ -27,7 +27,7 @@
     },
     {
       "name": "sdd",
-      "version": "4.0.0",
+      "version": "4.0.1",
       "description": "Spec-driven development: explore, propose, apply, verify, sync, and archive changes against versioned specs, with formal verification where a design needs proof.",
       "author": {
         "name": "ahgraber",
@@ -48,7 +48,7 @@
     },
     {
       "name": "code",
-      "version": "4.0.0",
+      "version": "4.0.1",
       "description": "Review, reshape, and ship code: review, simplify, refactor, debug, test, API design, shell, secure coding, changelogs, and Jujutsu.",
       "author": {
         "name": "ahgraber",
@@ -68,7 +68,7 @@
     },
     {
       "name": "python",
-      "version": "4.0.0",
+      "version": "4.0.1",
       "description": "Python house-style audit, docstrings, notebook event loops, and demo notebooks.",
       "author": {
         "name": "ahgraber",
@@ -88,7 +88,7 @@
     },
     {
       "name": "security",
-      "version": "4.0.0",
+      "version": "4.0.1",
       "description": "Scan repositories, pull requests, and supplied findings for vulnerabilities, then triage and fix what proves real.",
       "author": {
         "name": "ahgraber",
@@ -108,7 +108,7 @@
     },
     {
       "name": "thinking",
-      "version": "4.0.0",
+      "version": "4.0.1",
       "description": "Think before building: brainstorming, elicitation interviews, visual explanation, lessons, and session handoffs.",
       "author": {
         "name": "ahgraber",
@@ -129,7 +129,7 @@
     },
     {
       "name": "writing",
-      "version": "4.0.0",
+      "version": "4.0.1",
       "description": "Draft and edit prose that reads as a professional wrote it: de-slop, proofread, editorial sparring, synthesis, and alt text.",
       "author": {
         "name": "ahgraber",
@@ -149,7 +149,7 @@
     },
     {
       "name": "research",
-      "version": "4.0.0",
+      "version": "4.0.1",
       "description": "Sourced research: multi-source reports and current library, API, and version facts from MCP tools.",
       "author": {
         "name": "ahgraber",
@@ -168,7 +168,7 @@
     },
     {
       "name": "harness",
-      "version": "4.0.0",
+      "version": "4.0.1",
       "description": "Work across agent harnesses: drive an agent in another harness over tmux, and author or tune skills.",
       "author": {
         "name": "ahgraber",

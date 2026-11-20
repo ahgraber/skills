@@ -1,6 +1,6 @@
 {
   "name": "harness",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Work across agent harnesses: drive an agent in another harness over tmux, and author or tune skills.",
   "author": {
     "name": "ahgraber",

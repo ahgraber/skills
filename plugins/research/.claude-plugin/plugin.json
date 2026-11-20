@@ -1,6 +1,6 @@
 {
   "name": "research",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Sourced research: multi-source reports and current library, API, and version facts from MCP tools.",
   "author": {
     "name": "ahgraber",

@@ -1,6 +1,6 @@
 {
   "name": "core",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Skills the other plugins call on: subagent dispatch, assessing feedback, and commit messages.",
   "author": {
     "name": "ahgraber",

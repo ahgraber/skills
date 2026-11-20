@@ -1,6 +1,6 @@
 {
   "name": "code",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Review, reshape, and ship code: review, simplify, refactor, debug, test, API design, shell, secure coding, changelogs, and Jujutsu.",
   "author": {
     "name": "ahgraber",

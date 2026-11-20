@@ -17,7 +17,7 @@
 # Stamped into every rendered manifest. A plugin with a version only updates for its
 # users when this changes, so bump it with each skills-v<X.Y.Z> tag
 # (`just tag-skills` refuses a tag that disagrees with it).
-version: 4.0.0
+version: 4.0.1
 
 # Copied into every plugin as its listing icon: a square PNG, 512 to 2048 px, under 2 MB.
 icon: assets/plugin-icon.png
