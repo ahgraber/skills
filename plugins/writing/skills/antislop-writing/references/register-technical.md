@@ -1,0 +1,118 @@
+# Technical register
+
+Apply alongside the core directives when the piece is technical: a design doc, RFC or ADR, API reference, tutorial, how-to, runbook, engineering explainer, or README.
+The core still governs every sentence — point first, active voice, concrete verbs, lean sentences, claim-bearing headings, no engineered symmetry or AI tells.
+This module lists only where technical writing diverges, plus the shapes the common genres take.
+
+## The target
+
+Prose an engineer would trust and act on: a well-edited design doc, a clean man page, a reference like the Stripe or Kubernetes docs, a readable RFC.
+It is precise and unadorned.
+It is not a tutorial-flavored blog post, a marketing page for a library, or a wall of narrated bullets.
+Correctness is part of the register: a graceful sentence that is wrong fails.
+
+## Pick the mode before the words
+
+Technical documents serve four distinct jobs; a section that mixes them serves none (the Diátaxis split):
+
+- **Tutorial** — teach a beginner by doing; one happy path, no digressions or alternatives.
+- **How-to** — get a competent reader through one task; stated preconditions, numbered steps, a verified result.
+- **Reference** — answer a lookup; exhaustive, consistent, structured, no narrative.
+- **Explanation** — build understanding; prose, rationale, tradeoffs, context.
+
+Decide which job a section does, and cut whatever belongs to another.
+
+## Deltas from the core
+
+Whether content becomes a table or a paragraph depends on its shape, not on the document being "technical."
+Genuine lookup material — parameters, flags, config keys, fields, error codes, return values, and comparison matrices — is one fixed field-set repeated across entries, and it belongs in tables or definition lists; commands, code, and output belong in fenced blocks; ordered procedures belong in numbered steps.
+Everything else is sentences, here more than anywhere.
+A per-item description in a survey or design doc — what a component is, how it works, why its design matters — is explanation, not reference, even under its own heading, and it is written as flowing prose.
+Apply the row test from the core: could this content be a row whose columns fit every sibling entry?
+If not, it is narration; restore the verbs.
+And the surface pass still runs here — no technical document legitimizes emoji, decorative arrows, bold-first bullets, or em-dash pile-ups.
+
+Precision beats elegance, so name each thing the same way every time; elegant variation ("the endpoint," "the route," "the handler" for one thing) is a defect here, not a virtue.
+Where behavior is a contract — specs, RFCs, protocol docs — the normative keywords MUST, SHOULD, and MAY (RFC 2119) carry real weight; use them deliberately, and keep the capitalized keywords out of tutorials and explanations.
+A plain "must" in a tutorial step is a modal, not a normative keyword.
+
+Every example is correct, runnable, and shows its output: snippets copy-paste and produce what you claim, pinned to a version where behavior depends on it, and they show the error path, not only the happy one.
+A plausible example that does not run is worse than none.
+Claims are verifiable and version-scoped — if a claim depends on a version, name it, and if you cannot verify it, mark it rather than assert it.
+
+State prerequisites and scope up front, then disclose progressively: say what the reader must already have and know, and introduce each concept before the one that depends on it.
+Passive voice is legitimate when the system is the actor ("the request is retried three times"); keep the active voice for what the reader does ("run `x`," "set `FOO`").
+Close a section by pointing forward — the next task, the related reference, the failure to watch for — not on a flourish like "and that is the power of X."
+
+## Explanation prose holds the same plainness
+
+Explanation is the rationale, overview, and "why this exists" prose that is neither a numbered step nor a lookup table — the Diátaxis mode that carries a document's reasoning.
+It is where the sententious reflex hides, because it is exempt from the STE uniformity below and clears the "precise and unadorned" bar on lean grammar alone: a maxim can be short, active, and grammatically clean and still be slop.
+Hold explanation to the same plainness as an instruction, minus STE's flat rhythm.
+No maxim in place of a directive or a fact ("Refactor changes the shape of working code and nothing else").
+No abstraction or the document itself as the agent of a verb ("verification licenses the edit," "the pipeline decides what to keep").
+No decorative figure standing in for a plain term ("shape" for structure, "rung" for level); a figure that genuinely clarifies stays, so the test is whether the image does work the plain word cannot, not whether it is figurative.
+This register performs authority when left to polish, and transparency is the whole job, so a line the reader admires as writing has already failed.
+See `ai-tells.md`: "Maxim as instruction," "Abstraction or document as agent," and the technical-register clause of "Dead metaphor."
+
+## Instructional passages follow Simplified Technical English
+
+Content that tells the reader to do something — a runbook step, a how-to procedure, an error message, a remediation line in an incident report — is governed by ASD-STE100 Simplified Technical English, the controlled language aerospace maintenance manuals are written in.
+Its test is a tired reader who is not a native English speaker: that reader must not be able to misread the instruction.
+Where that reader and the "an engineer would trust and act on" target disagree, the reader wins.
+Its one-word-one-concept rule is the precision rule above, seen from the word's side.
+
+Three rules follow that the core does not otherwise give you:
+
+- **Put the condition before the command.**
+  Write "If the build fails, run `make clean`," not "Run `make clean` if the build fails."
+  A reader who does not meet the condition has to learn that before meeting an imperative they might execute.
+  This inverts the core's point-first rule, and it holds only for instructions — in argument and explanation the claim still leads.
+- **Keep instructions short and let the rhythm go flat.**
+  One instruction per sentence, roughly twenty words for a step and twenty-five for the description around it.
+  The core's rhythm-variation commitment is suspended here: uniform sentences serve a reader scanning for the next action, and varying them for texture costs scannability.
+  Uniformity is the shape of the genre, so the metronome tripwires do not apply.
+- **Restrict the modals.**
+  In a procedure, `can`, `will`, and `must` carry the meaning; `should`, `would`, `may`, and `might` leave the reader deciding whether the step is optional.
+  In a normative document the RFC 2119 keywords above take precedence: SHOULD and MAY are legitimate there because the spec defines their force.
+  A runbook has no such definitions, so it keeps to the three plain modals.
+
+Take the discipline, not the dictionary.
+The rest of STE's apparatus — the approved vocabulary of roughly nine hundred words with one sanctioned word per concept, simple tenses only, no contractions, no `-ing` forms — buys unambiguity with enforced uniformity, and outside a procedure that uniformity reads as the flat, interchangeable texture the core exists to remove.
+The kept part is naming one referent the same way every time (the precision rule); the declined part is letting a dictionary choose that name.
+A passage can satisfy every STE rule and still fail the standard: compliance with a ban-list does not produce prose someone would sign.
+The approved dictionary is ASD's own artifact; consult it at <https://asd-ste100.org>.
+
+## Common shapes
+
+- **Design doc / RFC / ADR** — context and problem; goals and explicit non-goals; the decision; alternatives considered and why rejected; risks and open questions.
+  Lead with the decision, not the history.
+- **Tutorial** — prerequisites; a single end-to-end path; each step's command and its expected output; a working result at the end.
+  No branches.
+- **How-to** — the task and when to use it; preconditions; numbered steps; the end state and how to verify it.
+- **Reference** — one entry per item, the same fields in the same order every time (name, signature, parameters, returns, errors, example).
+  Alphabetical or grouped, never narrative.
+- **README** — what it is in one line; install; a minimal working example; where to go next.
+  The example runs.
+
+## Worked example
+
+Fragment-stack slop — a heading over verbless fragments describing one thing:
+
+> #### filestash
+>
+> A self-hosted file-management platform and universal data-access layer. 13.9k stars. Go backend, vanilla-JS frontend.
+
+Prose — subject-first sentences carrying the same facts:
+
+> #### filestash
+>
+> Filestash is a self-hosted file-management platform and universal data-access layer with 13.9k GitHub stars, built with a Go backend and a vanilla-JavaScript frontend.
+> Its core `IBackend` interface is deliberately small: any storage that implements `Ls`, `Stat`, `Cat`, `Mkdir`, `Rm`, `Mv`, and `Save` becomes a first-class backend.
+
+Genuine lookup stays a table — N entries against the same columns:
+
+> | Implementation | Runtime  | Read/write | Maturity |
+> | -------------- | -------- | ---------- | -------- |
+> | wasi-common    | Wasmtime | Read-write | Mature   |
+> | fsspec memory  | CPython  | Read-write | Mature   |

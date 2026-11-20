@@ -1,0 +1,21 @@
+{
+  "name": "python",
+  "version": "3.6.0",
+  "description": "Python house-style audit, docstrings, notebook event loops, and demo notebooks.",
+  "author": {
+    "name": "ahgraber",
+    "url": "https://github.com/ahgraber"
+  },
+  "homepage": "https://github.com/ahgraber/skills",
+  "repository": "https://github.com/ahgraber/skills",
+  "license": "MIT",
+  "keywords": [
+    "python",
+    "docstrings",
+    "notebooks",
+    "asyncio"
+  ],
+  "dependencies": [
+    "core"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "security",
+  "version": "3.6.0",
+  "description": "Scan repositories, pull requests, and supplied findings for vulnerabilities, then triage and fix what proves real.",
+  "author": {
+    "name": "ahgraber",
+    "url": "https://github.com/ahgraber"
+  },
+  "homepage": "https://github.com/ahgraber/skills",
+  "repository": "https://github.com/ahgraber/skills",
+  "license": "MIT",
+  "keywords": [
+    "security",
+    "vulnerabilities",
+    "sast",
+    "triage"
+  ],
+  "dependencies": [
+    "core"
+  ]
+}

@@ -1,0 +1,164 @@
+# Source of truth for the plugins this repo publishes.
+#
+# `scripts/render_plugins.py` renders this file into the Claude Code plugin layout:
+#   - .claude-plugin/marketplace.json            the catalog, one entry per plugin
+#   - plugins/<plugin>/.claude-plugin/plugin.json
+#   - plugins/<plugin>/skills/                   copies of the listed skills
+# Codex and Copilot CLI install from the same files.
+#
+# Everything under plugins/ and .claude-plugin/ is generated. Edit this file or a
+# skill under skills/, then run `just render-plugins`; never hand-edit the output.
+#
+# Keys outside a plugin's `claude:` mapping are harness-neutral, so that a renderer
+# for another plugin format can read them unchanged.
+
+# Stamped into every rendered manifest. A plugin with a version only updates for its
+# users when this changes, so bump it with each skills-v<X.Y.Z> tag
+# (`just tag-skills` refuses a tag that disagrees with it).
+version: 3.6.0
+
+marketplace:
+  name: ahgraber-skills
+  description: Agent skills for spec-driven development, code work, prose, security, and research.
+  owner:
+    name: ahgraber
+    url: https://github.com/ahgraber
+
+# Merged into every plugin's manifest and catalog entry.
+defaults:
+  author:
+    name: ahgraber
+    url: https://github.com/ahgraber
+  homepage: https://github.com/ahgraber/skills
+  repository: https://github.com/ahgraber/skills
+  license: MIT
+
+# Skills shipped outside the plugins. Listed so the coverage check still fails on a
+# skill that has no home by accident.
+unbundled:
+  # A live-coding music skill; install it with `npx skills add`.
+  - strudel
+
+plugins:
+  core:
+    description: "Skills the other plugins call on: subagent dispatch, assessing feedback, and commit messages."
+    category: workflow
+    keywords: [subagents, feedback, commits]
+    skills:
+      - commit-message
+      - receiving-feedback
+      - subagent-patterns
+
+  sdd:
+    description: "Spec-driven development: explore, propose, apply, verify, sync, and archive changes against versioned specs, with formal verification where a design needs proof."
+    category: workflow
+    keywords: [sdd, specs, planning, requirements, formal-verification]
+    dependencies: [core]
+    skills:
+      - formal-verification
+      - sdd
+      - sdd-apply
+      - sdd-archive
+      - sdd-derive
+      - sdd-explore
+      - sdd-propose
+      - sdd-sync
+      - sdd-translate
+      - sdd-verify
+
+  code:
+    description: "Review, reshape, and ship code: review, simplify, refactor, debug, test, API design, shell, secure coding, changelogs, and Jujutsu."
+    category: development
+    keywords: [code-review, refactoring, testing, debugging]
+    dependencies: [core]
+    skills:
+      - api-design
+      - changelog
+      - code-review
+      - debugging
+      - jj
+      - refactor
+      - securing-code
+      - shell-scripts
+      - simplify
+      - writing-tests
+
+  python:
+    description: Python house-style audit, docstrings, notebook event loops, and demo notebooks.
+    category: development
+    keywords: [python, docstrings, notebooks, asyncio]
+    dependencies: [core]
+    skills:
+      - interactive-notebook-demo
+      - python
+      - python-notebooks-async
+      - writing-docstrings
+
+  security:
+    description: Scan repositories, pull requests, and supplied findings for vulnerabilities, then triage and fix what proves real.
+    category: security
+    keywords: [security, vulnerabilities, sast, triage]
+    dependencies: [core]
+    skills:
+      - security-deep-scan
+      - security-fix-finding
+      - security-scan
+      - security-triage-finding
+
+  thinking:
+    description: "Think before building: brainstorming, elicitation interviews, visual explanation, lessons, and session handoffs."
+    category: workflow
+    keywords: [brainstorming, design, diagrams, learning, handoff]
+    dependencies: [core]
+    skills:
+      - brainstorming
+      - grill-me
+      - handoff
+      - show-me
+      - teach-me
+
+  writing:
+    description: "Draft and edit prose that reads as a professional wrote it: de-slop, proofread, editorial sparring, synthesis, and alt text."
+    category: writing
+    keywords: [writing, editing, proofreading, prose]
+    dependencies: [core]
+    skills:
+      - alt-text
+      - antislop-writing
+      - editorial-review
+      - proof
+      - synthesize
+
+  research:
+    description: "Sourced research: multi-source reports and current library, API, and version facts from MCP tools."
+    category: research
+    keywords: [research, documentation, mcp]
+    dependencies: [core]
+    skills:
+      - deep-research
+      - mcp-research
+    # Authored in harness-neutral form; the renderer maps it to each harness.
+    mcp:
+      jina:
+        type: streamable-http
+        url: https://mcp.jina.ai/v1
+    claude:
+      userConfig:
+        jina_api_key:
+          type: string
+          title: Jina API key
+          description: Raises rate limits on the Jina MCP endpoint. Optional; the endpoint also serves unauthenticated requests.
+          sensitive: true
+      mcpServers:
+        jina:
+          headers:
+            Authorization: Bearer ${user_config.jina_api_key}
+
+  harness:
+    description: "Work across agent harnesses: drive an agent in another harness over tmux, and author or tune skills."
+    category: workflow
+    keywords: [agents, tmux, skill-authoring]
+    dependencies: [core]
+    skills:
+      - agent-bridge
+      - optimize-skills

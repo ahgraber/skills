@@ -9,19 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Plugins — the skills install as nine plugins from one marketplace in Claude Code, Codex, and GitHub Copilot (CLI and VS Code): `core`, `sdd`, `code`, `python`, `security`, `thinking`, `writing`, `research`, and `harness`. Each skill except `strudel` is in exactly one plugin. `core` holds the skills the others call on; Claude Code installs it as a dependency, and Codex and Copilot users install it themselves. `research` also registers the Jina MCP server. A plugin's version follows the `skills-v` release tags, so installed plugins update at each release. `npx skills` remains the default install path; see the README.
 - `jj` — a skill for repositories that use Jujutsu colocated with git. The agent records one described change per logical step and uses the user's jj aliases. It never pushes, rewrites a pushed change, or edits the human's changes. At one approval gate at finalize it runs the repo's hooks (jj runs none), presents the stack, and signs the agent's changes with an agent key when one is configured. A teach mode, turned on in the session or by a `jj: teach` line in the project instructions, ends each turn with the jj commands run, why, and their git analogues.
 
 ### Changed
 
 - `antislop-writing` — flags compressed prose that leaves the reader to unpack it: noun stacks, nouns used as verbs, things given a person's verb, a dropped "that" before a long clause, and a subject far from its verb. The fix restores the small words, so "lean" no longer means cutting them. The guidance follows Clark, Martin & Mahowald (2026), arXiv:2610.29162.
+
 - `sdd-verify`, `sdd-propose` — `sdd-verify` checks only whether the evidence covers each claim; instead of hunting for defects it offers `code-review`, which receives the specs and the under-tested requirements, and `security-scan` for security-boundary changes. Universal claims tested only by examples get a WARNING, and `sdd-propose` plans a property-based or differential test for them. Narrowing a requirement must state the behavior it gives up.
+
 - `code-review` — reviews are quick, standard, or deep, and the user picks one. Standard, the default, runs the quality, security, and spec lenses and a test adversary, then a challenger, in about seven subagent dispatches. Deep adds a per-branch list of domain features and hunts variants of each confirmed defect, for at most two rounds. A review can be resumed in a new session, the user rules only on disputed findings of critical or high priority, and a skipped check makes merge readiness unverified.
+
 - `receiving-feedback` — treats review items as a sample: for each accepted item, the agent fixes the cause and searches the artifact and its neighbors for other instances of the same class.
+
 - `sdd-propose` — completes an existing change that is missing artifacts, such as one from `sdd-derive`, `sdd-translate`, or a stubbed proposal. It keeps what the change has, asks only what its artifacts leave open, and writes the missing sections and files.
+
 - `formal-verification` — covers Aeon, a research language whose refinement types Z3 checks, as a code verifier, and points users who cannot rewrite code for proof toward refinement-type checkers for existing languages. Records go in `.formal/<effort>/` instead of `.verify/<effort>/`, which `sdd-verify` uses for scratch; existing efforts keep their recorded directory.
+
 - `sdd-verify`, `sdd-sync`, `sdd-archive` — each verify run keeps its log and report in `.verify/<run-id>/` and re-checks the previous run's blocking findings. `sdd-sync` accepts the newest report only from a run on committed code, and only while the code and specs are unchanged since that run, and a run that stops on a failing suite still writes its report. On the first run, `sdd-verify` asks whether git should ignore `.verify/`, which now moves with the change into the archive.
+
 - `code-review`, `receiving-feedback`, `formal-verification` — before recommending a fix, the agent shows that it removes the defect (a run, a replayed input, or a trace through the code) and traces what the change touches next. A recommendation it could not check is labeled unchecked. In `code-review` this covers the suggested change of every blocking finding. In `formal-verification`, a fix counts only after a full re-run in which the counterexample no longer reproduces and every property that passed before still passes.
+
 - `commit-message` — in a Jujutsu repository it drafts from the jj change itself, one message per change in a stack, ready for `jj describe --stdin`. jj has no staging area, so the staged-changes workflow found nothing to draft from there.
+
 - `mcp-research` — uses any docs, web-search, or page-reader server the agent has, naming Context7, Exa, Jina, Perplexity, Tavily, and Brave Search as examples, and does not prefer a server bundled with a plugin over one the user installed.
 
 ### Removed

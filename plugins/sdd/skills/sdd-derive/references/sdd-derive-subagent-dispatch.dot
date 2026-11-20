@@ -1,0 +1,30 @@
+digraph subagent_dispatch {
+    // Lifecycle for any sdd-derive subagent dispatch.
+    // KEY INVARIANT: orchestrator tracks a manifest of paths + counts;
+    // never re-ingests artifact content. Verification gates the next phase.
+
+    need [label="Phase needs subagent", shape=ellipse];
+    resolve [label="Resolve absolute paths\n($TMPDIR, skill_root)", shape=box];
+    compose [label="Compose prompt:\nread references/<role>.md\n+ scope + literal output path", shape=box];
+    dispatch [label="Dispatch subagent", shape=box];
+
+    work [label="Subagent reads role doc,\ndoes scoped work,\nwrites artifact to disk", shape=box];
+    verify_cmd [label="ls -la <output_path>", shape=plaintext];
+    report [label="Subagent reports path + bytes\n+ counts inline", shape=box];
+
+    check [label="File exists and non-empty?", shape=diamond];
+    manifest [label="Update manifest:\npath + counts + status=ok", shape=box];
+    fail [label="Mark dispatch failed;\nre-dispatch or escalate", shape=octagon, style=filled, fillcolor=pink];
+    next [label="Trigger next phase", shape=doublecircle];
+
+    need -> resolve;
+    resolve -> compose;
+    compose -> dispatch;
+    dispatch -> work;
+    work -> verify_cmd;
+    verify_cmd -> report;
+    report -> check;
+    check -> manifest [label="yes"];
+    check -> fail [label="no"];
+    manifest -> next;
+}

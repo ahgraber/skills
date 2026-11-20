@@ -1,11 +1,9 @@
-# Installing skills, and where they land
+# Installing skills with skills.sh, and where they land
 
-There are two ways to get these skills into an agent: copy the files into a directory the agent reads, or serve them over MCP.
-This page covers both, and documents which directories each agent reads — which turns out to be the more useful fact, because several agents share one.
+The [skills.sh](https://skills.sh) CLI copies skill files into a directory your agent reads.
+This page covers the CLI and documents which directories each agent reads, which turns out to be the more useful fact, because several agents share one.
 
 ## Copying with the CLI
-
-The [skills.sh](https://skills.sh) CLI copies skill files into the directory your agent reads:
 
 ```bash
 # One skill, for the current user, into Claude Code's directory
@@ -21,7 +19,7 @@ npx skills add ahgraber/skills --skill sdd
 Symlinked references inside this repository are resolved during the copy, so each installed skill is self-contained.
 Refresh installed skills with `npx skills update`.
 
-See the [README](../README.md#installation) for the full flag list.
+See the [README](../../README.md#installation) for the full flag list.
 
 ## Where skills land
 
@@ -46,24 +44,6 @@ It reads only `~/.claude/skills` and `.claude/skills`, so it needs its own copy 
 
 OpenCode and Pi also accept explicit directory lists in their configuration, so you can point them at an existing collection instead of copying.
 Pi's own documentation demonstrates pointing it at `~/.claude/skills`.
-
-## Serving over MCP
-
-If your agent supports MCP but has no concept of skills, or you would rather not maintain copies at all, the bundled `skills-mcp` server exposes skills as MCP resources from wherever they already live.
-It scans the known vendor directories, collapses duplicates that reach the same content by symlink or identical bytes, and serves one copy of each.
-
-See [serving-skills-via-mcp.md](serving-skills-via-mcp.md) for setup, and [`skills-mcp/src/skills_mcp/discovery.py`](../skills-mcp/src/skills_mcp/discovery.py) for the directories it searches, which include several beyond the table above.
-
-## Choosing between copying and serving
-
-Copy when you want a small number of skills in one or two agents, or when you want to read and edit the installed files.
-Copies are ordinary files; nothing hides them from you.
-
-Serve when you run several agents, or when you edit skills and want every agent to see the change without a re-copy.
-One source of truth, no per-vendor duplication.
-
-The two are not exclusive.
-Copying into `~/.agents/skills` and serving the same directory over MCP is a reasonable arrangement.
 
 ## Names and precedence
 

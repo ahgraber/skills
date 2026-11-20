@@ -1,0 +1,17 @@
+{
+  "name": "core",
+  "version": "3.6.0",
+  "description": "Skills the other plugins call on: subagent dispatch, assessing feedback, and commit messages.",
+  "author": {
+    "name": "ahgraber",
+    "url": "https://github.com/ahgraber"
+  },
+  "homepage": "https://github.com/ahgraber/skills",
+  "repository": "https://github.com/ahgraber/skills",
+  "license": "MIT",
+  "keywords": [
+    "subagents",
+    "feedback",
+    "commits"
+  ]
+}

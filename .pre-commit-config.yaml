@@ -13,15 +13,27 @@ default_install_hook_types:
 default_stages:
   - pre-commit
 
+# plugins/ and .claude-plugin/ are generated from skills/ and plugins.yaml, which the
+# hooks already check; a fixer that rewrote the copies would leave the
+# render-plugins hook permanently dirty.
 exclude: |
   (?x)^(
     ^.*(copier-answers\.ya?ml)$ |
-    ^.*\.rej$
+    ^.*\.rej$ |
+    ^plugins/.* |
+    ^\.claude-plugin/.*
   )$
 
 repos:
   - repo: local
     hooks:
+      - id: render-plugins
+        name: Render plugins from plugins.yaml and skills/
+        entry: uv run scripts/render_plugins.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
       - id: forbid-yml
         name: Forbid .yml file extensions (use .yaml)
         entry: YAML file extensions must be .yaml

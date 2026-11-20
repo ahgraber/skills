@@ -1,0 +1,22 @@
+{
+  "name": "sdd",
+  "version": "3.6.0",
+  "description": "Spec-driven development: explore, propose, apply, verify, sync, and archive changes against versioned specs, with formal verification where a design needs proof.",
+  "author": {
+    "name": "ahgraber",
+    "url": "https://github.com/ahgraber"
+  },
+  "homepage": "https://github.com/ahgraber/skills",
+  "repository": "https://github.com/ahgraber/skills",
+  "license": "MIT",
+  "keywords": [
+    "sdd",
+    "specs",
+    "planning",
+    "requirements",
+    "formal-verification"
+  ],
+  "dependencies": [
+    "core"
+  ]
+}

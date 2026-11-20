@@ -107,6 +107,28 @@ mcp-fix-release:
 # CHANGELOG.md (promote [Unreleased] → the version), commit, then cut the tag here.
 
 # Tag a skills-collection release from the root CHANGELOG, e.g. `just tag-skills 1.2.0`
+# Plugin users only receive updates when the version in plugins.yaml changes, so the
+# tag must carry the same version and the rendered plugins must be current.
 tag-skills version:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    declared="$(sed -nE 's/^version: *([^ #]+).*/\1/p' plugins.yaml | head -n1)"
+    if [ "${declared}" != "{{ version }}" ]; then
+        echo "plugins.yaml declares version ${declared}; set it to {{ version }}, run \`just render-plugins\`, and commit first" >&2
+        exit 1
+    fi
+    uv run scripts/render_plugins.py --check
     git tag -a "skills-v{{ version }}" -m "skills-v{{ version }}"
-    @echo "Created skills-v{{ version }} — push with: git push origin skills-v{{ version }}"
+    echo "Created skills-v{{ version }}; push with: git push origin skills-v{{ version }}"
+
+# --- plugins ---------------------------------------------------------------
+# plugins.yaml is the source; plugins/ and .claude-plugin/ are generated from it and
+# from skills/. The render-plugins pre-commit hook re-renders on every commit.
+
+# Render plugins/ and .claude-plugin/marketplace.json from plugins.yaml
+render-plugins:
+    uv run scripts/render_plugins.py
+
+# Fail if the committed plugins/ differs from a fresh render
+check-plugins:
+    uv run scripts/render_plugins.py --check

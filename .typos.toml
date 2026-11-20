@@ -9,6 +9,8 @@ extend-exclude = [
   "*.csv",
   "*.git*",
   "*.sops.yaml",
+  "plugins",
+  ".claude-plugin",
 ]
 ignore-hidden = true   # ignore hidden files/dirs
 ignore-files = true     # respect ignore files

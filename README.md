@@ -11,7 +11,8 @@ Many agents also allow forcibly invoking the skill by invoking as a `/-command`.
 
 ## Installation
 
-See [docs/install-paths.md](docs/install-paths.md) for which directories each agent reads, when to serve skills over MCP instead of copying them, and how an installed skill's name interacts with your agent's built-ins.
+See [docs/install/](docs/install/README.md) for how to choose between copying skills, installing plugins, and serving skills over MCP.
+[docs/install/skills-sh.md](docs/install/skills-sh.md) covers which directories each agent reads and how an installed skill's name interacts with your agent's built-ins.
 
 Install skills using the [skills.sh](https://skills.sh) CLI:
 
@@ -50,6 +51,32 @@ npx skills remove <name> # Uninstall a skill
 npx skills update        # Update all installed skills
 ```
 
+### Installing as Plugins
+
+The skills are also published as plugins for Claude Code, Codex, and GitHub Copilot (CLI and VS Code), so you can install a group of skills at once and update it with the harness's own plugin commands.
+The plugins are `core`, `sdd`, `code`, `python`, `security`, `thinking`, `writing`, `research`, and `harness`; [docs/install/plugins.md](docs/install/plugins.md) lists the skills in each and covers names, updates, and the API key for the `research` plugin's Jina MCP server.
+
+Skills in every other plugin call on the skills in `core`, so install `core` alongside any plugin you choose.
+Claude Code installs it for you as a dependency; Codex and Copilot do not.
+
+```bash
+# Claude Code (installs core automatically)
+claude plugin marketplace add ahgraber/skills
+claude plugin install code@ahgraber-skills
+
+# Codex
+codex plugin marketplace add ahgraber/skills
+codex plugin add core@ahgraber-skills
+codex plugin add code@ahgraber-skills
+
+# GitHub Copilot CLI; VS Code picks up plugins installed this way
+copilot plugin marketplace add ahgraber/skills
+copilot plugin install core@ahgraber-skills
+copilot plugin install code@ahgraber-skills
+```
+
+Use one install method per agent: plugins or `npx skills`, not both.
+
 ### Serving Skills via MCP
 
 See [docs/serving-skills-via-mcp.md](docs/serving-skills-via-mcp.md) for how to expose this repo's skills as MCP resources/tools using the bundled [`skills-mcp/`](./skills-mcp/) stdio server.
@@ -66,7 +93,7 @@ Symlinks + git work best on macOS/Linux; symlink behavior on Windows can break d
 
 **Note on optimize-skills**: This skill requires [`graphviz`](https://www.graphviz.org/download/) available on the system.
 
-**Note on mcp-research**: This skill assumes [context7](https://context7.com/docs/resources/all-clients), [exa](https://github.com/exa-labs/exa-mcp-server), and/or [jina](https://github.com/jina-ai/MCP) MCP servers are available.
+**Note on mcp-research**: This skill uses whatever docs, web-search, and page-reader MCP servers you have, such as [context7](https://context7.com/docs/resources/all-clients), [exa](https://github.com/exa-labs/exa-mcp-server), [jina](https://github.com/jina-ai/MCP), or [perplexity](https://github.com/perplexityai/modelcontextprotocol), and falls back to the agent's built-in web tools when none is available.
 
 **Note on sdd skills**: `skills/sdd/references`is the source of truth for shared SDD files.
 Replicated copies in `skills/sdd-*` are implemented as symlinks to reduce drift.
@@ -93,8 +120,7 @@ File an issue with:
 - The task you were trying to do.
 - The skill(s) involved, from this repo and any others (in case of interaction effects).
 - What the agent did that you didn't like, and what you'd have preferred.
-- The agent's reply when you ask it "why did you do X?"
-  or "why didn't you do Y?"
+- The agent's reply when you ask it "why did you do X?" or "why didn't you do Y?"
 
 **MCP servers: Bug reports and PRs welcome.**
 Open an issue to discuss first; PRs should include a brief rationale with the change (and tests where applicable).

@@ -1,0 +1,37 @@
+{
+  "name": "research",
+  "version": "3.6.0",
+  "description": "Sourced research: multi-source reports and current library, API, and version facts from MCP tools.",
+  "author": {
+    "name": "ahgraber",
+    "url": "https://github.com/ahgraber"
+  },
+  "homepage": "https://github.com/ahgraber/skills",
+  "repository": "https://github.com/ahgraber/skills",
+  "license": "MIT",
+  "keywords": [
+    "research",
+    "documentation",
+    "mcp"
+  ],
+  "dependencies": [
+    "core"
+  ],
+  "userConfig": {
+    "jina_api_key": {
+      "type": "string",
+      "title": "Jina API key",
+      "description": "Raises rate limits on the Jina MCP endpoint. Optional; the endpoint also serves unauthenticated requests.",
+      "sensitive": true
+    }
+  },
+  "mcpServers": {
+    "jina": {
+      "type": "http",
+      "url": "https://mcp.jina.ai/v1",
+      "headers": {
+        "Authorization": "Bearer ${user_config.jina_api_key}"
+      }
+    }
+  }
+}

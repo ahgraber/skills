@@ -1,0 +1,129 @@
+version = 2
+
+# Capability registry for security-scan preflight.
+#
+# This registry is agent-naive: every capability is evaluated from facts the
+# calling agent supplies about its own runtime, or from facts the helper can
+# verify on disk. Nothing here reads host configuration files, so the result is
+# the same under any coding-agent host.
+#
+# Capability kinds:
+#   runtime          - a boolean the agent supplies via --runtime-check NAME=BOOL
+#   worker_capacity  - an integer the agent supplies via --worker-slots N
+#
+# Requirement severities:
+#   block   - the workflow cannot be claimed honestly when unmet
+#   warn    - the workflow can continue only on a documented degraded path
+#   suggest - the workflow can continue; mention the improvement when it matters
+
+[capabilities.delegated_workers]
+kind = "runtime"
+check = "delegation_available"
+
+[capabilities.nested_delegation]
+kind = "runtime"
+check = "nested_delegation_available"
+
+[capabilities.goal_tools]
+kind = "runtime"
+check = "goal_tools_available"
+
+[capabilities.usable_worker_slots_6]
+kind = "worker_capacity"
+op = ">="
+value = 6
+
+[capabilities.usable_worker_slots_8]
+kind = "worker_capacity"
+op = ">="
+value = 8
+
+[profiles.security_diff_scan]
+description = "Capabilities for Git-backed security diff scans."
+
+[[profiles.security_diff_scan.requirements]]
+capability = "delegated_workers"
+severity = "warn"
+reason = "Large exhaustive diff scans use delegated workers when available; without them, the scan may need a narrower or single-agent path."
+
+[[profiles.security_diff_scan.requirements]]
+capability = "goal_tools"
+severity = "suggest"
+reason = "Goal or task-tracking tools help long diff scans preserve completion criteria across many steps."
+
+[profiles.security_scan]
+description = "Capabilities for repository-wide or scoped-path security scans."
+
+[[profiles.security_scan.requirements]]
+capability = "delegated_workers"
+severity = "warn"
+reason = "Exhaustive repository-wide and scoped-path scans use delegated workers for ranking, file review, validation, and attack-path work when available."
+
+[[profiles.security_scan.requirements]]
+capability = "usable_worker_slots_6"
+severity = "warn"
+reason = "About six concurrent workers is the minimum practical concurrency for exhaustive scans that dispatch multiple owned work items."
+
+[[profiles.security_scan.requirements]]
+capability = "goal_tools"
+severity = "suggest"
+reason = "Goal or task-tracking tools help long scans preserve completion criteria across interruptions and context compaction."
+
+[profiles.security_deep_scan]
+description = "Capabilities for deep repository-wide security scans."
+
+[[profiles.security_deep_scan.requirements]]
+capability = "delegated_workers"
+severity = "block"
+reason = "Deep scan requires repeated parallel delegated discovery workers."
+
+[[profiles.security_deep_scan.requirements]]
+capability = "usable_worker_slots_6"
+severity = "block"
+reason = "Each completed discovery round requires about six usable workers."
+
+[[profiles.security_deep_scan.requirements]]
+capability = "usable_worker_slots_8"
+severity = "warn"
+reason = "About eight workers leaves headroom beyond the six discovery workers for coordinator and nested work."
+
+[[profiles.security_deep_scan.requirements]]
+capability = "nested_delegation"
+severity = "warn"
+reason = "Deep scan workers may need nested delegation for downstream exhaustive review work."
+
+[[profiles.security_deep_scan.requirements]]
+capability = "goal_tools"
+severity = "suggest"
+reason = "Goal or task-tracking tools help long deep scans preserve completion criteria across many rounds."
+
+[profiles.security_diff_scan.remediation]
+summary = "Recommended host capabilities for longer diff scans."
+guidance = [
+  "Enable goal or task-tracking tools if your host supports them, so long diff scans can preserve completion criteria.",
+]
+
+[profiles.security_scan.remediation]
+summary = "Recommended host capabilities for repository-wide or scoped-path scans."
+guidance = [
+  "Enable subagent or parallel delegation so ranking, file review, validation, and attack-path work can fan out.",
+  "Allow at least six concurrent subagents for practical exhaustive-scan throughput.",
+  "Enable goal or task-tracking tools if your host supports them.",
+]
+
+[profiles.security_deep_scan.remediation]
+summary = "Recommended host capabilities for deep repository-wide scans."
+guidance = [
+  "Enable subagent or parallel delegation; deep scan fans out repeated discovery rounds.",
+  "Allow at least eight concurrent subagents (six discovery workers plus coordinator and nested headroom).",
+  "Allow subagents to spawn their own subagents (nested delegation) for downstream review work.",
+  "Enable goal or task-tracking tools if your host supports them.",
+]
+
+[[routes]]
+skill = "security-scan"
+profile = "security_scan"
+
+[[routes]]
+skill = "security-deep-scan"
+profile = "security_deep_scan"

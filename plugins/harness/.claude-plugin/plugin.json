@@ -1,0 +1,20 @@
+{
+  "name": "harness",
+  "version": "3.6.0",
+  "description": "Work across agent harnesses: drive an agent in another harness over tmux, and author or tune skills.",
+  "author": {
+    "name": "ahgraber",
+    "url": "https://github.com/ahgraber"
+  },
+  "homepage": "https://github.com/ahgraber/skills",
+  "repository": "https://github.com/ahgraber/skills",
+  "license": "MIT",
+  "keywords": [
+    "agents",
+    "tmux",
+    "skill-authoring"
+  ],
+  "dependencies": [
+    "core"
+  ]
+}

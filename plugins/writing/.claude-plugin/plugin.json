@@ -1,0 +1,21 @@
+{
+  "name": "writing",
+  "version": "3.6.0",
+  "description": "Draft and edit prose that reads as a professional wrote it: de-slop, proofread, editorial sparring, synthesis, and alt text.",
+  "author": {
+    "name": "ahgraber",
+    "url": "https://github.com/ahgraber"
+  },
+  "homepage": "https://github.com/ahgraber/skills",
+  "repository": "https://github.com/ahgraber/skills",
+  "license": "MIT",
+  "keywords": [
+    "writing",
+    "editing",
+    "proofreading",
+    "prose"
+  ],
+  "dependencies": [
+    "core"
+  ]
+}

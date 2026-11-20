@@ -1,0 +1,21 @@
+{
+  "name": "code",
+  "version": "3.6.0",
+  "description": "Review, reshape, and ship code: review, simplify, refactor, debug, test, API design, shell, secure coding, changelogs, and Jujutsu.",
+  "author": {
+    "name": "ahgraber",
+    "url": "https://github.com/ahgraber"
+  },
+  "homepage": "https://github.com/ahgraber/skills",
+  "repository": "https://github.com/ahgraber/skills",
+  "license": "MIT",
+  "keywords": [
+    "code-review",
+    "refactoring",
+    "testing",
+    "debugging"
+  ],
+  "dependencies": [
+    "core"
+  ]
+}
