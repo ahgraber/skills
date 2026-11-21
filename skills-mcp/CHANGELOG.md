@@ -8,6 +8,16 @@ Releases are cut with [uv-ship](https://floraths.github.io/uv-ship/) — see [RE
 
 ## [Unreleased]
 
+### Added
+
+- Support Python 3.15.
+
+### Changed
+
+- Require stable FastMCP 4 (`fastmcp>=4.1.4,<4.3`).
+  An install no longer resolves to a FastMCP 4 beta.
+  FastMCP 4.3 removes the skills provider this server builds on, so the range stops below it.
+
 ## [0.2.0] - 2026-08-20
 
 ### Changed
