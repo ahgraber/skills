@@ -8,6 +8,8 @@ Releases are cut with [uv-ship](https://floraths.github.io/uv-ship/) — see [RE
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-20
+
 ### Added
 
 - Support Python 3.15.
@@ -44,4 +46,5 @@ Releases are cut with [uv-ship](https://floraths.github.io/uv-ship/) — see [RE
 
 [0.1.0]: https://github.com/ahgraber/skills/releases/tag/skills-mcp-v0.1.0
 [0.2.0]: https://github.com/ahgraber/skills/compare/skills-mcp-v0.1.0...skills-mcp-v0.2.0
-[unreleased]: https://github.com/ahgraber/skills/compare/skills-mcp-v0.2.0...HEAD
+[0.2.1]: https://github.com/ahgraber/skills/compare/skills-mcp-v0.2.0...skills-mcp-v0.2.1
+[unreleased]: https://github.com/ahgraber/skills/compare/skills-mcp-v0.2.1...HEAD
